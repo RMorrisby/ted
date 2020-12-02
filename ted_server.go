@@ -16,6 +16,7 @@ const (
 type PageVariables struct {
 	Date string
 	Time string
+	Port int
 }
 
 func getPort() string {
