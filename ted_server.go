@@ -16,20 +16,24 @@ const (
 type PageVariables struct {
 	Date string
 	Time string
-	Port int
+	Port string
 }
 
 func getPort() string {
 	p := os.Getenv("PORT")
 	if p != "" {
-		return ":" + p
+		return p
 	}
-	return ":8080"
+	return "8080"
+}
+
+func getPortWithColon() string {
+	return ":" + getPort()
 }
 
 func main() {
 	http.HandleFunc("/", IndexPage)
-	log.Fatal(http.ListenAndServe(getPort(), nil))
+	log.Fatal(http.ListenAndServe(getPortWithColon(), nil))
 }
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
