@@ -37,7 +37,7 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 	IndexPageVars := PageVariables{ //store the date and time in a struct
 		Date: now.Format(layoutDateISO),
 		Time: now.Format(layoutTimeISO),
-		Port: getPort()
+		Port: getPort(),
 	}
 
 	t, err := template.ParseFiles("index.html") // parse the html file index.html
