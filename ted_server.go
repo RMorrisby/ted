@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -17,14 +18,22 @@ type PageVariables struct {
 	Time string
 }
 
+func getPort() string {
+	p := os.Getenv("PORT")
+	if p != "" {
+		return ":" + p
+	}
+	return ":8080"
+}
+
 func main() {
 	http.HandleFunc("/", IndexPage)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(getPort(), nil))
 }
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
 
-	now := time.Now()              // find the time right now
+	now := time.Now()               // find the time right now
 	IndexPageVars := PageVariables{ //store the date and time in a struct
 		Date: now.Format(layoutDateISO),
 		Time: now.Format(layoutTimeISO),
