@@ -4,6 +4,16 @@ An account has been created in Heroku :
 It created these URLs :
 https://arcane-ravine-69473.herokuapp.com/ | https://git.heroku.com/arcane-ravine-69473.git
 
+Heroku chooses the internal port the web-application must listen on, but to access 
+it, the standard port 80 is used. I.e. these two commands both work :
+
+curl http://arcane-ravine-69473.herokuapp.com
+curl http://arcane-ravine-69473.herokuapp.com:80
+
+HTTPS :
+curl https://arcane-ravine-69473.herokuapp.com    <-- works
+curl https://arcane-ravine-69473.herokuapp.com:80  <-- doesn't work
+
 
 
 How Heroku works :
