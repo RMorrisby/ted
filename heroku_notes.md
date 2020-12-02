@@ -34,6 +34,17 @@ will push the 'main' branch to Heroku. It will then build the application & star
 Therefore we do not need to build the application beforehand.
 
 
+Running locally :
+go build -o bin/ted.exe -v
+
+Then
+heroku local
+
+Note : Procfile needs to be adjusted slightly to run on Windows (change bin/ted to bin\ted.exe)
+This change should NOT be committed!
+
+
+
 go.mod : 
 This uses the Github URL as the identifier for this project, i.e.
 module github.com/RMorrisby/ted
