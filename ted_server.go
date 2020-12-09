@@ -116,6 +116,8 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("Result received for test", result.Name)
 	default:
+		// TODO remove this line
+
 		log.Println(r.Method, "/result called")
 
 		fmt.Fprintf(w, "Only POST is supported for /result")
