@@ -1,3 +1,8 @@
+### Heroku quirks
+
+It doesn't like any other .go files in the base directory. Importing your own files in Go is ... weird.
+
+# Info
 
 An account has been created in Heroku :
 
@@ -65,3 +70,4 @@ curl -XGET -i http://localhost:8080/is-alive
 curl -XPOST -i -H "Content-Type: application/json" -d "{\"Name\": \"234\"}" http://localhost:8080/result
 
 curl -XPOST -i -H "Content-Type: application/json" -d "{\"Name\": null}" http://localhost:8080/result
+
