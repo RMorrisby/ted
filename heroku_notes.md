@@ -53,3 +53,15 @@ module github.com/RMorrisby/ted
 Procfile :
 This is a Heroku file, instructing Heroku where to find the build web-application.
 In this case, it / golang will put it into bin/
+
+
+
+### Testing
+
+Sample Curl commands :
+
+curl -XGET -i http://localhost:8080/is-alive
+
+curl -XPOST -i -H "Content-Type: application/json" -d "{\"Name\": \"234\"}" http://localhost:8080/result
+
+curl -XPOST -i -H "Content-Type: application/json" -d "{\"Name\": null}" http://localhost:8080/result
