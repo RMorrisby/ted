@@ -27,7 +27,12 @@ type PageVariables struct {
 }
 
 type result_struct struct {
-	Name string
+	Name              string
+	TestRunIdentifier string
+	Category          string
+	Status            string
+	Timestamp         string
+	Message           string
 }
 
 func getPort() string {
@@ -46,6 +51,7 @@ func main() {
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/is-alive", IsAliveHandler)
 	http.HandleFunc("/result", ResultHandler)
+	log.Print("TED started")
 	log.Fatal(http.ListenAndServe(getPortWithColon(), nil))
 }
 
@@ -104,6 +110,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		err := d.Decode(&result)
 		if err != nil {
 			// bad JSON or unrecognized json field
+			log.Print("Bad JSON or unrecognized json field", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
