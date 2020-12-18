@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"encoding/csv"
 	// TODO how to import local file??????
 	// "github.com/RMorrisby/ted/handler"
 	// "ted/handler"
@@ -18,6 +20,8 @@ import (
 const (
 	layoutDateISO = "2006-01-02"
 	layoutTimeISO = "15:04:05"
+
+	resultCSVFilename = "result.csv"
 )
 
 type PageVariables struct {
@@ -51,6 +55,10 @@ func main() {
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/is-alive", IsAliveHandler)
 	http.HandleFunc("/result", ResultHandler)
+
+	InitResultsCSV()
+	// Do everything else above this line
+
 	log.Print("TED started")
 	log.Fatal(http.ListenAndServe(getPortWithColon(), nil))
 }
@@ -122,10 +130,52 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Println("Result received for test", result.Name)
+		WriteToResultsCSV(result)
 	default:
 
 		log.Println(r.Method, "/result called")
 
 		fmt.Fprintf(w, "Only POST is supported for /result")
+	}
+}
+
+func InitResultsCSV() {
+	// If the file doesn't exist, create it, or append to the file
+	// TODO only check if it exists?
+	f, err := os.OpenFile(resultCSVFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal("Failed to ", err)
+	}
+	if err := f.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO write header?
+}
+
+func WriteToResultsCSV(result result_struct) {
+	// TODO use PSV instead of CSV
+	// TODO only try to append/write
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		panic(err)
+	}
+
+	defer f.Close()
+
+	writer := csv.NewWriter(f)
+	defer writer.Flush()
+
+	for _, value := range result {
+		err := writer.Write(value)
+		checkError("Cannot write to file", err)
+	}
+
+	log.Println("Wrote result to CSV")
+}
+
+func checkError(message string, err error) {
+	if err != nil {
+		log.Fatal(message, err)
 	}
 }
