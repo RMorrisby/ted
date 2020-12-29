@@ -4,6 +4,9 @@
 package handler
 
 import (
+	_ "database/sql"
+	_ "fmt"
+	"log"
 	"net/http"
 )
 
@@ -32,7 +35,7 @@ func (se StatusError) Status() int {
 
 // A (simple) example of our application-wide configuration.
 type Env struct {
-	DB   *sql.DB
+	// DB   *sql.DB // TODO reenable?
 	Port string
 	Host string
 }
@@ -64,16 +67,16 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetIndex(env *Env, w http.ResponseWriter, r *http.Request) error {
-	users, err := env.DB.GetAllUsers()
-	if err != nil {
-		// We return a status error here, which conveniently wraps the error
-		// returned from our DB queries. We can clearly define which errors
-		// are worth raising a HTTP 500 over vs. which might just be a HTTP
-		// 404, 403 or 401 (as appropriate). It's also clear where our
-		// handler should stop processing by returning early.
-		return StatusError{500, err}
-	}
+	// users, err := env.DB.GetAllUsers() // TODO reenable?
+	// if err != nil {
+	// We return a status error here, which conveniently wraps the error
+	// returned from our DB queries. We can clearly define which errors
+	// are worth raising a HTTP 500 over vs. which might just be a HTTP
+	// 404, 403 or 401 (as appropriate). It's also clear where our
+	// handler should stop processing by returning early.
+	// return StatusError{500, err}
+	// }
 
-	fmt.Fprintf(w, "%+v", users)
+	// fmt.Fprintf(w, "%+v", users)
 	return nil
 }

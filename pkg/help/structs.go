@@ -1,9 +1,11 @@
 package help
 
 type PageVariables struct {
-	Date string
-	Time string
-	Port string
+	Date         string
+	Time         string
+	Port         string
+	SuccessCount int
+	FailCount    int
 }
 
 type ResultStruct struct {
@@ -13,6 +15,17 @@ type ResultStruct struct {
 	Status            string
 	Timestamp         string
 	Message           string
+}
+
+func NewResultStruct(csvLine []string) *ResultStruct {
+	r := new(ResultStruct)
+	r.Name = csvLine[0]
+	r.TestRunIdentifier = csvLine[1]
+	r.Category = csvLine[2]
+	r.Status = csvLine[3]
+	r.Timestamp = csvLine[4]
+	r.Message = csvLine[5]
+	return r
 }
 
 func (r ResultStruct) ToA() []string {
