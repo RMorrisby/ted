@@ -1,3 +1,4 @@
 *.exe
 bin/*
 Procfile
+result.csv
