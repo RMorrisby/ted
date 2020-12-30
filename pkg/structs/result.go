@@ -1,14 +1,6 @@
-package help
+package structs
 
-type PageVariables struct {
-	Date         string
-	Time         string
-	Port         string
-	SuccessCount int
-	FailCount    int
-}
-
-type ResultStruct struct {
+type Result struct {
 	Name              string
 	TestRunIdentifier string
 	Category          string
@@ -17,8 +9,8 @@ type ResultStruct struct {
 	Message           string
 }
 
-func NewResultStruct(csvLine []string) *ResultStruct {
-	r := new(ResultStruct)
+func NewResult(csvLine []string) *Result {
+	r := new(Result)
 	r.Name = csvLine[0]
 	r.TestRunIdentifier = csvLine[1]
 	r.Category = csvLine[2]
@@ -28,7 +20,7 @@ func NewResultStruct(csvLine []string) *ResultStruct {
 	return r
 }
 
-func (r ResultStruct) ToA() []string {
+func (r Result) ToA() []string {
 	resultArray := []string{
 		r.Name,
 		r.TestRunIdentifier,

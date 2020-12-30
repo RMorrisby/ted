@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"os"
 	_ "ted/pkg/handler" // TODO enable
-	"ted/pkg/help"
+	"ted/pkg/structs"
 	"time"
 )
 
@@ -25,6 +25,17 @@ const (
 
 	resultCSVFilename = "result.csv"
 )
+
+var isLocal bool // cache the fact that we are running locally (or not)
+
+// If "PORT" is set, we are not running locally
+func IsTEDRunningLocally() bool {
+	p := os.Getenv("PORT")
+	if p != "" {
+		return false
+	}
+	return true
+}
 
 // func getPort() string {
 // 	p := os.Getenv("PORT")
@@ -50,10 +61,7 @@ func getHostAndPort() string {
 }
 
 func main() {
-
-	InitResultsCSV()
-	existingResults := ReadResultsCSV()
-	CalcResultCounts(existingResults)
+	Startup()
 
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/is-alive", IsAliveHandler)
@@ -64,10 +72,19 @@ func main() {
 	log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
 }
 
+func Startup() {
+
+	isLocal = IsTEDRunningLocally()
+	log.Println("Running locally?", isLocal)
+	InitResultsStore()
+	existingResults := ReadResultsStore()
+	CalcResultCounts(existingResults)
+}
+
 var SuccessCount int
 var FailCount int
 
-func CalcResultCounts(results []help.ResultStruct) {
+func CalcResultCounts(results []structs.Result) {
 	for _, result := range results {
 		IncrementCounts(result)
 	}
@@ -85,8 +102,8 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	now := time.Now()                    // find the time right now
-	IndexPageVars := help.PageVariables{ //store the date and time in a struct
+	now := time.Now()                       // find the time right now
+	IndexPageVars := structs.PageVariables{ //store the date and time in a struct
 		Date:         now.Format(layoutDateISO),
 		Time:         now.Format(layoutTimeISO),
 		Port:         getHostAndPort(),
@@ -125,7 +142,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 
 		// Now try to parse the POST body from JSON
-		var result help.ResultStruct
+		var result structs.Result
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields() // catch unwanted fields
 
@@ -146,14 +163,14 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Result received for test", result.Name)
 		IncrementCounts(result)
 
-		WriteToResultsCSV(result)
+		WriteResultToCSV(result)
 	default:
 		log.Println(r.Method, "/result called")
 		fmt.Fprintf(w, "Only POST is supported for /result")
 	}
 }
 
-func IncrementCounts(result help.ResultStruct) {
+func IncrementCounts(result structs.Result) {
 	switch result.Status {
 	case "PASSED":
 		// log.Println("SuccessCount : ", SuccessCount)
@@ -163,6 +180,14 @@ func IncrementCounts(result help.ResultStruct) {
 		FailCount++
 	default:
 		log.Println("Result contained unrecognised status", result.Status)
+	}
+}
+
+func InitResultsStore() {
+	if isLocal {
+		InitResultsCSV()
+	} else {
+		InitResultsDB()
 	}
 }
 
@@ -187,7 +212,7 @@ func InitResultsCSV() {
 
 		writer := csv.NewWriter(f)
 
-		err = writer.Write(help.ResultHeader())
+		err = writer.Write(structs.ResultHeader())
 		checkError("Cannot write header to file", err)
 		writer.Flush()
 	}
@@ -195,10 +220,20 @@ func InitResultsCSV() {
 	if err := f.Close(); err != nil {
 		log.Fatal(err)
 	}
-
 }
 
-func WriteToResultsCSV(result help.ResultStruct) {
+func InitResultsDB() {
+	// TODO
+}
+
+func WriteResultToStore(result structs.Result) {
+	if isLocal {
+		WriteResultToCSV(result)
+	} else {
+		WriteResultToDB(result)
+	}
+}
+func WriteResultToCSV(result structs.Result) {
 	log.Println("Will now write result to file :", result)
 	// TODO use PSV instead of CSV
 	// TODO don't write duplicates?
@@ -220,7 +255,19 @@ func WriteToResultsCSV(result help.ResultStruct) {
 	log.Println("Wrote result to file")
 }
 
-func ReadResultsCSV() []help.ResultStruct {
+func WriteResultToDB(result structs.Result) {
+	// TODO
+}
+
+func ReadResultsStore() (results []structs.Result) {
+	if isLocal {
+		results = ReadResultsCSV()
+	} else {
+		results = ReadResultsDB()
+	}
+	return
+}
+func ReadResultsCSV() []structs.Result {
 	log.Println("Will now read results from file :", resultCSVFilename)
 	f, err := os.Open(resultCSVFilename)
 	if err != nil {
@@ -238,11 +285,11 @@ func ReadResultsCSV() []help.ResultStruct {
 	size := len(lines)
 	// log.Printf("Read %d results from file", size)
 
-	records := make([]help.ResultStruct, size-1)
+	records := make([]structs.Result, size-1)
 
-	// Convert each of the lines to a ResultStruct (ignoring the header line)
+	// Convert each of the lines to a Result (ignoring the header line)
 	for i, line := range lines[1:] {
-		result := help.NewResultStruct(line)
+		result := structs.NewResult(line)
 		records[i] = *result // we need the * here
 	}
 
@@ -253,6 +300,11 @@ func ReadResultsCSV() []help.ResultStruct {
 		}*/
 
 	return records
+}
+
+func ReadResultsDB() []structs.Result {
+	// TODO
+	return nil
 }
 
 func checkError(message string, err error) {
