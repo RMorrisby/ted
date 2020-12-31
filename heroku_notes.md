@@ -2,6 +2,13 @@
 
 It doesn't like any other .go files in the base directory. Importing your own files in Go is ... weird.
 
+# URLs
+
+TED -> https://arcane-ravine-69473.herokuapp.com/
+
+Logs -> https://dashboard.heroku.com/apps/arcane-ravine-69473/logs
+Go DB help -> https://devcenter.heroku.com/articles/getting-started-with-go#use-a-database
+
 # Info
 
 An account has been created in Heroku :
