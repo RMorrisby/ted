@@ -63,6 +63,8 @@ In this case, it / golang will put it into bin/
 
 ### Testing
 
+## Local
+
 Sample Curl commands :
 
 curl -XGET -i http://localhost:8080/is-alive
@@ -70,4 +72,25 @@ curl -XGET -i http://localhost:8080/is-alive
 curl -XPOST -i -H "Content-Type: application/json" -d "{\"Name\": \"234\"}" http://localhost:8080/result
 
 curl -XPOST -i -H "Content-Type: application/json" -d "{\"Name\": null}" http://localhost:8080/result
+
+## Heroku
+
+curl -XGET -i http://arcane-ravine-69473.herokuapp.com/is-alive
+
+curl -XPOST -i -H "Content-Type: application/json" -d "{  \"name\": \"test_TED_data_1_b\",  \"category\": \"Test client\",  \"status\": \"PASSED\",  \"timestamp\": \"2020-12-31 09:09:44 UTC\",  \"testRunIdentifier\": \"2020-12-31 09:09:44 UTC\"  }" http://arcane-ravine-69473.herokuapp.com/result
+
+curl -XPOST -i -H "Content-Type: application/json" -d "{\"Name\": null}" http://arcane-ravine-69473.herokuapp.com/result
+
+### DB
+
+Created with 
+(all in local cmd) `heroku addons:create heroku-postgresql:hobby-dev`
+
+`heroku config` will show
+DATABASE_URL: postgres://odpwvcfjzdxhom:c3cf3a8184dac6aed218ba4540996ff3b2c31ba163728232ba3921a9295cc4a0@ec2-3-90-124-60.compute-1.amazonaws.com:5432/d8hic8bk4o5ecj
+
+`heroku pg` show more DB statistics
+
+Get Go's PostGres module : `go get github.com/lib/pq@v1`
+
 

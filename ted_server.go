@@ -6,7 +6,11 @@ import (
 	"html/template"
 	"path/filepath"
 
+	"database/sql"
+
 	"github.com/gorilla/websocket"
+	_ "github.com/lib/pq"
+
 	// "io/ioutil"
 	"encoding/csv"
 	"log"
@@ -24,6 +28,11 @@ const (
 	layoutTimeISO = "15:04:05"
 
 	resultCSVFilename = "result.csv"
+
+	resultsTable                  = "results"
+	resultsTableColumnDefinitions = "id serial, name varchar(100), testrun varchar(32), category varchar(32), status varchar(32), endtime timestamp with time zone, message varchar(100)"
+	resultsTableCreateSQL         = fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (%s)", resultsTable, resultsTableColumnDefinitions)
+	resultsTableInsertSQL         = fmt.Sprintf("INSERT INTO %s(name, testrun, category, status, endtime, message) VALUES", resultsTable)
 )
 
 var isLocal bool // cache the fact that we are running locally (or not)
@@ -225,6 +234,18 @@ func InitResultsCSV() {
 
 func InitResultsDB() {
 	log.Println("Initialising results DB")
+
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Error opening database: %q", err)
+	}
+
+	if _, err := db.Exec("CREATE TABLE IF NOT EXISTS results (tick timestamp)"); err != nil {
+		c.String(http.StatusInternalServerError,
+			fmt.Sprintf("Error creating database table: %q", err))
+		return
+	}
+
 	// TODO
 }
 
@@ -259,6 +280,10 @@ func WriteResultToCSV(result structs.Result) {
 
 func WriteResultToDB(result structs.Result) {
 	log.Println("Writing result to DB")
+	cmd := resultsTableInsertSQL + fmt.Sprintf("(%s %s %s %s %s %s)", result.Name, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
+	if _, err := db.Exec(cmd); err != nil {
+		log.Fatalf("Error writing result to DB: %q", err)
+	}
 	// TODO
 }
 
@@ -307,6 +332,14 @@ func ReadResultsCSV() []structs.Result {
 
 func ReadResultsDB() []structs.Result {
 	log.Println("Reading results from DB")
+
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", resultsTable))
+	if err != nil {
+		log.fatalf("Error reading results: %q", err)
+	}
+
+	log.Printf("Found %d results in DB")
+
 	// TODO
 	return nil
 }
