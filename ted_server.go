@@ -210,6 +210,7 @@ func InitResultsStore() {
 	if isLocal {
 		InitResultsCSV()
 	} else {
+		ConnectToDB()
 		InitResultsDB()
 	}
 }
