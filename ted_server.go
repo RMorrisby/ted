@@ -107,7 +107,10 @@ func ConnectToDB() {
 	if err != nil {
 		log.Fatalf("Error opening database: %q", err)
 	}
+	log.Println("dbConn != nil", dbConn != nil)
 	dbConn = db
+	log.Println("dbConn != nil", dbConn != nil)
+	log.Println("DB connection established")
 }
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
@@ -244,6 +247,7 @@ func InitResultsCSV() {
 
 func InitResultsDB() {
 	log.Println("Initialising results DB")
+	log.Println("dbConn != nil", dbConn != nil)
 
 	// dbConn, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	// if err != nil {
