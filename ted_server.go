@@ -251,6 +251,7 @@ func InitResultsDB() {
 	// }
 
 	if _, err := dbConn.Exec(resultsTableCreateSQL); err != nil {
+		log.Panicf("Error creating database table with SQL %s; error: %q", resultsTableCreateSQL, err)
 		log.Fatalf("Error creating database table: %q", err)
 	}
 
