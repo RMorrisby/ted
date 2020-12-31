@@ -79,6 +79,7 @@ func Startup() {
 	InitResultsStore()
 	existingResults := ReadResultsStore()
 	CalcResultCounts(existingResults)
+	log.Println("Startup() completed")
 }
 
 var SuccessCount int
@@ -223,6 +224,7 @@ func InitResultsCSV() {
 }
 
 func InitResultsDB() {
+	log.Println("Initialising results DB")
 	// TODO
 }
 
@@ -256,6 +258,7 @@ func WriteResultToCSV(result structs.Result) {
 }
 
 func WriteResultToDB(result structs.Result) {
+	log.Println("Writing result to DB")
 	// TODO
 }
 
@@ -303,6 +306,7 @@ func ReadResultsCSV() []structs.Result {
 }
 
 func ReadResultsDB() []structs.Result {
+	log.Println("Reading results from DB")
 	// TODO
 	return nil
 }
