@@ -56,6 +56,8 @@ func main() {
 
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/data", pages.DataPage)
+
+	http.HandleFunc("/data2", pages.DataPage2)
 	http.HandleFunc("/is-alive", IsAliveHandler)
 	http.HandleFunc("/result", ResultHandler)
 	// Do everything else above this line

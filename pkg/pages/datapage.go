@@ -17,6 +17,7 @@ _	"os"
 	_ "ted/pkg/handler" // TODO enable
 	"ted/pkg/structs"
 	"ted/pkg/constants"
+	"ted/pkg/dataio"
 	"time"
 )
 
@@ -42,6 +43,30 @@ func DataPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = t.Execute(w, DataPageVars) //execute the template and pass it the struct to fill in the gaps
+
+	if err != nil {
+		log.Print("template executing error: ", err)
+	}
+}
+
+func DataPage2(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	t, err := template.ParseFiles("data2.html") // parse the html file index.html
+
+	// if there is an error, log it
+	if err != nil {
+		log.Print("template parsing error: ", err)
+	}
+
+ // (results []structs.Result)
+results := dataio.ReadResultsStore()
+
+	err = t.Execute(w, results) //execute the template and pass it the struct to fill in the gaps
 
 	if err != nil {
 		log.Print("template executing error: ", err)
