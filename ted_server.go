@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"path/filepath"
+_	"path/filepath"
 
-	"database/sql"
+_	"database/sql"
 
 	"github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
@@ -18,33 +18,15 @@ import (
 	"os"
 	_ "ted/pkg/handler" // TODO enable
 	"ted/pkg/structs"
+	"ted/pkg/pages"
+	"ted/pkg/dataio"
+	"ted/pkg/help"
+	"ted/pkg/constants"
 	"time"
 )
 
 var _ = websocket.PingMessage // debugging to silence the import-compiler
 
-const (
-	layoutDateISO = "2006-01-02"
-	layoutTimeISO = "15:04:05"
-
-	resultCSVFilename = "result.csv"
-
-	resultsTable                  = "results"
-	resultsTableColumnDefinitions = "id serial, name varchar(100), testrun varchar(32), category varchar(32), status varchar(32), endtime timestamp with time zone, message varchar(100)"
-	resultsTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + resultsTable + " (" + resultsTableColumnDefinitions + ")"
-	resultsTableInsertSQL         = "INSERT INTO " + resultsTable + "(name, testrun, category, status, endtime, message) VALUES"
-)
-
-var isLocal bool // cache the fact that we are running locally (or not)
-
-// If "PORT" is set, we are not running locally
-func IsTEDRunningLocally() bool {
-	p := os.Getenv("PORT")
-	if p != "" {
-		return false
-	}
-	return true
-}
 
 // func getPort() string {
 // 	p := os.Getenv("PORT")
@@ -73,6 +55,7 @@ func main() {
 	Startup()
 
 	http.HandleFunc("/", IndexPage)
+	http.HandleFunc("/data", pages.DataPage)
 	http.HandleFunc("/is-alive", IsAliveHandler)
 	http.HandleFunc("/result", ResultHandler)
 	// Do everything else above this line
@@ -83,10 +66,10 @@ func main() {
 
 func Startup() {
 
-	isLocal = IsTEDRunningLocally()
-	log.Println("Running locally?", isLocal)
+	help.IsLocal = help.IsTEDRunningLocally()
+	log.Println("Running locally?", help.IsLocal)
 	InitResultsStore()
-	existingResults := ReadResultsStore()
+	existingResults := dataio.ReadResultsStore()
 	CalcResultCounts(existingResults)
 	log.Println("Startup() completed")
 }
@@ -100,18 +83,6 @@ func CalcResultCounts(results []structs.Result) {
 	}
 }
 
-var dbConn *sql.DB
-
-func ConnectToDB() {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatalf("Error opening database: %q", err)
-	}
-	log.Println("dbConn != nil", dbConn != nil)
-	dbConn = db
-	log.Println("dbConn != nil", dbConn != nil)
-	log.Println("DB connection established")
-}
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
 
@@ -127,8 +98,8 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()                       // find the time right now
 	IndexPageVars := structs.PageVariables{ //store the date and time in a struct
-		Date:         now.Format(layoutDateISO),
-		Time:         now.Format(layoutTimeISO),
+		Date:         now.Format(constants.LayoutDateISO),
+		Time:         now.Format(constants.LayoutTimeISO),
 		Port:         getHostAndPort(),
 		SuccessCount: SuccessCount,
 		FailCount:    FailCount,
@@ -207,74 +178,59 @@ func IncrementCounts(result structs.Result) {
 }
 
 func InitResultsStore() {
-	if isLocal {
-		InitResultsCSV()
+	if help.IsLocal {
+		dataio.InitResultsCSV()
 	} else {
-		ConnectToDB()
-		InitResultsDB()
+		dataio.ConnectToDB()
+		dataio.InitResultsDB()
 	}
 }
 
-func InitResultsCSV() {
+// func InitResultsCSV() {
 
-	needToWriteHeader := false
-	if _, err := os.Stat(resultCSVFilename); os.IsNotExist(err) {
-		abs, _ := filepath.Abs(resultCSVFilename)
-		log.Println("Initialising results file", abs)
-		needToWriteHeader = true
-	}
+// 	needToWriteHeader := false
+// 	if _, err := os.Stat(resultCSVFilename); os.IsNotExist(err) {
+// 		abs, _ := filepath.Abs(resultCSVFilename)
+// 		log.Println("Initialising results file", abs)
+// 		needToWriteHeader = true
+// 	}
 
-	// If the file doesn't exist, create it, or append to the file
-	f, err := os.OpenFile(resultCSVFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+// 	// If the file doesn't exist, create it, or append to the file
+// 	f, err := os.OpenFile(resultCSVFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
-	if err != nil {
-		log.Fatal("Failed to ", err)
-	}
+// 	if err != nil {
+// 		log.Fatal("Failed to ", err)
+// 	}
 
-	// If the file is new/empty, write the header
-	if needToWriteHeader {
+// 	// If the file is new/empty, write the header
+// 	if needToWriteHeader {
 
-		writer := csv.NewWriter(f)
+// 		writer := csv.NewWriter(f)
 
-		err = writer.Write(structs.ResultHeader())
-		checkError("Cannot write header to file", err)
-		writer.Flush()
-	}
+// 		err = writer.Write(structs.ResultHeader())
+// 		CheckError("Cannot write header to file", err)
+// 		writer.Flush()
+// 	}
 
-	if err := f.Close(); err != nil {
-		log.Fatal(err)
-	}
-}
+// 	if err := f.Close(); err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
 
-func InitResultsDB() {
-	log.Println("Initialising results DB")
-	log.Println("dbConn != nil", dbConn != nil)
-
-	// dbConn, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	// if err != nil {
-	// 	log.Fatalf("Error opening database: %q", err)
-	// }
-
-	if _, err := dbConn.Exec(resultsTableCreateSQL); err != nil {
-		log.Panicf("Error creating database table with SQL %s; error: %q", resultsTableCreateSQL, err)
-		log.Fatalf("Error creating database table: %q", err)
-	}
-
-	// TODO
-}
 
 func WriteResultToStore(result structs.Result) {
-	if isLocal {
+	if help.IsLocal {
 		WriteResultToCSV(result)
 	} else {
 		WriteResultToDB(result)
 	}
 }
+
 func WriteResultToCSV(result structs.Result) {
 	log.Println("Will now write result to file :", result)
 	// TODO use PSV instead of CSV
 	// TODO don't write duplicates?
-	f, err := os.OpenFile(resultCSVFilename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	f, err := os.OpenFile(constants.ResultCSVFilename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		panic(err)
 	}
@@ -287,81 +243,16 @@ func WriteResultToCSV(result structs.Result) {
 	resultArray := result.ToA()
 
 	err = writer.Write(resultArray)
-	checkError("Cannot write to file", err)
+	help.CheckError("Cannot write to file", err)
 
 	log.Println("Wrote result to file")
 }
 
 func WriteResultToDB(result structs.Result) {
 	log.Println("Writing result to DB")
-	cmd := resultsTableInsertSQL + fmt.Sprintf("(%s %s %s %s %s %s)", result.Name, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
-	if _, err := dbConn.Exec(cmd); err != nil {
+	cmd := constants.ResultsTableInsertSQL + fmt.Sprintf("(%s %s %s %s %s %s)", result.Name, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
+	if _, err := dataio.DBConn.Exec(cmd); err != nil {
 		log.Fatalf("Error writing result to DB: %q", err)
 	}
 	// TODO
-}
-
-func ReadResultsStore() (results []structs.Result) {
-	if isLocal {
-		results = ReadResultsCSV()
-	} else {
-		results = ReadResultsDB()
-	}
-	return
-}
-func ReadResultsCSV() []structs.Result {
-	log.Println("Will now read results from file :", resultCSVFilename)
-	f, err := os.Open(resultCSVFilename)
-	if err != nil {
-		panic(err)
-	}
-
-	defer f.Close()
-
-	lines, err := csv.NewReader(f).ReadAll()
-	if err != nil {
-		panic(err)
-	}
-
-	checkError("Cannot read from file", err)
-	size := len(lines)
-	// log.Printf("Read %d results from file", size)
-
-	records := make([]structs.Result, size-1)
-
-	// Convert each of the lines to a Result (ignoring the header line)
-	for i, line := range lines[1:] {
-		result := structs.NewResult(line)
-		records[i] = *result // we need the * here
-	}
-
-	// debugging
-	/*
-		for _, r := range records {
-			log.Println(r.Status)
-		}*/
-
-	return records
-}
-
-func ReadResultsDB() []structs.Result {
-	log.Println("Reading results from DB")
-
-	rows, err := dbConn.Query(fmt.Sprintf("SELECT * FROM %s", resultsTable))
-	if err != nil {
-		log.Fatalf("Error reading results: %q", err)
-	}
-
-	cols, _ := rows.Columns()
-	log.Printf("Found %d columns in DB", len(cols))
-	// log.Printf("Found %d results in DB", resultCount)
-
-	// TODO
-	return nil
-}
-
-func checkError(message string, err error) {
-	if err != nil {
-		log.Fatal(message, err)
-	}
 }
