@@ -81,7 +81,19 @@ func ReadResultsDB() []structs.Result {
 	log.Printf("Found %d columns in DB", len(cols))
 	// log.Printf("Found %d results in DB", resultCount)
 
-	// TODO
-	return nil
+
+	var results []structs.Result
+	for rows.Next() {
+
+		var r structs.Result
+		err = rows.Scan(&r.Name, &r.TestRunIdentifier,&r.Category,  &r.Status, &r.Timestamp, &r.Message)
+		if err != nil {
+				log.Fatalf("Error reading row into struct: %q", err)
+			}
+
+
+				results = append(results, r)
+		}
+	return results
 }
 

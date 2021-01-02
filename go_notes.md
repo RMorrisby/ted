@@ -12,3 +12,6 @@
 Launching a local web-application will have it running on HTTP port 8080, i.e. 
 http://localhost:8080/
 
+## Websockets
+https://blog.markvincze.com/programmatically-refreshing-a-browser-tab-from-a-golang-application/
+
