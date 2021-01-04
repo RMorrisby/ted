@@ -1,5 +1,10 @@
 package structs
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type Result struct {
 	Name              string
 	TestRunIdentifier string
@@ -7,6 +12,18 @@ type Result struct {
 	Status            string
 	Timestamp         string
 	Message           string
+}
+
+func ResultHeader() []string {
+	header := []string{
+		"Name",
+		"TestRunIdentifier",
+		"Category",
+		"Status",
+		"Timestamp",
+		"Message",
+	}
+	return header
 }
 
 func NewResult(csvLine []string) *Result {
@@ -32,14 +49,11 @@ func (r Result) ToA() []string {
 	return resultArray
 }
 
-func ResultHeader() []string {
-	header := []string{
-		"Name",
-		"TestRunIdentifier",
-		"Category",
-		"Status",
-		"Timestamp",
-		"Message",
+func (r Result) ToJSON() string {
+	b, err := json.Marshal(r)
+	if err != nil {
+		fmt.Println(err)
+		return ""
 	}
-	return header
+	return string(b)
 }

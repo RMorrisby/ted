@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
-_	"path/filepath"
+	_ "path/filepath"
 
-_	"database/sql"
+	_ "database/sql"
 
 	"github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
@@ -16,17 +17,17 @@ _	"database/sql"
 	"log"
 	"net/http"
 	"os"
-	_ "ted/pkg/handler" // TODO enable
-	"ted/pkg/structs"
-	"ted/pkg/pages"
-	"ted/pkg/dataio"
-	"ted/pkg/help"
 	"ted/pkg/constants"
+	"ted/pkg/dataio"
+	_ "ted/pkg/handler" // TODO enable
+	"ted/pkg/help"
+	"ted/pkg/pages"
+	"ted/pkg/structs"
+	"ted/pkg/ws"
 	"time"
 )
 
 var _ = websocket.PingMessage // debugging to silence the import-compiler
-
 
 // func getPort() string {
 // 	p := os.Getenv("PORT")
@@ -54,16 +55,18 @@ func getHostAndPort() string {
 func main() {
 	Startup()
 
+	http.HandleFunc("/is-alive", IsAliveHandler)
+
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/data", pages.DataPage)
-
 	http.HandleFunc("/data2", pages.DataPage2)
-	http.HandleFunc("/is-alive", IsAliveHandler)
-	http.HandleFunc("/result", ResultHandler)
+
+	http.HandleFunc("/result", ResultHandler) // path to POST new results into TED
 	// Do everything else above this line
 
 	log.Print("TED started")
-	log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
+	startReloadServer()
+	// log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
 }
 
 func Startup() {
@@ -84,7 +87,6 @@ func CalcResultCounts(results []structs.Result) {
 		IncrementCounts(result)
 	}
 }
-
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
 
@@ -159,7 +161,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Result received for test", result.Name)
 		IncrementCounts(result)
 
-		WriteResultToCSV(result)
+		WriteResultToStore(result)
 	default:
 		log.Println(r.Method, "/result called")
 		fmt.Fprintf(w, "Only POST is supported for /result")
@@ -219,13 +221,15 @@ func InitResultsStore() {
 // 	}
 // }
 
-
 func WriteResultToStore(result structs.Result) {
 	if help.IsLocal {
 		WriteResultToCSV(result)
 	} else {
 		WriteResultToDB(result)
 	}
+	log.Println("Result written to store")
+	SendReload(result) // after writing, reload the page so that it shows the new results
+	log.Println("After SendReload")
 }
 
 func WriteResultToCSV(result structs.Result) {
@@ -258,3 +262,43 @@ func WriteResultToDB(result structs.Result) {
 	}
 	// TODO
 }
+
+////////////////////////
+
+// Websockety stuff
+
+func startReloadServer() {
+	ws.WSHub = ws.NewHub()
+	go ws.WSHub.Run()
+	http.HandleFunc("/datareload", func(w http.ResponseWriter, r *http.Request) {
+		ws.ServeWs(ws.WSHub, w, r)
+	})
+
+	startServer()
+}
+
+func startServer() {
+	// log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
+	err := http.ListenAndServe(getHostAndPort(), nil)
+	if err != nil {
+		log.Fatal("Failed to start up the Reload server: ", err)
+		return
+	}
+}
+
+func SendReload(result structs.Result) {
+	log.Println("Will try to send result to WS")
+	message := result.ToJSON()
+	messageBytes := bytes.TrimSpace([]byte(message))
+	ws.WSHub.Broadcast <- messageBytes
+
+	log.Println("Result sent to WS: ", message)
+}
+
+// func SendReload() {
+// 	log.Println("Will try to send WS reload")
+// 	message := bytes.TrimSpace([]byte("reload"))
+// 	ws.WSHub.Broadcast <- message
+
+// 	log.Println("WS reload sent: ", message)
+// }

@@ -3,14 +3,59 @@
 <head>
 <title>TED Data</title>
 </head>
-<body>
-<p>The date today is {{.Date}}</p>
-<p>And the time is {{.Time}}</p>
-<p></p>
-<p></p>
-<pre>
-</pre>
-<p></p>
-TODO : use websockets instead of refreshing the whole page
+    <script type="text/javascript">
+    /**
+     * Tries to connect to the reload service and start listening to reload events.
+     *
+     * @function tryConnectToReload
+     * @public
+     */
+    function tryConnectToReload(address) {
+      var conn = new WebSocket(address);
+    
+      conn.onclose = function() {
+        setTimeout(function() {
+          tryConnectToReload(address);
+        }, 2000);
+      };
+    
+      conn.onmessage = function(evt) {
+        appendLog("Refresh received! :: " + evt.data);
+    
+        // If we uncomment this line, then the page will refresh every time a message is received.
+        //location.reload()
+      };
+    }
+    
+    function appendLog(msg){
+        var d = document.getElementById("log");
+        d.innerHTML += '<br /><span>' + msg + '</span>';
+    }
+    
+    try {
+      if (window["WebSocket"]) {
+        // The reload endpoint is hosted on a statically defined port.
+        try {
+          tryConnectToReload("ws://localhost:8080/datareload");
+        }
+        catch (ex) {
+          // If an exception is thrown, that means that we couldn't connect to to WebSockets because of mixed content
+          // security restrictions, so we try to connect using wss.
+          tryConnectToReload("wss://localhost:8081/datareload");
+        }
+      } else {
+        console.log("Your browser does not support WebSockets, cannot connect to the Reload service.");
+      }
+    } catch (ex) {
+      console.error('Exception during connecting to Reload:', ex);
+    }
+    </script>
+    </head>
+    
+    <body>
+    <p>The date today is {{.Date}}</p>
+    <p>And the time is {{.Time}}</p>
+    <p></p>
+    <div id="log"><span>Log:</span></div>
 </body>
 </html>
