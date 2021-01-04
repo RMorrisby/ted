@@ -60,6 +60,9 @@ func main() {
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/data", pages.DataPage)
 	http.HandleFunc("/data2", pages.DataPage2)
+	http.HandleFunc("/admin", pages.AdminPage)
+	http.HandleFunc("/admin/deleteall", pages.AdminDeleteAll)
+	http.HandleFunc("/admin/getcount", pages.AdminGetCount)
 
 	http.HandleFunc("/result", ResultHandler) // path to POST new results into TED
 	// Do everything else above this line

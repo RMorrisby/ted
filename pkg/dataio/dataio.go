@@ -1,29 +1,27 @@
 package dataio
 
-
 import (
-_	"encoding/json"
-_	"fmt"
-_	"html/template"
+	_ "encoding/json"
+	_ "fmt"
+	_ "html/template"
 	"path/filepath"
 
 	"database/sql"
 
-_	"github.com/gorilla/websocket"
+	_ "github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
 
 	// "io/ioutil"
 	"encoding/csv"
 	"log"
-_	"net/http"
+	_ "net/http"
 	"os"
-	_ "ted/pkg/handler" // TODO enable
-	"ted/pkg/structs"
-	"ted/pkg/help"
 	"ted/pkg/constants"
-_	"time"
+	_ "ted/pkg/handler" // TODO enable
+	"ted/pkg/help"
+	"ted/pkg/structs"
+	_ "time"
 )
-
 
 var DBConn *sql.DB // should be available globally
 
@@ -38,9 +36,20 @@ func ConnectToDB() {
 	log.Println("DB connection established")
 }
 
-func InitResultsCSV() {
+// Initialise the results CSV. Optionally allow the calling method to insist that the header be written
+// with InitResultsCSV(true)
+// Otherwise, just call this with InitResultsCSV()
+func InitResultsCSV(writeHeader ...bool) {
 
-	needToWriteHeader := false
+	// If a boolean has been passed to this method, then it requires this method to write the header
+	var needToWriteHeader bool
+	if len(writeHeader) == 0 {
+		needToWriteHeader = false
+	} else {
+		needToWriteHeader = true
+	}
+
+	// If the file does not exist, then we should write the header after it is created
 	if _, err := os.Stat(constants.ResultCSVFilename); os.IsNotExist(err) {
 		abs, _ := filepath.Abs(constants.ResultCSVFilename)
 		log.Println("Initialising results file", abs)
@@ -68,7 +77,6 @@ func InitResultsCSV() {
 		log.Fatal(err)
 	}
 }
-
 
 func InitResultsDB() {
 	log.Println("Initialising results DB")

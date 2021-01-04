@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>TED Data</title>
-</head>
+  <head>
+    <title>TED Data</title>
     <script type="text/javascript">
+
     /**
      * Tries to connect to the reload service and start listening to reload events.
      *
@@ -33,7 +33,10 @@
     }
     
     try {
-      if (window["WebSocket"]) {
+      if (window.WebSocket === undefined) {
+            $("#container").append("Your browser does not support WebSockets");
+            //return;
+        } else if (window["WebSocket"]) {
         // The reload endpoint is hosted on a statically defined port.
         try {
           tryConnectToReload("ws://localhost:8080/datareload");
