@@ -4,7 +4,7 @@ import (
 	_ "database/sql"
 	_ "encoding/json"
 	_ "fmt"
-	"html/template"
+	_ "html/template"
 	"log"
 	"net/http"
 	_ "os"
@@ -34,14 +34,8 @@ func DataPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ws.ServeWs(ws.WSHub, w, r)
-	t, err := template.ParseFiles("data.html") // parse the html file index.html
 
-	// if there is an error, log it
-	if err != nil {
-		log.Print("template parsing error: ", err)
-	}
-
-	err = t.Execute(w, DataPageVars) //execute the template and pass it the struct to fill in the gaps
+	err := Templates.ExecuteTemplate(w, "data.html", DataPageVars) //execute the template and pass it the struct to fill in the gaps
 
 	if err != nil {
 		log.Print("template executing error: ", err)
@@ -55,17 +49,10 @@ func DataPage2(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := template.ParseFiles("data2.html") // parse the html file index.html
-
-	// if there is an error, log it
-	if err != nil {
-		log.Print("template parsing error: ", err)
-	}
-
 	// (results []structs.Result)
 	results := dataio.ReadResultsStore()
 
-	err = t.Execute(w, results) //execute the template and pass it the struct to fill in the gaps
+	err := Templates.ExecuteTemplate(w, "data2.html", results) //execute the template and pass it the struct to fill in the gaps
 
 	if err != nil {
 		log.Print("template executing error: ", err)

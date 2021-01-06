@@ -4,7 +4,7 @@ import (
 	_ "database/sql"
 	_ "encoding/json"
 	_ "fmt"
-	"html/template"
+	_ "html/template"
 	"log"
 	"net/http"
 	_ "os"
@@ -36,14 +36,8 @@ func AdminPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// ws.ServeWs(ws.WSHub, w, r)
-	t, err := template.ParseFiles("admin.html") // parse the html file index.html
 
-	// if there is an error, log it
-	if err != nil {
-		log.Print("template parsing error: ", err)
-	}
-
-	err = t.Execute(w, AdminPageVars) //execute the template and pass it the struct to fill in the gaps
+	err := Templates.ExecuteTemplate(w, "admin.html", AdminPageVars) //execute the template and pass it the struct to fill in the gaps
 
 	if err != nil {
 		log.Print("template executing error: ", err)

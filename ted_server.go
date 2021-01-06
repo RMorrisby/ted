@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"html/template"
+	_ "html/template"
 	_ "path/filepath"
 
 	_ "database/sql"
@@ -51,6 +51,8 @@ func getHostAndPort() string {
 	// This stops Win10 from asking about firewall permissions with each new build
 	return "localhost:8080"
 }
+
+// var templates = template.Must(template.ParseFiles("index.html", "data.html", "admin.html"))
 
 func main() {
 	Startup()
@@ -112,14 +114,7 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 		FailCount:    FailCount,
 	}
 
-	t, err := template.ParseFiles("index.html") // parse the html file index.html
-
-	// if there is an error, log it
-	if err != nil {
-		log.Print("template parsing error: ", err)
-	}
-
-	err = t.Execute(w, IndexPageVars) //execute the template and pass it the HomePageVars struct to fill in the gaps
+	err := pages.Templates.ExecuteTemplate(w, "index.html", IndexPageVars)
 
 	if err != nil {
 		log.Print("template executing error: ", err)
