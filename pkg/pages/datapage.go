@@ -32,7 +32,7 @@ func DataPage(w http.ResponseWriter, r *http.Request) {
 	DataPageVars := structs.PageVariables{ //store the date and time in a struct
 		Date:        now.Format(constants.LayoutDateISO),
 		Time:        now.Format(constants.LayoutTimeISO),
-		HostAndPort: help.GetHostAndPort(),
+		HostAndPort: help.GetHostAndPortExplicit(),
 	}
 
 	// ws.ServeWs(ws.WSHub, w, r)
