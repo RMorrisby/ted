@@ -87,6 +87,7 @@ func InitResultsDB() {
 	// 	log.Fatalf("Error opening database: %q", err)
 	// }
 
+	log.Println("SQL :", constants.ResultsTableCreateSQL)
 	if _, err := DBConn.Exec(constants.ResultsTableCreateSQL); err != nil {
 		log.Panicf("Error creating database table with SQL %s; error: %q", constants.ResultsTableCreateSQL, err)
 		log.Fatalf("Error creating database table: %q", err)

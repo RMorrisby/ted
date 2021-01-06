@@ -54,7 +54,8 @@ func DeleteAllResultsDB() (bool, error) {
 
 	log.Println("Will now delete results from DB")
 
-	r, err := DBConn.Exec(fmt.Sprintf("DELETE * FROM %s", constants.ResultsTable))
+	sql := fmt.Sprintf("DELETE FROM %s", constants.ResultsTable)
+	r, err := DBConn.Exec(sql)
 	if err != nil {
 		log.Fatalf("Error deleting all results: %q", err)
 		return false, err

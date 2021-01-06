@@ -74,7 +74,9 @@ func ReadResultsCSV() []structs.Result {
 func ReadResultsDB() []structs.Result {
 	log.Println("Reading results from DB")
 
-	rows, err := DBConn.Query(fmt.Sprintf("SELECT * FROM %s", constants.ResultsTable))
+	sql := fmt.Sprintf("SELECT * FROM %s ORDER BY testrun ASC", constants.ResultsTable)
+	log.Println("SQL :", sql)
+	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Fatalf("Error reading results: %q", err)
 	}
