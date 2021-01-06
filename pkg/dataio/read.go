@@ -89,7 +89,8 @@ func ReadResultsDB() []structs.Result {
 	for rows.Next() {
 
 		var r structs.Result
-		err = rows.Scan(&r.Name, &r.TestRunIdentifier, &r.Category, &r.Status, &r.Timestamp, &r.Message)
+		var rowID int
+		err = rows.Scan(&rowID, &r.Name, &r.TestRunIdentifier, &r.Category, &r.Status, &r.Timestamp, &r.Message)
 		if err != nil {
 			log.Fatalf("Error reading row into struct: %q", err)
 		}
