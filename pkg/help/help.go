@@ -23,7 +23,7 @@ func GetHostAndPort() string {
 
 	// If Heroku, do not specify the hostname. Just return the : and the port
 	if p != "" {
-		return ":" + p
+		return "arcane-ravine-69473.herokuapp.com:" + p
 	}
 
 	// If local (Win10), we should specify localhost as the host
