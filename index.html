@@ -1,11 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>My Page</title>
-</head>
-<body>
-<a href="/data">Data Page</a>
-<a href="/admin">Admin Page</a>
+{{ template "_header.html" . }}
+
 <p>The date today is {{.Date}}</p>
 <p>And the time is {{.Time}}</p>
 <p></p>
@@ -16,11 +10,7 @@ Successful tests : {{.SuccessCount}}
 Failed tests :     {{.FailCount}}
 </pre>
 <p></p>
-TODO : a header bar with links
 <p></p>
-<pre>
-Pages : /data
-        /admin
-        </pre>
-</body>
-</html>
+        
+{{ template "_footer.html" . }}
+

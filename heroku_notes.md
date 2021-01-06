@@ -101,3 +101,7 @@ DATABASE_URL: postgres://odpwvcfjzdxhom:c3cf3a8184dac6aed218ba4540996ff3b2c31ba1
 Get Go's PostGres module : `go get github.com/lib/pq@v1`
 
 
+## CSS notes
+
+Colours : https://www.rapidtables.com/web/css/css-color.html#white
+
