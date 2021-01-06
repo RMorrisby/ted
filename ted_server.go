@@ -239,8 +239,9 @@ func WriteResultToCSV(result structs.Result) {
 
 func WriteResultToDB(result structs.Result) {
 	log.Println("Writing result to DB")
-	cmd := constants.ResultsTableInsertSQL + fmt.Sprintf("(%s %s %s %s %s %s)", result.Name, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
-	if _, err := dataio.DBConn.Exec(cmd); err != nil {
+	sql := constants.ResultsTableInsertSQL + fmt.Sprintf("(%s %s %s %s %s %s)", result.Name, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
+	log.Println("SQL :", sql)
+	if _, err := dataio.DBConn.Exec(sql); err != nil {
 		log.Fatalf("Error writing result to DB: %q", err)
 	}
 	// TODO
