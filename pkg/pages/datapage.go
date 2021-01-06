@@ -12,6 +12,7 @@ import (
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
 	_ "ted/pkg/handler" // TODO enable
+	"ted/pkg/help"
 	"ted/pkg/structs"
 	_ "ted/pkg/ws"
 	"time"
@@ -29,8 +30,9 @@ func DataPage(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()                      // find the time right now
 	DataPageVars := structs.PageVariables{ //store the date and time in a struct
-		Date: now.Format(constants.LayoutDateISO),
-		Time: now.Format(constants.LayoutTimeISO),
+		Date:        now.Format(constants.LayoutDateISO),
+		Time:        now.Format(constants.LayoutTimeISO),
+		HostAndPort: help.GetHostAndPort(),
 	}
 
 	// ws.ServeWs(ws.WSHub, w, r)

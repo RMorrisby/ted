@@ -37,21 +37,6 @@ var _ = websocket.PingMessage // debugging to silence the import-compiler
 // 	return "8080"
 // }
 
-func getHostAndPort() string {
-	// If "PORT" is set, we are running on Heroku
-	// If not set, we are running locally (Win10)
-	p := os.Getenv("PORT")
-
-	// If Heroku, do not specify the hostname. Just return the : and the port
-	if p != "" {
-		return ":" + p
-	}
-
-	// If local (Win10), we should specify localhost as the host
-	// This stops Win10 from asking about firewall permissions with each new build
-	return "localhost:8080"
-}
-
 // var templates = template.Must(template.ParseFiles("index.html", "data.html", "admin.html"))
 
 func main() {
@@ -109,7 +94,7 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 	IndexPageVars := structs.PageVariables{ //store the date and time in a struct
 		Date:         now.Format(constants.LayoutDateISO),
 		Time:         now.Format(constants.LayoutTimeISO),
-		Port:         getHostAndPort(),
+		Port:         help.GetHostAndPort(),
 		SuccessCount: SuccessCount,
 		FailCount:    FailCount,
 	}
@@ -277,7 +262,7 @@ func startReloadServer() {
 
 func startServer() {
 	// log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
-	err := http.ListenAndServe(getHostAndPort(), nil)
+	err := http.ListenAndServe(help.GetHostAndPort(), nil)
 	if err != nil {
 		log.Fatal("Failed to start up the Reload server: ", err)
 		return
