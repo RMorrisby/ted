@@ -19,10 +19,28 @@
     
       conn.onmessage = function(evt) {
         appendLog("Refresh received! :: " + evt.data);
+        const r = JSON.parse(evt.data);
+        appendLog("Test name :: " + r.Name);
+        addResultToPage(r);
+    
     
         // If we uncomment this line, then the page will refresh every time a message is received.
         //location.reload()
       };
+    }
+    
+    function addResultToPage(r){
+        var d = document.getElementById("results-table-body");
+        d.innerHTML += `
+        <tr>
+          <td>${r.Category}</td>
+          <td>${r.Name}</td>
+          <td>${r.TestRunIdentifier}</td>
+          <td>${r.Status}</td>
+          <td>${r.Timestamp}</td>
+          <td>${r.Message}</td>
+        </tr>
+        `;
     }
     
     function appendLog(msg){
@@ -56,6 +74,23 @@
     <p>The date today is {{.Date}}</p>
     <p>And the time is {{.Time}}</p>
     <p></p>
+    <div id="results-div">
+      <table id="results-table">
+        <thead>
+          <tr>
+              <th>Category</th>
+              <th>Name</th>
+              <th>Test Run</th>
+              <th>Status</th>
+              <th>Timestamp</th>
+              <th>Message</th>
+          </tr>
+      </thead>
+      <tbody id="results-table-body">
+      </tbody>
+      </table>
+    </div>
+
     <div id="log"><span>Log:</span></div>
 
 {{ template "_footer.html" . }}

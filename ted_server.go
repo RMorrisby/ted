@@ -45,6 +45,9 @@ func main() {
 	http.HandleFunc("/is-alive", IsAliveHandler)
 
 	http.HandleFunc("/", IndexPage)
+	// http.Handle("/", http.FileServer(http.Dir("css/")))
+
+	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css"))))
 	http.HandleFunc("/data", pages.DataPage)
 	http.HandleFunc("/data2", pages.DataPage2)
 	http.HandleFunc("/admin", pages.AdminPage)

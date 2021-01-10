@@ -1,0 +1,48 @@
+#results-div table
+{
+   width:           100%;
+   table-layout:    fixed;
+   border-collapse: collapse;
+}
+#results-div table tbody
+{
+   width:    100%;
+   overflow: auto;
+/*   height:   400px; /* table height, inc. all rows */*/
+}
+#results-div table thead
+{
+   background: rgb(191, 191, 191);
+font-size: 1.2em;
+
+}
+#results-div table th
+{
+   padding:     0 5px;
+   text-align:  center;
+/*   font-family: monospace;*/
+   white-space: nowrap;
+   border:      1px solid rgb(153, 153, 153);
+}
+#results-div table td
+{
+   padding:     0 5px;
+   text-align:  left;
+/*   font-family: monospace;*/
+   white-space: nowrap;
+   border:      1px solid rgb(153, 153, 153);
+}
+#results-div table td:last-child {
+    width: 100%;
+}
+body {
+      font-family: "Gill Sans", sans-serif;
+      background-color: aliceblue;
+      color: black;
+    }
+    #content {
+      margin: 30px auto 30px auto;
+    }
+    #footer {
+      font-size: 0.8em;
+    }
