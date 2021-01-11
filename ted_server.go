@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "html/template"
-	"io/ioutil"
 	_ "path/filepath"
 
 	_ "database/sql"
@@ -41,7 +40,7 @@ var _ = websocket.PingMessage // debugging to silence the import-compiler
 // var templates = template.Must(template.ParseFiles("index.html", "data.html", "admin.html"))
 
 func main() {
-	Startup()
+	startup()
 
 	http.HandleFunc("/is-alive", IsAliveHandler)
 

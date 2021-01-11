@@ -55,7 +55,11 @@
         } else if (window["WebSocket"]) {
         // The reload endpoint is hosted on a statically defined port.
         try {
-          var wsurl = window.location.host + "/datareload";
+          if ("{{ .HostAndPort }}" == "localhost:8080") {
+            var wsurl = "localhost:8080/datareload";
+          } else {
+            var wsurl = window.location.hostname + "/datareload";
+          }
           console.log("Trying to connect websocket to ws://" + wsurl);
           tryConnectToReload("ws://" + wsurl);
           console.log("WS connection succeeded");
