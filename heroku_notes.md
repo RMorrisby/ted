@@ -92,6 +92,22 @@ DATABASE_URL: postgres://odpwvcfjzdxhom:c3cf3a8184dac6aed218ba4540996ff3b2c31ba1
 
 Get Go's PostGres module : `go get github.com/lib/pq@v1`
 
+## Websockets
+
+You must NOT specify the port number in the (browser) websocket-connection URL. I.e. do
+
+```
+var wsurl = "arcane-ravine-69473.herokuapp.com/ws";
+```
+
+and not
+
+```
+var wsurl = "arcane-ravine-69473.herokuapp.com:59121/ws";
+```
+
+There is no need for SSL or certificates for this (Heroku manages its SSL stuff, apparently). One may need proper SSL for other reasons, of course.
+
 ## SSL
 
 https://devcenter.heroku.com/articles/ssl
