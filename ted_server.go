@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "html/template"
+	"io/ioutil"
 	_ "path/filepath"
 
 	_ "database/sql"
@@ -62,7 +63,7 @@ func main() {
 	// log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
 }
 
-func Startup() {
+func startup() {
 
 	help.IsLocal = help.IsTEDRunningLocally()
 	log.Println("Running locally?", help.IsLocal)
@@ -109,7 +110,7 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Handles the /isalive GET request path, returning a simple JSON object
+// IsAliveHandler handles the /isalive GET request path, returning a simple JSON object
 func IsAliveHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Print("Is-Alive called")
@@ -119,7 +120,7 @@ func IsAliveHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, data)
 }
 
-// Handles the /result POST request path for receiving new test results
+// ResultHandler handles the /result POST request path for receiving new test results
 func ResultHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("/result called")
 	switch r.Method {
