@@ -56,20 +56,22 @@
         // The reload endpoint is hosted on a statically defined port.
         try {
           var wsurl = "{{ .HostAndPort }}/datareload";
-          console.log("Trying to connect websocket to ws://" + wsurl);
-          tryConnectToReload("ws://" + wsurl);
-        }
-        catch (ex) {
-          // If an exception is thrown, that means that we couldn't connect to to WebSockets because of mixed content
-          // security restrictions, so we try to connect using wss.
-          try {
+          var wsurl2 = window.location.host + "/datareload";
+          console.log("Alt. WS URL :: " + wsurl);
+        //   console.log("Trying to connect websocket to ws://" + wsurl);
+        //   tryConnectToReload("ws://" + wsurl);
+        // }
+        // catch (ex) {
+        //   // If an exception is thrown, that means that we couldn't connect to to WebSockets because of mixed content
+        //   // security restrictions, so we try to connect using wss.
+        //   try {
             console.log("ws connection failed; now trying to connect via wss to wss://" + wsurl);
             tryConnectToReload("wss://" + wsurl);
           }
           catch (ex2) {
             console.log("wss connection failed");
           }
-        }
+        // }
       } else {
         console.log("Your browser does not support WebSockets, cannot connect to the Reload service.");
       }
