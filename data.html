@@ -55,7 +55,7 @@
         } else if (window["WebSocket"]) {
         // The reload endpoint is hosted on a statically defined port.
         try {
-          var wsurl = "{{ .HostAndPort }}/datareload"
+          var wsurl = "{{ .HostAndPort }}/datareload";
           console.log("Trying to connect websocket to ws://" + wsurl);
           tryConnectToReload("ws://" + wsurl);
         }
@@ -63,8 +63,9 @@
           // If an exception is thrown, that means that we couldn't connect to to WebSockets because of mixed content
           // security restrictions, so we try to connect using wss.
           try {
-            console.log("Now trying to connect via wss to wss://" + wsurl");
+            console.log("ws connection failed; now trying to connect via wss to wss://" + wsurl);
             tryConnectToReload("wss://" + wsurl);
+          }
           catch (ex2) {
             console.log("wss connection failed");
           }
