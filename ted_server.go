@@ -40,21 +40,28 @@ var _ = websocket.PingMessage // debugging to silence the import-compiler
 // var templates = template.Must(template.ParseFiles("index.html", "data.html", "admin.html"))
 
 func main() {
+	// Before serving the pages
 	startup()
 
-	http.HandleFunc("/is-alive", IsAliveHandler)
-
-	http.HandleFunc("/", IndexPage)
-	// http.Handle("/", http.FileServer(http.Dir("css/")))
-
+	// Page support
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css"))))
+	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("js"))))
+
+	// Pages
+	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/data", pages.DataPage)
 	http.HandleFunc("/data2", pages.DataPage2)
 	http.HandleFunc("/admin", pages.AdminPage)
 	http.HandleFunc("/admin/deleteall", pages.AdminDeleteAll)
 	http.HandleFunc("/admin/getcount", pages.AdminGetCount)
 
+	// APIs
+	http.HandleFunc("/is-alive", IsAliveHandler)
 	http.HandleFunc("/result", ResultHandler) // path to POST new results into TED
+
+	// Misc
+	http.HandleFunc("/favicon.ico", pages.Favicon)
+
 	// Do everything else above this line
 
 	log.Print("TED started")

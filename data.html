@@ -1,92 +1,12 @@
 {{ template "_header.html" . }}
-
-    <script type="text/javascript">
-
-    /**
-     * Tries to connect to the reload service and start listening to reload events.
-     *
-     * @function tryConnectToReload
-     * @public
-     */
-    function tryConnectToReload(address) {
-      var conn = new WebSocket(address);
+    <script src="/js/data.js"></script>
     
-      conn.onclose = function() {
-        setTimeout(function() {
-          tryConnectToReload(address);
-        }, 2000);
-      };
-    
-      conn.onmessage = function(evt) {
-        appendLog("Refresh received! :: " + evt.data);
-        const r = JSON.parse(evt.data);
-        appendLog("Test name :: " + r.Name);
-        addResultToPage(r);
-    
-    
-        // If we uncomment this line, then the page will refresh every time a message is received.
-        //location.reload()
-      };
-    }
-    
-    function addResultToPage(r){
-        var d = document.getElementById("results-table-body");
-        d.innerHTML += `
-        <tr>
-          <td>${r.Category}</td>
-          <td>${r.Name}</td>
-          <td>${r.TestRunIdentifier}</td>
-          <td>${r.Status}</td>
-          <td>${r.Timestamp}</td>
-          <td>${r.Message}</td>
-        </tr>
-        `;
-    }
-    
-    function appendLog(msg){
-        var d = document.getElementById("log");
-        d.innerHTML += '<br /><span>' + msg + '</span>';
-    }
-    
-    try {
-      if (window.WebSocket === undefined) {
-            $("#container").append("Your browser does not support WebSockets");
-            //return;
-        } else if (window["WebSocket"]) {
-        // The reload endpoint is hosted on a statically defined port.
-        try {
-          if ("{{ .HostAndPort }}" == "localhost:8080") {
-            var wsurl = "localhost:8080/datareload";
-          } else {
-            var wsurl = window.location.hostname + "/datareload";
-          }
-          console.log("Trying to connect websocket to ws://" + wsurl);
-          tryConnectToReload("ws://" + wsurl);
-          console.log("WS connection succeeded");
-        }
-        catch (ex) {
-          // If an exception is thrown, that means that we couldn't connect to to WebSockets because of mixed content
-          // security restrictions, so we try to connect using wss.
-          try {
-            console.log("ws connection failed; now trying to connect via wss to wss://" + wsurl);
-            tryConnectToReload("wss://" + wsurl);
-            console.log("WSS connection succeeded");
-          }
-          catch (ex2) {
-            console.log("wss connection failed");
-          }
-        }
-      } else {
-        console.log("Your browser does not support WebSockets, cannot connect to the Reload service.");
-      }
-    } catch (ex) {
-      console.error('Exception during connecting to Reload:', ex);
-    }
-    </script>
     <p>The date today is {{.Date}}</p>
     <p>And the time is {{.Time}}</p>
     <p></p>
     <div id="results-div">
+      <div id="latest-test"><span>Waiting for new test result...</span></div>
+    <br/>
       <table id="results-table">
         <thead>
           <tr>
@@ -102,7 +22,5 @@
       </tbody>
       </table>
     </div>
-
-    <div id="log"><span>Log:</span></div>
 
 {{ template "_footer.html" . }}
