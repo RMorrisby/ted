@@ -1,7 +1,9 @@
 package pages
 
 import (
+	"bytes"
 	_ "database/sql"
+	"encoding/json"
 	_ "encoding/json"
 	_ "fmt"
 	_ "html/template"
@@ -13,6 +15,7 @@ import (
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
 	_ "ted/pkg/handler" // TODO enable
+	"ted/pkg/help"
 	"ted/pkg/structs"
 	_ "ted/pkg/ws"
 	"time"
@@ -77,4 +80,66 @@ func AdminGetCount(w http.ResponseWriter, r *http.Request) {
 	count := len(dataio.ReadResultsStore())
 	log.Print("Total result count : ", count)
 	w.Write([]byte(strconv.Itoa(count)))
+}
+
+// REST endpoint to get the total number of known test runs, and the number of results in each run
+func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
+
+	log.Print("AdminGetAllTestRunCounts called")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	results := dataio.ReadResultsStore()
+
+	// If there are no results, return
+	if len(results) == 0 {
+		log.Print("No results exist; cannot collect stats")
+		w.Write([]byte("{}"))
+		return
+	}
+
+	// If the first result doesn't have a Name, something is very wrong
+	if results[0].Name == "" {
+		log.Fatalln("First result object was nil, or its name was nil :", results[0])
+		w.Write([]byte("{}"))
+		return
+	}
+
+	var testruns []string // set of test run IDs
+	var stats []structs.Stat
+
+	// Initialise testrunstats with the first result
+	stats = append(stats, structs.Stat{TestRunName: results[0].TestRunIdentifier, Count: 0})
+
+	for _, r := range results {
+		incremented := false
+		log.Print(":___:", r.TestRunIdentifier, ":___:", stats[0].TestRunName, ":___:")
+		if !help.Contains(testruns, r.TestRunIdentifier) {
+			testruns = append(testruns, r.TestRunIdentifier)
+		}
+
+		// Now collect
+		for i := range stats {
+			if stats[i].TestRunName == r.TestRunIdentifier {
+				stats[i].Count++ // this woun't increment if we loop by object, only by index
+				incremented = true
+				break
+			}
+		}
+		if !incremented {
+			stats = append(stats, structs.Stat{TestRunName: r.TestRunIdentifier, Count: 1})
+		}
+
+	}
+
+	log.Print("Stats of all test runs : ", stats)
+
+	message, _ := json.Marshal(stats)
+	// message := stats.ToJSON() // stats is an array, but ToJSON() is on the object
+	messageBytes := bytes.TrimSpace([]byte(message))
+	w.Write(messageBytes)
+	// w.Write([]byte(strconv.Itoa(count)))
 }

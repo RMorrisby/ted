@@ -22,8 +22,8 @@ function tryConnectToReload(address) {
 }
 
 function addResultToPage(r){
-    var d = document.getElementById("results-table-body");
-    d.innerHTML += `
+    var e = document.getElementById("results-table-body");
+    e.innerHTML += `
     <tr>
         <td>${r.Category}</td>
         <td>${r.Name}</td>
@@ -37,8 +37,8 @@ function addResultToPage(r){
 
 
 function announceLatestResult(r){
-    var d = document.getElementById("latest-test");
-    d.innerHTML = '<span>Latest test : ' + r.Name + '</span>';
+    var e = document.getElementById("latest-test");
+    e.innerHTML = '<span>Latest test : ' + r.Name + '    ' + r.Status + ' on ' + r.Timestamp + '</span>';
 }
 
 

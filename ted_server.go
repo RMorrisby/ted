@@ -54,6 +54,7 @@ func main() {
 	http.HandleFunc("/admin", pages.AdminPage)
 	http.HandleFunc("/admin/deleteall", pages.AdminDeleteAll)
 	http.HandleFunc("/admin/getcount", pages.AdminGetCount)
+	http.HandleFunc("/admin/getalltestruncounts", pages.AdminGetAllTestRunCounts)
 
 	// APIs
 	http.HandleFunc("/is-alive", IsAliveHandler)
@@ -144,6 +145,8 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		result = result.Trim()
 
 		// 'name' field is mandatory
 		if result.Name == "" {

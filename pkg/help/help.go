@@ -51,3 +51,13 @@ func CheckError(message string, err error) {
 		log.Fatal(message, err)
 	}
 }
+
+// Contains asks whether the string list contains the supplied string
+func Contains(listOfStrings []string, myString string) bool {
+	for _, s := range listOfStrings {
+		if s == myString {
+			return true
+		}
+	}
+	return false
+}

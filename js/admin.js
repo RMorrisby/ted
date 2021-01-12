@@ -24,3 +24,25 @@ function deleteAllResults() {
     xhr.open("POST", "/admin/deleteall", true);
     try { xhr.send(); } catch (err) { /* handle error */ }
 }
+
+// Get the names & test counts of all known test runs in the store
+function getAllTestRuns() {
+    var e = document.getElementById("test-run-list");
+    e.innerHTML = ``;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            console.log("Received " + xhr.responseText);
+            var json = JSON.parse(xhr.responseText);
+            
+            for(var i = 0; i < json.length; i++) {
+                var obj = json[i];
+                console.log("Received " + obj.TestRunName + " and " + obj.Count)
+                e.innerHTML += `<li>${obj.TestRunName} :: ${obj.Count}</li>`;
+            }
+
+        }
+    }
+    xhr.open("GET", "/admin/getalltestruncounts", true);
+    try { xhr.send(); } catch (err) { /* handle error */ }
+}

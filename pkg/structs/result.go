@@ -3,6 +3,8 @@ package structs
 import (
 	"encoding/json"
 	"fmt"
+
+	"strings"
 )
 
 type Result struct {
@@ -34,6 +36,18 @@ func NewResult(csvLine []string) *Result {
 	r.Status = csvLine[3]
 	r.Timestamp = csvLine[4]
 	r.Message = csvLine[5]
+	return r
+}
+
+// TODO alter in-place without returning
+func (r Result) Trim() Result {
+	r.Name = strings.TrimSpace(r.Name)
+	r.TestRunIdentifier = strings.TrimSpace(r.TestRunIdentifier)
+	r.Category = strings.TrimSpace(r.Category)
+	r.Status = strings.TrimSpace(r.Status)
+	r.Timestamp = strings.TrimSpace(r.Timestamp)
+	r.Message = strings.TrimSpace(r.Message)
+
 	return r
 }
 
