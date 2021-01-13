@@ -1,46 +1,29 @@
 // Get the total number of results in the store
 function getResultCount() {
-  var e = document.getElementById("resultcount");
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-      e.textContent = " " + xhr.responseText;
-    }
-  };
-  xhr.open("GET", "/admin/getcount", true);
-  try {
-    xhr.send();
-  } catch (err) {
-    /* handle error */
-  }
+  $.get("/admin/getcount", function (data) {
+    document.getElementById("resultcount").textContent = " " + data;
+  });
 }
 
 // Deletes all results from the store
 function deleteAllResults() {
-  var e = document.getElementById("resultcount");
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-      e.textContent = " " + xhr.responseText;
-    }
-  };
-  xhr.open("POST", "/admin/deleteall", true);
-  try {
-    xhr.send();
-  } catch (err) {
-    /* handle error */
-  }
+  $.post("/admin/deleteall", function (data) {
+    document.getElementById("resultcount").textContent = " " + data;
+  });
+  document.getElementById("test-run-list").innerHTML = "";
 }
 
 // Get the names & test counts of all known test runs in the store
 function getAllTestRuns() {
-  var e = document.getElementById("test-run-list");
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-      console.log("Received " + xhr.responseText);
-      var json = JSON.parse(xhr.responseText);
+  console.log("Requesting all test runs...");
 
+  $.get("/admin/getalltestruncounts", function (data) {
+    console.log("Received all test runs");
+    var json = JSON.parse(data);
+
+    console.log(`Received ${json.length} test runs`);
+    var e = document.getElementById("test-run-list");
+    for (var i = 0; i < json.length; i++) {
       e.innerHTML = ``;
       for (var i = 0; i < json.length; i++) {
         var obj = json[i];
@@ -48,13 +31,7 @@ function getAllTestRuns() {
         e.innerHTML += `<li>${obj.TestRunName} :: ${obj.Count}</li>`;
       }
     }
-  };
-  xhr.open("GET", "/admin/getalltestruncounts", true);
-  try {
-    xhr.send();
-  } catch (err) {
-    /* handle error */
-  }
+  });
 }
 
 // On page load, get the result-count

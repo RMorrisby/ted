@@ -105,24 +105,17 @@ function addResultToPage(r) {
 // Get all existing results from the DB
 function getAllResults() {
   console.log("Requesting all results...");
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState == 4 && xhr.status == 200) {
-      console.log("Received all results");
 
-      var json = JSON.parse(xhr.responseText);
-      for (var i = 0; i < json.length; i++) {
-        var r = json[i];
-        addResultToPage(r);
-      }
+  $.get("/results", function (data) {
+    console.log("Received all results");
+    var json = JSON.parse(data);
+    
+    console.log(`Received ${json.length} results`);
+    for (var i = 0; i < json.length; i++) {
+      var r = json[i];
+      addResultToPage(r);
     }
-  };
-  xhr.open("GET", "/results", true);
-  try {
-    xhr.send();
-  } catch (err) {
-    /* handle error */
-  }
+  });
 }
 
 // On page load, get the existing results
