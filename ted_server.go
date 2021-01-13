@@ -52,13 +52,14 @@ func main() {
 	http.HandleFunc("/data", pages.DataPage)
 	http.HandleFunc("/data2", pages.DataPage2)
 	http.HandleFunc("/admin", pages.AdminPage)
-	http.HandleFunc("/admin/deleteall", pages.AdminDeleteAll)
-	http.HandleFunc("/admin/getcount", pages.AdminGetCount)
-	http.HandleFunc("/admin/getalltestruncounts", pages.AdminGetAllTestRunCounts)
-
+	
 	// APIs
 	http.HandleFunc("/is-alive", IsAliveHandler)
 	http.HandleFunc("/result", ResultHandler) // path to POST new results into TED
+	http.HandleFunc("/results", pages.DataGetAllResults)
+	http.HandleFunc("/admin/deleteall", pages.AdminDeleteAll)
+	http.HandleFunc("/admin/getcount", pages.AdminGetCount)
+	http.HandleFunc("/admin/getalltestruncounts", pages.AdminGetAllTestRunCounts)
 
 	// Misc
 	http.HandleFunc("/favicon.ico", pages.Favicon)

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	_ "database/sql"
 	"encoding/json"
-	_ "encoding/json"
 	_ "fmt"
 	_ "html/template"
 	"log"
@@ -116,7 +115,7 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 
 	for _, r := range results {
 		incremented := false
-		log.Print(":___:", r.TestRunIdentifier, ":___:", stats[0].TestRunName, ":___:")
+		// log.Print(":___:", r.TestRunIdentifier, ":___:", stats[0].TestRunName, ":___:")
 		if !help.Contains(testruns, r.TestRunIdentifier) {
 			testruns = append(testruns, r.TestRunIdentifier)
 		}
@@ -135,7 +134,7 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	log.Print("Stats of all test runs : ", stats)
+	// log.Print("Stats of all test runs : ", stats)
 
 	message, _ := json.Marshal(stats)
 	// message := stats.ToJSON() // stats is an array, but ToJSON() is on the object

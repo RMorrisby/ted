@@ -1,8 +1,9 @@
 package pages
 
 import (
+	"bytes"
 	_ "database/sql"
-	_ "encoding/json"
+	"encoding/json"
 	_ "fmt"
 	_ "html/template"
 	"log"
@@ -59,4 +60,29 @@ func DataPage2(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print("template executing error: ", err)
 	}
+}
+
+func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
+
+	log.Print("DataGetAllResults called")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	results := dataio.ReadResultsStore()
+
+	log.Print("Total result count : ", len(results))
+
+	// TODO sort the results
+	// - group them by version ID
+	// - TODO check that the version IDs are in the right order by comparing the timestamps
+	// - (maybe the version IDs haven't been written in a sortable way)
+
+	message, _ := json.Marshal(results)
+	// message := results.ToJSON() // stats is an array, but ToJSON() is on the object
+	messageBytes := bytes.TrimSpace([]byte(message))
+	w.Write(messageBytes)
+
 }
