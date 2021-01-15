@@ -92,6 +92,8 @@ DATABASE_URL: postgres://odpwvcfjzdxhom:c3cf3a8184dac6aed218ba4540996ff3b2c31ba1
 
 Get Go's PostGres module : `go get github.com/lib/pq@v1`
 
+`heroku pg:reset --confirm arcane-ravine-69473` will destroy all tables & reset it to a blank slate
+
 ## Websockets
 
 You must NOT specify the port number in the (browser) websocket-connection URL. I.e. do

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	_ "html/template"
@@ -9,14 +8,15 @@ import (
 
 	_ "database/sql"
 
+	"github.com/joho/godotenv"
+
 	"github.com/gorilla/websocket"
 	_ "github.com/lib/pq"
 
 	// "io/ioutil"
-	"encoding/csv"
+
 	"log"
 	"net/http"
-	"os"
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
 	_ "ted/pkg/handler" // TODO enable
@@ -39,6 +39,15 @@ var _ = websocket.PingMessage // debugging to silence the import-compiler
 
 // var templates = template.Must(template.ParseFiles("index.html", "data.html", "admin.html"))
 
+// init() is invoked before main()
+func init() {
+	// godotenv loads values from .env into the system
+	// They can then be read in via os.Getenv(), e.g. os.Getenv("DATABASE_URL")
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
+
 func main() {
 	// Before serving the pages
 	startup()
@@ -50,9 +59,8 @@ func main() {
 	// Pages
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/data", pages.DataPage)
-	http.HandleFunc("/data2", pages.DataPage2)
 	http.HandleFunc("/admin", pages.AdminPage)
-	
+
 	// APIs
 	http.HandleFunc("/is-alive", IsAliveHandler)
 	http.HandleFunc("/result", ResultHandler) // path to POST new results into TED
@@ -75,8 +83,8 @@ func startup() {
 
 	help.IsLocal = help.IsTEDRunningLocally()
 	log.Println("Running locally?", help.IsLocal)
-	InitResultsStore()
-	existingResults := dataio.ReadResultsStore()
+	dataio.InitDB()
+	existingResults := dataio.ReadResultStore()
 	CalcResultCounts(existingResults)
 	log.Println("Startup() completed")
 }
@@ -158,7 +166,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Result received for test", result.Name)
 		IncrementCounts(result)
 
-		WriteResultToStore(result)
+		dataio.WriteResultToStore(result)
 	default:
 		log.Println(r.Method, "/result called")
 		fmt.Fprintf(w, "Only POST is supported for /result")
@@ -175,15 +183,6 @@ func IncrementCounts(result structs.Result) {
 		FailCount++
 	default:
 		log.Println("Result contained unrecognised status", result.Status)
-	}
-}
-
-func InitResultsStore() {
-	if help.IsLocal {
-		dataio.InitResultsCSV()
-	} else {
-		dataio.ConnectToDB()
-		dataio.InitResultsDB()
 	}
 }
 
@@ -218,49 +217,6 @@ func InitResultsStore() {
 // 	}
 // }
 
-func WriteResultToStore(result structs.Result) {
-	if help.IsLocal {
-		WriteResultToCSV(result)
-	} else {
-		WriteResultToDB(result)
-	}
-	log.Println("Result written to store")
-	SendReload(result) // after writing, reload the page so that it shows the new results
-	log.Println("After SendReload")
-}
-
-func WriteResultToCSV(result structs.Result) {
-	log.Println("Will now write result to file :", result)
-	// TODO use PSV instead of CSV
-	// TODO don't write duplicates?
-	f, err := os.OpenFile(constants.ResultCSVFilename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if err != nil {
-		panic(err)
-	}
-
-	defer f.Close()
-
-	writer := csv.NewWriter(f)
-	defer writer.Flush()
-
-	resultArray := result.ToA()
-
-	err = writer.Write(resultArray)
-	help.CheckError("Cannot write to file", err)
-
-	log.Println("Wrote result to file")
-}
-
-func WriteResultToDB(result structs.Result) {
-	log.Println("Writing result to DB")
-	sql := constants.ResultsTableInsertSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s')", result.Name, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
-	log.Println("SQL :", sql)
-	if _, err := dataio.DBConn.Exec(sql); err != nil {
-		log.Fatalf("Error writing result to DB: %q", err)
-	}
-	// TODO
-}
-
 ////////////////////////
 
 // Websockety stuff
@@ -284,19 +240,11 @@ func startServer() {
 	}
 }
 
-func SendReload(result structs.Result) {
-	log.Println("Will try to send result to WS")
-	message := result.ToJSON()
-	messageBytes := bytes.TrimSpace([]byte(message))
-	ws.WSHub.Broadcast <- messageBytes
+// func SendReload(result structs.Result) {
+// 	log.Println("Will try to send result to WS")
+// 	message := result.ToJSON()
+// 	messageBytes := bytes.TrimSpace([]byte(message))
+// 	ws.WSHub.Broadcast <- messageBytes
 
-	log.Println("Result sent to WS: ", message)
-}
-
-// func SendReload() {
-// 	log.Println("Will try to send WS reload")
-// 	message := bytes.TrimSpace([]byte("reload"))
-// 	ws.WSHub.Broadcast <- message
-
-// 	log.Println("WS reload sent: ", message)
+// 	log.Println("Result sent to WS: ", message)
 // }

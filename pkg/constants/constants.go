@@ -6,10 +6,28 @@ const (
 
 	ResultCSVFilename = "result.csv"
 
-	ResultsTable                  = "results"
-	ResultsTableColumnDefinitions = "id serial, name varchar(100), testrun varchar(32), category varchar(32), status varchar(32), endtime timestamp with time zone, message varchar(100)"
-	ResultsTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + ResultsTable + " (" + ResultsTableColumnDefinitions + ")"
-	ResultsTableInsertSQL         = "INSERT INTO " + ResultsTable + " (name, testrun, category, status, endtime, message) VALUES "
+	// Suite Table
+	SuiteTable                  = "suite"
+	SuiteTableColumnDefinitions = "id serial primary key, name varchar(100) unique, description varchar(255), owner varchar(32), notes varchar(100)"
+	SuiteTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + SuiteTable + " (" + SuiteTableColumnDefinitions + ")"
+	SuiteTableInsertSQL         = "INSERT INTO " + SuiteTable + " (name, description, owner, notes) VALUES "
 
-	ResultsTableSelectSQL = "SELECT name, testrun, category, status, endtime, message from " + ResultsTable
+	SuiteTableSelectSQL = "SELECT name, description, owner, notes from " + SuiteTable
+
+	// Registered Test table
+	RegisteredTestTable                  = "test"
+	RegisteredTestTableColumnDefinitions = "id serial primary key, name varchar(100) unique, dir varchar(32), priority integer, categories varchar(255), description varchar(255), notes varchar(100), owner varchar(32), is_known_issue boolean default false, known_issue_description varchar(255)"
+	RegisteredTestTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + RegisteredTestTable + " (" + RegisteredTestTableColumnDefinitions + ")"
+	RegisteredTestTableInsertSQL         = "INSERT INTO " + RegisteredTestTable + " (name, dir, priority, categories, description, notes, owner, is_known_issue, known_issue_description) VALUES "
+
+	// Result table
+	ResultTable                  = "result"
+	ResultTableColumnDefinitions = "id serial primary key, suite_id integer references " + SuiteTable + ", test_id integer references " + RegisteredTestTable + ", testrun varchar(32) not null, status varchar(32), start_time timestamp with time zone, end_time timestamp with time zone, ran_by varchar(32), message varchar(100), ted_status varchar(32), ted_notes varchar(255)"
+	ResultTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + ResultTable + " (" + ResultTableColumnDefinitions + ")"
+	ResultTableInsertFullRowSQL  = "INSERT INTO " + ResultTable + " (suite_id, test_id, testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes) VALUES "
+
+	ResultTableInsertNotYetRunRowSQL = "INSERT INTO " + ResultTable + " (suite_id, test_id, testrun, ted_status, ted_notes) VALUES "
+
+	// Reads all results from the DB, yielding the fields that the Result struct wants (i.e. test.name instead of result.test_id)
+	ResultTableSelectSQL = "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + ResultTable + " result LEFT JOIN " + SuiteTable + " suite ON result.suite_id = suite.id LEFT JOIN " + RegisteredTestTable + " test ON result.test_id = test.id ORDER BY suite.name ASC, result.testrun ASC, test.name ASC"
 )

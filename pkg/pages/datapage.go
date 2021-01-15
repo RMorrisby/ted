@@ -45,23 +45,6 @@ func DataPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DataPage2(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	// (results []structs.Result)
-	results := dataio.ReadResultsStore()
-
-	err := Templates.ExecuteTemplate(w, "data2.html", results) //execute the template and pass it the struct to fill in the gaps
-
-	if err != nil {
-		log.Print("template executing error: ", err)
-	}
-}
-
 func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 
 	log.Print("DataGetAllResults called")
@@ -71,7 +54,7 @@ func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results := dataio.ReadResultsStore()
+	results := dataio.ReadResultStore()
 
 	log.Print("Total result count : ", len(results))
 

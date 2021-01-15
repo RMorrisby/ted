@@ -76,7 +76,7 @@ func AdminGetCount(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	count := len(dataio.ReadResultsStore())
+	count := len(dataio.ReadResultStore())
 	log.Print("Total result count : ", count)
 	w.Write([]byte(strconv.Itoa(count)))
 }
@@ -91,7 +91,7 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results := dataio.ReadResultsStore()
+	results := dataio.ReadResultStore()
 
 	// If there are no results, return
 	if len(results) == 0 {
