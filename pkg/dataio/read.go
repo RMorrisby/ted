@@ -71,7 +71,7 @@ func ReadResultStore() (results []structs.Result) {
 func ReadResultDB() []structs.Result {
 	log.Println("Reading results from DB")
 
-	sql := constants.ResultTableSelectSQL
+	sql := constants.ResultTableSelectAllSQL
 	log.Println("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
@@ -95,4 +95,48 @@ func ReadResultDB() []structs.Result {
 		results = append(results, r)
 	}
 	return results
+}
+
+func SuiteExists(name string) bool {
+	log.Println("Reading suites from DB")
+
+	sql := constants.SuiteTableSelectNameSQL
+	log.Println("SQL :", sql)
+
+	var suiteNameInDB string
+	// QueryRow is supposed to return an error if there was no row
+	// If there was no error, then there was a row
+	err := DBConn.QueryRow(sql).Scan(&suiteNameInDB)
+	if err != nil {
+		log.Println("Suite", name, "was not found in the DB")
+		return false
+	}
+
+	if name != suiteNameInDB {
+		log.Fatalf("Suite %s was returned from the DB, when we searched for suite %s", suiteNameInDB, name)
+		return false
+	}
+	return true
+}
+
+func TestExists(name string) bool {
+	log.Println("Reading tests from DB")
+
+	sql := constants.RegisteredTestTableSelectNameSQL
+	log.Println("SQL :", sql)
+
+	var testNameInDB string
+	// QueryRow is supposed to return an error if there was no row
+	// If there was no error, then there was a row
+	err := DBConn.QueryRow(sql).Scan(&testNameInDB)
+	if err != nil {
+		log.Println("Suite", name, "was not found in the DB")
+		return false
+	}
+
+	if name != testNameInDB {
+		log.Fatalf("Test %s was returned from the DB, when we searched for test %s", testNameInDB, name)
+		return false
+	}
+	return true
 }

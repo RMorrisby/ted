@@ -10,15 +10,19 @@ const (
 	SuiteTable                  = "suite"
 	SuiteTableColumnDefinitions = "id serial primary key, name varchar(100) unique, description varchar(255), owner varchar(32), notes varchar(100)"
 	SuiteTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + SuiteTable + " (" + SuiteTableColumnDefinitions + ")"
-	SuiteTableInsertSQL         = "INSERT INTO " + SuiteTable + " (name, description, owner, notes) VALUES "
+	SuiteTableInsertFullRowSQL  = "INSERT INTO " + SuiteTable + " (name, description, owner, notes) VALUES "
 
-	SuiteTableSelectSQL = "SELECT name, description, owner, notes from " + SuiteTable
+	SuiteTableSelectAllSQL  = "SELECT name, description, owner, notes from " + SuiteTable
+	SuiteTableSelectNameSQL = "SELECT name from " + SuiteTable
 
 	// Registered Test table
 	RegisteredTestTable                  = "test"
 	RegisteredTestTableColumnDefinitions = "id serial primary key, name varchar(100) unique, dir varchar(32), priority integer, categories varchar(255), description varchar(255), notes varchar(100), owner varchar(32), is_known_issue boolean default false, known_issue_description varchar(255)"
 	RegisteredTestTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + RegisteredTestTable + " (" + RegisteredTestTableColumnDefinitions + ")"
-	RegisteredTestTableInsertSQL         = "INSERT INTO " + RegisteredTestTable + " (name, dir, priority, categories, description, notes, owner, is_known_issue, known_issue_description) VALUES "
+	RegisteredTestTableInsertFullRowSQL  = "INSERT INTO " + RegisteredTestTable + " (name, dir, priority, categories, description, notes, owner, is_known_issue, known_issue_description) VALUES "
+
+	RegisteredTestTableSelectAllSQL  = "SELECT name, dir, priority, categories, description, notes, is_known_issue, known_issue_description from " + RegisteredTestTable
+	RegisteredTestTableSelectNameSQL = "SELECT name from " + RegisteredTestTable
 
 	// Result table
 	ResultTable                  = "result"
@@ -29,5 +33,5 @@ const (
 	ResultTableInsertNotYetRunRowSQL = "INSERT INTO " + ResultTable + " (suite_id, test_id, testrun, ted_status, ted_notes) VALUES "
 
 	// Reads all results from the DB, yielding the fields that the Result struct wants (i.e. test.name instead of result.test_id)
-	ResultTableSelectSQL = "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + ResultTable + " result LEFT JOIN " + SuiteTable + " suite ON result.suite_id = suite.id LEFT JOIN " + RegisteredTestTable + " test ON result.test_id = test.id ORDER BY suite.name ASC, result.testrun ASC, test.name ASC"
+	ResultTableSelectAllSQL = "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + ResultTable + " result LEFT JOIN " + SuiteTable + " suite ON result.suite_id = suite.id LEFT JOIN " + RegisteredTestTable + " test ON result.test_id = test.id ORDER BY suite.name ASC, result.testrun ASC, test.name ASC"
 )

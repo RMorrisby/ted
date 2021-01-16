@@ -81,9 +81,43 @@ func WriteFullResultToDB(result structs.Result) {
 
 	log.Println("Writing result to DB")
 	// (suite_id, test_id, testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes)
-	sql := constants.ResultTableInsertFullRowSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.StartTimestamp, result.EndTimestamp, result.RanBy, result.Message, result.Status, "")
+	sql := constants.ResultTableInsertFullRowSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.StartTimestamp, result.EndTimestamp, result.RanBy, result.Message, result.Status, "")
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
 		log.Fatalf("Error writing result to DB: %q", err)
+	}
+}
+
+// Write the suite to the DB, if the DB does not already contain a suite of that name
+func WriteSuiteToDBIfNew(suite structs.Suite) {
+
+	if !SuiteExists(suite.Name) {
+
+		log.Println("Writing suite to DB")
+		sql := constants.SuiteTableInsertFullRowSQL + fmt.Sprintf("('%s', '%s', '%s', '%s')", suite.Name, suite.Description, suite.Owner, suite.Notes)
+		log.Println("SQL :", sql)
+		if _, err := DBConn.Exec(sql); err != nil {
+			log.Fatalf("Error writing result to DB: %q", err)
+		}
+	} else {
+		log.Printf("Suite %s already exists", suite.Name)
+	}
+}
+
+// Write the test to the DB, if the DB does not already contain a test of that name
+func WriteTestToDBIfNew(test structs.Test) {
+
+	if !TestExists(test.Name) {
+
+		log.Println("Writing test to DB")
+		// (name, dir, priority, categories, description, notes, owner, is_known_issue, known_issue_description) VALUES "
+		sql := constants.RegisteredTestTableInsertFullRowSQL + fmt.Sprintf("('%s', '%s', '%d', '%s', '%s', '%s', '%s', '%t', '%s')",
+			test.Name, test.Dir, test.Priority, test.Categories, test.Description, test.Notes, test.Owner, test.IsKnownIssue, test.KnownIssueDescription)
+		log.Println("SQL :", sql)
+		if _, err := DBConn.Exec(sql); err != nil {
+			log.Fatalf("Error writing result to DB: %q", err)
+		}
+	} else {
+		log.Printf("Test %s already exists", test.Name)
 	}
 }

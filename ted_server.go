@@ -63,8 +63,15 @@ func main() {
 
 	// APIs
 	http.HandleFunc("/is-alive", IsAliveHandler)
+	http.HandleFunc("/suite", SuiteHandler) // path to POST new suites into TED
+	// http.HandleFunc("/suite/exists", SuiteExistsHandler) // path to GET new suites into TED
+	// http.HandleFunc("/suites", pages.DataGetAllSuites)
+	http.HandleFunc("/test", TestHandler) // path to POST new tests into TED
+	// http.HandleFunc("/tests", pages.DataGetAllTests)
+	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
 	http.HandleFunc("/result", ResultHandler) // path to POST new results into TED
 	http.HandleFunc("/results", pages.DataGetAllResults)
+
 	http.HandleFunc("/admin/deleteall", pages.AdminDeleteAll)
 	http.HandleFunc("/admin/getcount", pages.AdminGetCount)
 	http.HandleFunc("/admin/getalltestruncounts", pages.AdminGetAllTestRunCounts)
@@ -170,6 +177,80 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		log.Println(r.Method, "/result called")
 		fmt.Fprintf(w, "Only POST is supported for /result")
+	}
+}
+
+// SuiteHandler handles the /suite POST request path for receiving new test suites
+func SuiteHandler(w http.ResponseWriter, r *http.Request) {
+	log.Print("/suite called")
+	switch r.Method {
+	case "GET":
+		// TODO try to get the suite & return it
+	case "POST":
+
+		// Now try to parse the POST body from JSON
+		var suite structs.Suite
+		d := json.NewDecoder(r.Body)
+		d.DisallowUnknownFields() // catch unwanted fields
+
+		err := d.Decode(&suite)
+		if err != nil {
+			// bad JSON or unrecognized json field
+			log.Print("Bad JSON or unrecognized json field", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// result = result.Trim()
+
+		// 'name' field is mandatory
+		if suite.Name == "" {
+			http.Error(w, "Missing field 'name' from JSON object", http.StatusBadRequest)
+			return
+		}
+
+		log.Println("New suite received :", suite.Name)
+
+		dataio.WriteSuiteToDBIfNew(suite)
+	default:
+		log.Println(r.Method, "/suite called")
+		fmt.Fprintf(w, "Only GET and POST are supported for /suite")
+	}
+}
+
+// TestHandler handles the /test POST request path for receiving new tests
+func TestHandler(w http.ResponseWriter, r *http.Request) {
+	log.Print("/test called")
+	switch r.Method {
+	case "POST":
+
+		// Now try to parse the POST body from JSON
+		var test structs.Test
+		d := json.NewDecoder(r.Body)
+		d.DisallowUnknownFields() // catch unwanted fields
+
+		err := d.Decode(&test)
+		if err != nil {
+			// bad JSON or unrecognized json field
+			log.Print("Bad JSON or unrecognized json field", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// result = result.Trim()
+
+		// 'name' field is mandatory
+		if test.Name == "" {
+			http.Error(w, "Missing field 'name' from JSON object", http.StatusBadRequest)
+			return
+		}
+
+		log.Println("New test received :", test.Name)
+
+		dataio.WriteTestToDBIfNew(test)
+	default:
+		log.Println(r.Method, "/test called")
+		fmt.Fprintf(w, "Only POST is supported for /test")
 	}
 }
 
