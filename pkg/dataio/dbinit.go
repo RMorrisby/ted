@@ -1,22 +1,12 @@
 package dataio
 
 import (
-	_ "encoding/json"
-	_ "fmt"
-	_ "html/template"
+	"os"
 
-	_ "database/sql"
-
-	_ "github.com/gorilla/websocket"
-	_ "github.com/lib/pq"
-
-	// "io/ioutil"
-
-	"log"
-	_ "net/http"
 	"ted/pkg/constants"
 	_ "ted/pkg/handler" // TODO enable
-	_ "time"
+
+	log "github.com/romana/rlog"
 )
 
 /*
@@ -102,7 +92,7 @@ func InitTable(name string, createSQL string) {
 
 	log.Println("SQL :", createSQL)
 	if _, err := DBConn.Exec(createSQL); err != nil {
-		log.Panicf("Error creating database table with SQL %s; error: %q", createSQL, err)
-		log.Fatalf("Error creating database table: %q", err)
+		log.Critical("Error creating database table with SQL %s; error: %q", createSQL, err)
+		os.Exit(1)
 	}
 }

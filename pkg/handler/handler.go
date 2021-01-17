@@ -6,7 +6,7 @@ package handler
 import (
 	_ "database/sql"
 	_ "fmt"
-	"log"
+	log "github.com/romana/rlog"
 	"net/http"
 )
 

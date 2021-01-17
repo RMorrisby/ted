@@ -1,24 +1,12 @@
 package dataio
 
 import (
-	_ "encoding/json"
 	"fmt"
-	_ "html/template"
-	_ "path/filepath"
 
-	_ "database/sql"
-
-	_ "github.com/gorilla/websocket"
-	_ "github.com/lib/pq"
-
-	// "io/ioutil"
-	_ "encoding/csv"
-	"log"
-	_ "net/http"
 	"ted/pkg/constants"
 	_ "ted/pkg/handler" // TODO enable
-	_ "ted/pkg/structs"
-	_ "time"
+
+	log "github.com/romana/rlog"
 )
 
 func DeleteAllResults() (success bool, err error) {
@@ -56,13 +44,13 @@ func DeleteAllResultsDB() (bool, error) {
 	log.Println("SQL :", sql)
 	r, err := DBConn.Exec(sql)
 	if err != nil {
-		log.Fatalf("Error deleting all results: %q", err)
+		log.Criticalf("Error deleting all results: %q", err)
 		return false, err
 	}
 
 	numDeleted, err := r.RowsAffected()
 	if err != nil {
-		log.Fatalf("Error deleting all results: %q", err)
+		log.Criticalf("Error deleting all results: %q", err)
 	}
 
 	log.Printf("Deleted %d results from the DB", numDeleted)

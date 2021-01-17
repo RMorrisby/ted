@@ -15,7 +15,7 @@ package dataio
 
 // 	// "io/ioutil"
 // 	_ "encoding/csv"
-// 	"log"
+// 	log "github.com/romana/rlog"
 // 	_ "net/http"
 // 	"os"
 // 	"ted/pkg/constants"
@@ -25,6 +25,8 @@ package dataio
 // 	_ "ted/pkg/structs"
 // 	"ted/pkg/ws"
 // 	_ "time"
+
+// log "github.com/romana/rlog"
 // )
 
 // TODO this is a placeholder file
@@ -76,7 +78,7 @@ package dataio
 // 	sql := constants.ResultsTableInsertSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s')", result.Name, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
 // 	log.Println("SQL :", sql)
 // 	if _, err := DBConn.Exec(sql); err != nil {
-// 		log.Fatalf("Error writing result to DB: %q", err)
+// 		log.Criticalf("Error writing result to DB: %q", err)
 // 	}
 // 	// TODO
 

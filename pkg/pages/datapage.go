@@ -2,24 +2,16 @@ package pages
 
 import (
 	"bytes"
-	_ "database/sql"
 	"encoding/json"
-	_ "fmt"
-	_ "html/template"
-	"log"
 	"net/http"
-	_ "os"
-	_ "path/filepath"
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
 	_ "ted/pkg/handler" // TODO enable
 	"ted/pkg/help"
 	"ted/pkg/structs"
-	_ "ted/pkg/ws"
 	"time"
 
-	_ "github.com/gorilla/websocket"
-	_ "github.com/lib/pq"
+	log "github.com/romana/rlog"
 )
 
 func DataPage(w http.ResponseWriter, r *http.Request) {
@@ -41,13 +33,13 @@ func DataPage(w http.ResponseWriter, r *http.Request) {
 	err := Templates.ExecuteTemplate(w, "data.html", DataPageVars) //execute the template and pass it the struct to fill in the gaps
 
 	if err != nil {
-		log.Print("template executing error: ", err)
+		log.Debug("template executing error: ", err)
 	}
 }
 
 func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 
-	log.Print("DataGetAllResults called")
+	log.Debug("DataGetAllResults called")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -56,7 +48,7 @@ func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 
 	results := dataio.ReadResultStore()
 
-	log.Print("Total result count : ", len(results))
+	log.Debug("Total result count : ", len(results))
 
 	// TODO sort the results
 	// - group them by version ID

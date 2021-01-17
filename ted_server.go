@@ -3,19 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	_ "html/template"
-	_ "path/filepath"
-
-	_ "database/sql"
 
 	"github.com/joho/godotenv"
 
-	"github.com/gorilla/websocket"
-	_ "github.com/lib/pq"
-
-	// "io/ioutil"
-
-	"log"
 	"net/http"
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
@@ -25,6 +15,10 @@ import (
 	"ted/pkg/structs"
 	"ted/pkg/ws"
 	"time"
+
+	"github.com/gorilla/websocket"
+
+	log "github.com/romana/rlog"
 )
 
 var _ = websocket.PingMessage // debugging to silence the import-compiler
@@ -40,15 +34,24 @@ var _ = websocket.PingMessage // debugging to silence the import-compiler
 // var templates = template.Must(template.ParseFiles("index.html", "data.html", "admin.html"))
 
 // init() is invoked before main()
+// var log *logrus.Logger
+
 func init() {
+
+	// Read in a custom config file for rlog
+	// This file controls the logging level, etc.
+	log.SetConfFile(".rlog.conf")
+
 	// godotenv loads values from .env into the system
 	// They can then be read in via os.Getenv(), e.g. os.Getenv("DATABASE_URL")
 	if err := godotenv.Load(); err != nil {
-		log.Print("No .env file found")
+		log.Error("No .env file found")
 	}
+
 }
 
 func main() {
+
 	// Before serving the pages
 	startup()
 
@@ -81,7 +84,7 @@ func main() {
 
 	// Do everything else above this line
 
-	log.Print("TED started")
+	log.Info("TED started")
 	startReloadServer()
 	// log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
 }
@@ -89,11 +92,11 @@ func main() {
 func startup() {
 
 	help.IsLocal = help.IsTEDRunningLocally()
-	log.Println("Running locally?", help.IsLocal)
+	log.Debug("Running locally?", help.IsLocal)
 	dataio.InitDB()
 	existingResults := dataio.ReadResultStore()
 	CalcResultCounts(existingResults)
-	log.Println("Startup() completed")
+	log.Debug("Startup() completed")
 }
 
 var SuccessCount int
@@ -129,14 +132,14 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 	err := pages.Templates.ExecuteTemplate(w, "index.html", IndexPageVars)
 
 	if err != nil {
-		log.Print("template executing error: ", err)
+		log.Error("template executing error: ", err)
 	}
 }
 
 // IsAliveHandler handles the /isalive GET request path, returning a simple JSON object
 func IsAliveHandler(w http.ResponseWriter, r *http.Request) {
 
-	log.Print("Is-Alive called")
+	log.Debug("Is-Alive called")
 
 	data := "{\"is-alive\": true}"
 
@@ -145,7 +148,7 @@ func IsAliveHandler(w http.ResponseWriter, r *http.Request) {
 
 // ResultHandler handles the /result POST request path for receiving new test results
 func ResultHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print("/result called")
+	log.Debug("/result called")
 	switch r.Method {
 	case "POST":
 
@@ -157,7 +160,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		err := d.Decode(&result)
 		if err != nil {
 			// bad JSON or unrecognized json field
-			log.Print("Bad JSON or unrecognized json field", err)
+			log.Error("Bad JSON or unrecognized json field", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -170,22 +173,44 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		log.Println("Result received for test", result.Name)
+		log.Debug("Result received for test", result.Name)
 		IncrementCounts(result)
 
 		dataio.WriteResultToStore(result)
 	default:
 		log.Println(r.Method, "/result called")
-		fmt.Fprintf(w, "Only POST is supported for /result")
+		http.Error(w, "Only POST is supported for /result", http.StatusMethodNotAllowed)
 	}
 }
 
 // SuiteHandler handles the /suite POST request path for receiving new test suites
 func SuiteHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print("/suite called")
+	log.Debug("/suite called")
 	switch r.Method {
 	case "GET":
-		// TODO try to get the suite & return it
+		log.Println(r.Method, "GET /suite called")
+		log.Println(r.URL)
+		log.Println(r.URL.Query())
+		log.Println(r.URL.Query().Get("suite"))
+		log.Println(r.URL.Query().Get("suite") != "")
+
+		name := r.URL.Query().Get("suite")
+		if name == "" {
+			// A suite name must be supplied
+			s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /suite?suite=___"
+			log.Error(s)
+			http.Error(w, s, http.StatusBadRequest)
+			return
+		}
+
+		suite := dataio.GetSuite(name)
+		if suite == nil {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Suite '" + name + "' is not registered in TED"))
+		} else {
+			fmt.Fprintf(w, suite.ToJSON())
+		}
+
 	case "POST":
 
 		// Now try to parse the POST body from JSON
@@ -196,7 +221,7 @@ func SuiteHandler(w http.ResponseWriter, r *http.Request) {
 		err := d.Decode(&suite)
 		if err != nil {
 			// bad JSON or unrecognized json field
-			log.Print("Bad JSON or unrecognized json field", err)
+			log.Error("Bad JSON or unrecognized json field", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -212,16 +237,40 @@ func SuiteHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("New suite received :", suite.Name)
 
 		dataio.WriteSuiteToDBIfNew(suite)
+		w.WriteHeader(http.StatusCreated) // return a 201
 	default:
-		log.Println(r.Method, "/suite called")
-		fmt.Fprintf(w, "Only GET and POST are supported for /suite")
+		log.Debug(r.Method, "/suite called")
+		http.Error(w, "Only GET and POST are supported for /suite", http.StatusMethodNotAllowed)
 	}
 }
 
 // TestHandler handles the /test POST request path for receiving new tests
 func TestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print("/test called")
+	log.Debug(r.Method, "/test called")
 	switch r.Method {
+	case "GET":
+		log.Println(r.URL)
+		log.Println(r.URL.Query())
+		log.Println(r.URL.Query().Get("test"))
+		log.Println(r.URL.Query().Get("test") != "")
+
+		name := r.URL.Query().Get("test")
+		if name == "" {
+			// A test name must be supplied
+			s := "No test name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /test?test=___"
+			log.Error(s)
+			http.Error(w, s, http.StatusBadRequest)
+			return
+		}
+
+		test := dataio.GetTest(name)
+		if test == nil {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Test '" + name + "' is not registered in TED"))
+		} else {
+			fmt.Fprintf(w, test.ToJSON())
+		}
+
 	case "POST":
 
 		// Now try to parse the POST body from JSON
@@ -232,7 +281,7 @@ func TestHandler(w http.ResponseWriter, r *http.Request) {
 		err := d.Decode(&test)
 		if err != nil {
 			// bad JSON or unrecognized json field
-			log.Print("Bad JSON or unrecognized json field", err)
+			log.Error("Bad JSON or unrecognized json field", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -248,9 +297,10 @@ func TestHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("New test received :", test.Name)
 
 		dataio.WriteTestToDBIfNew(test)
+		w.WriteHeader(http.StatusCreated) // return a 201
 	default:
-		log.Println(r.Method, "/test called")
-		fmt.Fprintf(w, "Only POST is supported for /test")
+		log.Debug(r.Method, "/test called")
+		http.Error(w, "Only POST is supported for /test", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -263,7 +313,7 @@ func IncrementCounts(result structs.Result) {
 	case "FAILED":
 		FailCount++
 	default:
-		log.Println("Result contained unrecognised status", result.Status)
+		log.Debug("Result contained unrecognised status", result.Status)
 	}
 }
 
@@ -316,7 +366,7 @@ func startServer() {
 	// log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
 	err := http.ListenAndServe(help.GetHostAndPort(), nil)
 	if err != nil {
-		log.Fatal("Failed to start up the Reload server: ", err)
+		log.Critical("Failed to start up the Reload server: ", err)
 		return
 	}
 }

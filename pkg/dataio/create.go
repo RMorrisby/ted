@@ -2,29 +2,14 @@ package dataio
 
 import (
 	"bytes"
-	_ "encoding/csv"
-	_ "encoding/json"
 	"fmt"
-	_ "html/template"
-	_ "path/filepath"
-
-	_ "database/sql"
-
-	_ "github.com/gorilla/websocket"
-	_ "github.com/lib/pq"
-
-	// "io/ioutil"
-	_ "encoding/csv"
-	"log"
-	_ "net/http"
-	_ "os"
 	"ted/pkg/constants"
 	_ "ted/pkg/handler" // TODO enable
 	_ "ted/pkg/help"
 	"ted/pkg/structs"
-	_ "ted/pkg/structs"
 	"ted/pkg/ws"
-	_ "time"
+
+	log "github.com/romana/rlog"
 )
 
 func WriteResultToStore(result structs.Result) {
@@ -71,8 +56,8 @@ func SendReload(result structs.Result) {
 
 func WriteFullResultToDB(result structs.Result) {
 
-	suiteID := "" // TODO use result.SuiteName
-	testID := ""  // TODO use result.Name
+	suiteID := fmt.Sprintf("(SELECT id from suite where suite.name = %s)", result.SuiteName)
+	testID := fmt.Sprintf("(SELECT id from test where test.name = %s)", result.Name)
 
 	// TODO Maybe try something like this?
 	// "INSERT INTO " + ResultTable + " ((select suite.id from suite where suite.name is " + result.SuiteName + ")),
@@ -84,7 +69,7 @@ func WriteFullResultToDB(result structs.Result) {
 	sql := constants.ResultTableInsertFullRowSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.StartTimestamp, result.EndTimestamp, result.RanBy, result.Message, result.Status, "")
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
-		log.Fatalf("Error writing result to DB: %q", err)
+		log.Criticalf("Error writing result to DB: %q", err)
 	}
 }
 
@@ -97,7 +82,7 @@ func WriteSuiteToDBIfNew(suite structs.Suite) {
 		sql := constants.SuiteTableInsertFullRowSQL + fmt.Sprintf("('%s', '%s', '%s', '%s')", suite.Name, suite.Description, suite.Owner, suite.Notes)
 		log.Println("SQL :", sql)
 		if _, err := DBConn.Exec(sql); err != nil {
-			log.Fatalf("Error writing result to DB: %q", err)
+			log.Criticalf("Error writing result to DB: %q", err)
 		}
 	} else {
 		log.Printf("Suite %s already exists", suite.Name)
@@ -115,7 +100,7 @@ func WriteTestToDBIfNew(test structs.Test) {
 			test.Name, test.Dir, test.Priority, test.Categories, test.Description, test.Notes, test.Owner, test.IsKnownIssue, test.KnownIssueDescription)
 		log.Println("SQL :", sql)
 		if _, err := DBConn.Exec(sql); err != nil {
-			log.Fatalf("Error writing result to DB: %q", err)
+			log.Criticalf("Error writing result to DB: %q", err)
 		}
 	} else {
 		log.Printf("Test %s already exists", test.Name)

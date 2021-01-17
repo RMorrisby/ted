@@ -3,7 +3,7 @@
 package ws
 
 import (
-	"log"
+	log "github.com/romana/rlog"
 	"net/http"
 	"time"
 

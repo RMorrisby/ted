@@ -1,23 +1,11 @@
 package dataio
 
 import (
-	_ "encoding/json"
-	_ "html/template"
-	_ "path/filepath"
-
-	_ "database/sql"
-
-	_ "github.com/gorilla/websocket"
-	_ "github.com/lib/pq"
-
-	// "io/ioutil"
-
-	"log"
-	_ "net/http"
 	"ted/pkg/constants"
 	_ "ted/pkg/handler" // TODO enable
 	"ted/pkg/structs"
-	_ "time"
+
+	log "github.com/romana/rlog"
 )
 
 func ReadResultStore() (results []structs.Result) {
@@ -75,11 +63,11 @@ func ReadResultDB() []structs.Result {
 	log.Println("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
-		log.Fatalf("Error reading results: %q", err)
+		log.Criticalf("Error reading results: %q", err)
 	}
 
-	cols, _ := rows.Columns()
-	log.Printf("Found %d columns in DB", len(cols))
+	// cols, _ := rows.Columns()
+	// log.Printf("Found %d columns in DB", len(cols))
 	// log.Printf("Found %d results in DB", resultCount)
 
 	var results []structs.Result
@@ -89,53 +77,76 @@ func ReadResultDB() []structs.Result {
 		// var rowID int
 		err = rows.Scan(&r.SuiteName, &r.Name, &r.TestRunIdentifier, &r.Status, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
 		if err != nil {
-			log.Fatalf("Error reading row into struct: %q", err)
+			log.Criticalf("Error reading row into struct: %q", err)
 		}
 
 		results = append(results, r)
 	}
+
+	log.Debugf("Found %d results in DB", len(results))
 	return results
 }
 
-func SuiteExists(name string) bool {
-	log.Println("Reading suites from DB")
+// May return nil
+func GetSuite(name string) *structs.Suite {
+	log.Debug("\n\n")
+	log.Printf("Reading suites from DB; want suite '%s'", name)
 
-	sql := constants.SuiteTableSelectNameSQL
+	sql := constants.SuiteTableSelectAllSQL + " WHERE name = '" + name + "'"
 	log.Println("SQL :", sql)
 
-	var suiteNameInDB string
+	suite := structs.Suite{}
 	// QueryRow is supposed to return an error if there was no row
 	// If there was no error, then there was a row
-	err := DBConn.QueryRow(sql).Scan(&suiteNameInDB)
+	err := DBConn.QueryRow(sql).Scan(&suite.Name, &suite.Description, &suite.Owner, &suite.Notes)
 	if err != nil {
-		log.Println("Suite", name, "was not found in the DB")
-		return false
+		log.Printf("Suite %s was not found in the DB", name)
+		return nil
 	}
 
-	if name != suiteNameInDB {
-		log.Fatalf("Suite %s was returned from the DB, when we searched for suite %s", suiteNameInDB, name)
+	if name != suite.Name {
+		log.Criticalf("Suite %s was returned from the DB, when we searched for suite %s", suite.Name, name)
+		return nil
+	}
+	log.Debug("Found suite", name)
+	return &suite
+}
+
+func SuiteExists(name string) bool {
+	suite := GetSuite(name)
+	if suite == nil {
 		return false
 	}
 	return true
 }
 
-func TestExists(name string) bool {
-	log.Println("Reading tests from DB")
-
-	sql := constants.RegisteredTestTableSelectNameSQL
+// May return nil
+func GetTest(name string) *structs.Test {
+	log.Printf("Reading tests from DB; want test '%s'", name)
+	// = "SELECT name, dir, priority, categories, description, notes, is_known_issue, known_issue_description from "
+	sql := constants.RegisteredTestTableSelectAllSQL + " WHERE test.name = '" + name + "'"
 	log.Println("SQL :", sql)
 
-	var testNameInDB string
+	test := structs.Test{}
 	// QueryRow is supposed to return an error if there was no row
 	// If there was no error, then there was a row
-	err := DBConn.QueryRow(sql).Scan(&testNameInDB)
+	err := DBConn.QueryRow(sql).Scan(&test.Name, &test.Dir, &test.Priority, &test.Categories, &test.Description, &test.Notes, &test.Owner, &test.IsKnownIssue, &test.KnownIssueDescription)
 	if err != nil {
-		log.Println("Suite", name, "was not found in the DB")
-		return false
+		log.Printf("Test %s was not found in the DB", name)
+		return nil
 	}
 
-	if name != testNameInDB {
-		log.Fatalf("Test %s was returned from the DB, when we searched for test %s", testNameInDB, name)
+	if name != test.Name {
+		log.Criticalf("Test %s was returned from the DB, when we searched for test %s", test.Name, name)
+		return nil
+	}
+	log.Debug("Found test", name)
+	return &test
+}
+
+func TestExists(name string) bool {
+	test := GetTest(name)
+	if test == nil {
 		return false
 	}
 	return true

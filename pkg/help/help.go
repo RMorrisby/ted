@@ -1,8 +1,9 @@
 package help
 
 import (
-	"log"
 	"os"
+
+	log "github.com/romana/rlog"
 )
 
 var IsLocal bool // cache the fact that we are running locally (or not) // should be available globally
@@ -48,7 +49,7 @@ func GetHostAndPortExplicit() string {
 
 func CheckError(message string, err error) {
 	if err != nil {
-		log.Fatal(message, err)
+		log.Critical(message, err)
 	}
 }
 

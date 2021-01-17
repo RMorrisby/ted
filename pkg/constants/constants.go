@@ -21,7 +21,7 @@ const (
 	RegisteredTestTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + RegisteredTestTable + " (" + RegisteredTestTableColumnDefinitions + ")"
 	RegisteredTestTableInsertFullRowSQL  = "INSERT INTO " + RegisteredTestTable + " (name, dir, priority, categories, description, notes, owner, is_known_issue, known_issue_description) VALUES "
 
-	RegisteredTestTableSelectAllSQL  = "SELECT name, dir, priority, categories, description, notes, is_known_issue, known_issue_description from " + RegisteredTestTable
+	RegisteredTestTableSelectAllSQL  = "SELECT name, dir, priority, categories, description, notes, owner, is_known_issue, known_issue_description from " + RegisteredTestTable
 	RegisteredTestTableSelectNameSQL = "SELECT name from " + RegisteredTestTable
 
 	// Result table

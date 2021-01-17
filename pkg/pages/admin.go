@@ -2,25 +2,17 @@ package pages
 
 import (
 	"bytes"
-	_ "database/sql"
 	"encoding/json"
-	_ "fmt"
-	_ "html/template"
-	"log"
+	log "github.com/romana/rlog"
 	"net/http"
-	_ "os"
-	_ "path/filepath"
 	"strconv"
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
 	_ "ted/pkg/handler" // TODO enable
 	"ted/pkg/help"
 	"ted/pkg/structs"
-	_ "ted/pkg/ws"
 	"time"
 
-	_ "github.com/gorilla/websocket"
-	_ "github.com/lib/pq"
 )
 
 // The Admin page
@@ -42,7 +34,7 @@ func AdminPage(w http.ResponseWriter, r *http.Request) {
 	err := Templates.ExecuteTemplate(w, "admin.html", AdminPageVars) //execute the template and pass it the struct to fill in the gaps
 
 	if err != nil {
-		log.Print("template executing error: ", err)
+		log.Debug("template executing error: ", err)
 	}
 }
 
@@ -69,7 +61,7 @@ func AdminDeleteAll(w http.ResponseWriter, r *http.Request) {
 // REST endpoint to get the total number of results
 func AdminGetCount(w http.ResponseWriter, r *http.Request) {
 
-	log.Print("AdminGetCount called")
+	log.Debug("AdminGetCount called")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -77,14 +69,14 @@ func AdminGetCount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	count := len(dataio.ReadResultStore())
-	log.Print("Total result count : ", count)
+	log.Debug("Total result count : ", count)
 	w.Write([]byte(strconv.Itoa(count)))
 }
 
 // REST endpoint to get the total number of known test runs, and the number of results in each run
 func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 
-	log.Print("AdminGetAllTestRunCounts called")
+	log.Debug("AdminGetAllTestRunCounts called")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -95,14 +87,14 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 
 	// If there are no results, return
 	if len(results) == 0 {
-		log.Print("No results exist; cannot collect stats")
+		log.Debug("No results exist; cannot collect stats")
 		w.Write([]byte("{}"))
 		return
 	}
 
 	// If the first result doesn't have a Name, something is very wrong
 	if results[0].Name == "" {
-		log.Fatalln("First result object was nil, or its name was nil :", results[0])
+		log.Critical("First result object was nil, or its name was nil :", results[0])
 		w.Write([]byte("{}"))
 		return
 	}
@@ -115,7 +107,7 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 
 	for _, r := range results {
 		incremented := false
-		// log.Print(":___:", r.TestRunIdentifier, ":___:", stats[0].TestRunName, ":___:")
+		// log.Debug(":___:", r.TestRunIdentifier, ":___:", stats[0].TestRunName, ":___:")
 		if !help.Contains(testruns, r.TestRunIdentifier) {
 			testruns = append(testruns, r.TestRunIdentifier)
 		}
@@ -134,7 +126,7 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	// log.Print("Stats of all test runs : ", stats)
+	// log.Debug("Stats of all test runs : ", stats)
 
 	message, _ := json.Marshal(stats)
 	// message := stats.ToJSON() // stats is an array, but ToJSON() is on the object
