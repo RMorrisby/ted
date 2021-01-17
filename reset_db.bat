@@ -1,0 +1,1 @@
+heroku pg:reset --confirm arcane-ravine-69473
