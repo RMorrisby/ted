@@ -16,16 +16,16 @@ func WriteResultToStore(result structs.Result) {
 	// if help.IsLocal {
 	// 	WriteResultToCSV(result)
 	// } else {
-	WriteFullResultToDB(result)
+	resultForUI := WriteFullResultToDB(result)
 	// }
 	log.Println("Result written to store")
-	SendReload(result) // after writing, reload the page so that it shows the new results
+	SendReload(resultForUI) // after writing, reload the page so that it shows the new results
 	log.Println("After SendReload")
 }
 
-func SendReload(result structs.Result) {
-	log.Println("Will try to send result to WS")
-	message := result.ToJSON()
+func SendReload(resultForUI structs.ResultForUI) {
+	log.Println("Will try to send resultForUI to WS")
+	message := resultForUI.ToJSON()
 	messageBytes := bytes.TrimSpace([]byte(message))
 	ws.WSHub.Broadcast <- messageBytes
 
@@ -54,10 +54,10 @@ func SendReload(result structs.Result) {
 // 	log.Println("Wrote result to file")
 // }
 
-func WriteFullResultToDB(result structs.Result) {
+func WriteFullResultToDB(result structs.Result) (resultForUI structs.ResultForUI) {
 
-	suiteID := fmt.Sprintf("(SELECT id from suite where suite.name = %s)", result.SuiteName)
-	testID := fmt.Sprintf("(SELECT id from test where test.name = %s)", result.Name)
+	suiteID := fmt.Sprintf("(SELECT id from suite where suite.name = '%s')", result.SuiteName)
+	testID := fmt.Sprintf("(SELECT id from test where test.name = '%s')", result.TestName)
 
 	// TODO Maybe try something like this?
 	// "INSERT INTO " + ResultTable + " ((select suite.id from suite where suite.name is " + result.SuiteName + ")),
@@ -66,11 +66,30 @@ func WriteFullResultToDB(result structs.Result) {
 
 	log.Println("Writing result to DB")
 	// (suite_id, test_id, testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes)
-	sql := constants.ResultTableInsertFullRowSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.StartTimestamp, result.EndTimestamp, result.RanBy, result.Message, result.Status, "")
+	sql := constants.ResultTableInsertFullRowSQL + fmt.Sprintf("(%s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.StartTimestamp, result.EndTimestamp, result.RanBy, result.Message, result.Status, "")
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
 		log.Criticalf("Error writing result to DB: %q", err)
 	}
+
+	// Now gather the info we need for the ResultForUI object
+	// Get the test
+	test := GetTest(result.TestName)
+
+	resultForUI.TestName = result.TestName
+	resultForUI.TestRunIdentifier = result.TestRunIdentifier
+	resultForUI.Status = result.Status
+	resultForUI.StartTimestamp = result.StartTimestamp
+	resultForUI.EndTimestamp = result.EndTimestamp
+	resultForUI.RanBy = result.RanBy
+	resultForUI.Message = result.Message
+	resultForUI.TedStatus = result.TedStatus
+	resultForUI.TedNotes = result.TedNotes
+
+	resultForUI.Categories = test.Categories
+	resultForUI.Dir = test.Dir
+	resultForUI.Priority = test.Priority
+	return
 }
 
 // Write the suite to the DB, if the DB does not already contain a suite of that name

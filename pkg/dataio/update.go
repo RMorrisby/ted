@@ -75,7 +75,7 @@ package dataio
 
 // func WriteResultToDB(result structs.Result) {
 // 	log.Println("Writing result to DB")
-// 	sql := constants.ResultsTableInsertSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s')", result.Name, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
+// 	sql := constants.ResultsTableInsertSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s')", result.TestName, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
 // 	log.Println("SQL :", sql)
 // 	if _, err := DBConn.Exec(sql); err != nil {
 // 		log.Criticalf("Error writing result to DB: %q", err)

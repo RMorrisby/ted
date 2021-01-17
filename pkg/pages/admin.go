@@ -3,7 +3,7 @@ package pages
 import (
 	"bytes"
 	"encoding/json"
-	log "github.com/romana/rlog"
+	"fmt"
 	"net/http"
 	"strconv"
 	"ted/pkg/constants"
@@ -13,6 +13,7 @@ import (
 	"ted/pkg/structs"
 	"time"
 
+	log "github.com/romana/rlog"
 )
 
 // The Admin page
@@ -39,9 +40,9 @@ func AdminPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // REST endpoint to trigger the deletion of all results
-func AdminDeleteAll(w http.ResponseWriter, r *http.Request) {
+func AdminDeleteAllResults(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method != "POST" {
+	if r.Method != "DELETE" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -58,24 +59,98 @@ func AdminDeleteAll(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// REST endpoint to get the total number of results
-func AdminGetCount(w http.ResponseWriter, r *http.Request) {
+// REST endpoint to trigger the deletion of all tests
+func AdminDeleteAllTests(w http.ResponseWriter, r *http.Request) {
 
-	log.Debug("AdminGetCount called")
+	if r.Method != "DELETE" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	success, err := dataio.DeleteAllTests()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	} else if success {
+		w.Write([]byte(strconv.Itoa(0)))
+	} else {
+		http.Error(w, "ERROR - not successful but no error returned!", 500)
+		return
+	}
+}
+
+// REST endpoint to trigger the deletion of all tests
+func AdminDeleteAllSuites(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "DELETE" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	success, err := dataio.DeleteAllSuites()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	} else if success {
+		w.Write([]byte(strconv.Itoa(0)))
+	} else {
+		http.Error(w, "ERROR - not successful but no error returned!", 500)
+		return
+	}
+}
+
+// REST endpoint to get the total number of results
+func AdminGetResultCount(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("") // print a new-line to help make the logs be more readable
+	log.Debug("AdminGetTestCount called")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	count := len(dataio.ReadResultStore())
+	count := len(dataio.ReadAllResults())
 	log.Debug("Total result count : ", count)
+	w.Write([]byte(strconv.Itoa(count)))
+}
+
+// REST endpoint to get the total number of tests
+func AdminGetTestCount(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("") // print a new-line to help make the logs be more readable
+	log.Debug("AdminGetTestCount called")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	count := len(dataio.ReadAllTests())
+	log.Debug("Total test count : ", count)
+	w.Write([]byte(strconv.Itoa(count)))
+}
+
+// REST endpoint to get the total number of suites
+func AdminGetSuiteCount(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("") // print a new-line to help make the logs be more readable
+	log.Debug("AdminGetSuiteCount called")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	count := len(dataio.ReadAllSuites())
+	log.Debug("Total suite count : ", count)
 	w.Write([]byte(strconv.Itoa(count)))
 }
 
 // REST endpoint to get the total number of known test runs, and the number of results in each run
 func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 
+	fmt.Println("") // print a new-line to help make the logs be more readable
 	log.Debug("AdminGetAllTestRunCounts called")
 
 	if r.Method != "GET" {
@@ -93,7 +168,7 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If the first result doesn't have a Name, something is very wrong
-	if results[0].Name == "" {
+	if results[0].TestName == "" {
 		log.Critical("First result object was nil, or its name was nil :", results[0])
 		w.Write([]byte("{}"))
 		return

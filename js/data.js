@@ -16,36 +16,15 @@ function tryConnectToReload(address) {
   };
 
   conn.onmessage = function (evt) {
-    const r = JSON.parse(evt.data); // thi should be a ResultStruct (JSON)
+    const r = JSON.parse(evt.data); // this should be a ResultStruct (JSON)
     announceLatestResult(r);
     addResultToPage(r);
   };
 }
 
-function addResultToPage(r) {
-  var e = document.getElementById("results-table-body");
-  e.innerHTML += `
-    <tr>
-        <td>${r.Category}</td>
-        <td>${r.Name}</td>
-        <td>${r.TestRunIdentifier}</td>
-        <td>${r.Status}</td>
-        <td>${r.Timestamp}</td>
-        <td>${r.Message}</td>
-    </tr>
-    `;
-}
-
 function announceLatestResult(r) {
   var e = document.getElementById("latest-test");
-  e.innerHTML =
-    "<span>Latest test : " +
-    r.Name +
-    "    " +
-    r.Status +
-    " on " +
-    r.Timestamp +
-    "</span>";
+  e.innerHTML = "<span>Latest test : " + r.TestName + "    " + r.Status + " on " + r.Timestamp + "</span>";
 }
 
 try {
@@ -67,10 +46,7 @@ try {
       // If an exception is thrown, that means that we couldn't connect to to WebSockets because of mixed content
       // security restrictions, so we try to connect using wss.
       try {
-        console.log(
-          "ws connection failed; now trying to connect via wss to wss://" +
-            wsurl
-        );
+        console.log("ws connection failed; now trying to connect via wss to wss://" + wsurl);
         tryConnectToReload("wss://" + wsurl);
         console.log("WSS connection succeeded");
       } catch (ex2) {
@@ -78,26 +54,30 @@ try {
       }
     }
   } else {
-    console.log(
-      "Your browser does not support WebSockets, cannot connect to the Reload service."
-    );
+    console.log("Your browser does not support WebSockets, cannot connect to the Reload service.");
   }
 } catch (ex) {
   console.error("Exception during connecting to Reload:", ex);
 }
 
-// ############# Websocket stuff
+// ############# END Websocket stuff
 
 function addResultToPage(r) {
   var e = document.getElementById("results-table-body");
   e.innerHTML += `
     <tr>
-        <td>${r.Category}</td>
-        <td>${r.Name}</td>
+        <td>${r.Categories}</td>
+        <td>${r.Dir}</td>
+        <td>${r.TestName}</td>
         <td>${r.TestRunIdentifier}</td>
         <td>${r.Status}</td>
-        <td>${r.Timestamp}</td>
+        <td>${r.Priority}</td>
+        <td>${r.StartTimestamp}</td>
+        <td>${r.EndTimestamp}</td>
+        <td>${r.RanBy}</td>
         <td>${r.Message}</td>
+        <td>${r.TedStatus}</td>
+        <td>${r.TedNotes}</td>
     </tr>
     `;
 }
@@ -109,7 +89,7 @@ function getAllResults() {
   $.get("/results", function (data) {
     console.log("Received all results");
     var json = JSON.parse(data);
-    
+
     console.log(`Received ${json.length} results`);
     for (var i = 0; i < json.length; i++) {
       var r = json[i];

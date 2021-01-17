@@ -72,12 +72,16 @@ func main() {
 	http.HandleFunc("/test", TestHandler) // path to POST new tests into TED
 	// http.HandleFunc("/tests", pages.DataGetAllTests)
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
-	http.HandleFunc("/result", ResultHandler) // path to POST new results into TED
-	http.HandleFunc("/results", pages.DataGetAllResults)
+	http.HandleFunc("/result", ResultHandler)            // path to POST new results into TED
+	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI
 
-	http.HandleFunc("/admin/deleteall", pages.AdminDeleteAll)
-	http.HandleFunc("/admin/getcount", pages.AdminGetCount)
+	http.HandleFunc("/admin/deleteallresults", pages.AdminDeleteAllResults)
+	http.HandleFunc("/admin/deletealltests", pages.AdminDeleteAllTests)
+	http.HandleFunc("/admin/deleteallsuites", pages.AdminDeleteAllSuites)
+	http.HandleFunc("/admin/getresultcount", pages.AdminGetResultCount)
 	http.HandleFunc("/admin/getalltestruncounts", pages.AdminGetAllTestRunCounts)
+	http.HandleFunc("/admin/gettestcount", pages.AdminGetTestCount)
+	http.HandleFunc("/admin/getsuitecount", pages.AdminGetSuiteCount)
 
 	// Misc
 	http.HandleFunc("/favicon.ico", pages.Favicon)
@@ -168,15 +172,25 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		result = result.Trim()
 
 		// 'name' field is mandatory
-		if result.Name == "" {
-			http.Error(w, "Missing field 'name' from JSON object", http.StatusBadRequest)
+		if result.TestName == "" {
+			http.Error(w, "Missing field 'TestName' from JSON object", http.StatusBadRequest)
 			return
 		}
 
-		log.Debug("Result received for test", result.Name)
+		log.Debug("Result received for test", result.TestName)
+		log.Debug(result)
 		IncrementCounts(result)
 
+		// If the test is not registered, return an error
+		if !dataio.TestExists(result.TestName) {
+			s := "Result referred to a test that was not registered"
+			log.Error(s)
+			http.Error(w, s, http.StatusBadRequest)
+			return
+		}
+
 		dataio.WriteResultToStore(result)
+		w.WriteHeader(http.StatusCreated) // return a 201
 	default:
 		log.Println(r.Method, "/result called")
 		http.Error(w, "Only POST is supported for /result", http.StatusMethodNotAllowed)

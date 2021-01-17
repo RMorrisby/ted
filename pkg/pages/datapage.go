@@ -46,7 +46,7 @@ func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results := dataio.ReadResultStore()
+	results := dataio.ReadAllResultsForUI()
 
 	log.Debug("Total result count : ", len(results))
 
@@ -59,5 +59,8 @@ func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 	// message := results.ToJSON() // stats is an array, but ToJSON() is on the object
 	messageBytes := bytes.TrimSpace([]byte(message))
 	w.Write(messageBytes)
+
+// TODO write SQL to pull out the result info that the UI wants. Don't issue repeated DB calls.
+
 
 }

@@ -8,7 +8,7 @@ import (
 )
 
 type Result struct {
-	Name              string
+	TestName          string
 	SuiteName         string
 	TestRunIdentifier string
 	Status            string
@@ -46,7 +46,7 @@ type Result struct {
 // TODO alter in-place without returning
 func (r Result) Trim() Result {
 	r.SuiteName = strings.TrimSpace(r.SuiteName)
-	r.Name = strings.TrimSpace(r.Name)
+	r.TestName = strings.TrimSpace(r.TestName)
 	r.TestRunIdentifier = strings.TrimSpace(r.TestRunIdentifier)
 	r.Status = strings.TrimSpace(r.Status)
 	r.StartTimestamp = strings.TrimSpace(r.StartTimestamp)

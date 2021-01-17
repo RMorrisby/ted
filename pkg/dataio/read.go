@@ -8,11 +8,12 @@ import (
 	log "github.com/romana/rlog"
 )
 
+// TODO remove this and just call  ReadAllResults()
 func ReadResultStore() (results []structs.Result) {
 	// if help.IsLocal {
 	// 	results = ReadResultCSV()
 	// } else {
-	results = ReadResultDB()
+	results = ReadAllResults()
 	// }
 	return
 }
@@ -56,7 +57,35 @@ func ReadResultStore() (results []structs.Result) {
 // 	return records
 // }
 
-func ReadResultDB() []structs.Result {
+func ReadAllResultsForUI() []structs.ResultForUI {
+	log.Println("Reading results from DB for the UI")
+
+	sql := constants.ResultTableSelectAllResultsForUISQL
+	log.Println("SQL :", sql)
+	rows, err := DBConn.Query(sql)
+	if err != nil {
+		log.Criticalf("Error reading results: %q", err)
+	}
+
+	var results []structs.ResultForUI
+	for rows.Next() {
+
+		var r structs.ResultForUI
+		// Categories 	Dir 	Name 	Test Run 	Status 	Priority 	Start 	End 	Ran By 	Message 	TED Status 	TED Notes
+
+		err = rows.Scan(&r.Categories, &r.Dir, &r.TestName, &r.TestRunIdentifier, &r.Status, &r.Priority, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
+		if err != nil {
+			log.Criticalf("Error reading row into struct: %q", err)
+		}
+
+		results = append(results, r)
+	}
+
+	log.Debugf("Found %d results in DB", len(results))
+	return results
+}
+
+func ReadAllResults() []structs.Result {
 	log.Println("Reading results from DB")
 
 	sql := constants.ResultTableSelectAllSQL
@@ -75,7 +104,7 @@ func ReadResultDB() []structs.Result {
 
 		var r structs.Result
 		// var rowID int
-		err = rows.Scan(&r.SuiteName, &r.Name, &r.TestRunIdentifier, &r.Status, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
+		err = rows.Scan(&r.SuiteName, &r.TestName, &r.TestRunIdentifier, &r.Status, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
 		if err != nil {
 			log.Criticalf("Error reading row into struct: %q", err)
 		}
@@ -85,6 +114,56 @@ func ReadResultDB() []structs.Result {
 
 	log.Debugf("Found %d results in DB", len(results))
 	return results
+}
+
+func ReadAllTests() (tests []structs.Test) {
+
+	log.Debug("Reading tests from DB")
+
+	sql := constants.RegisteredTestTableSelectAllSQL
+	log.Println("SQL :", sql)
+	rows, err := DBConn.Query(sql)
+	if err != nil {
+		log.Criticalf("Error reading tests: %q", err)
+	}
+	// "SELECT name, dir, priority, categories, description, notes, owner, is_known_issue, known_issue_description from " + RegisteredTestTable
+	for rows.Next() {
+		var t structs.Test
+		err = rows.Scan(&t.Name, &t.Dir, &t.Priority, &t.Categories, &t.Description, &t.Notes, &t.Owner, &t.IsKnownIssue, &t.KnownIssueDescription)
+		if err != nil {
+			log.Criticalf("Error reading row into struct: %q", err)
+		}
+
+		tests = append(tests, t)
+	}
+
+	log.Debugf("Found %d tests in DB", len(tests))
+	return tests
+}
+
+func ReadAllSuites() (suites []structs.Suite) {
+
+	log.Debug("Reading suites from DB")
+
+	sql := constants.SuiteTableSelectAllSQL
+	log.Println("SQL :", sql)
+	rows, err := DBConn.Query(sql)
+	if err != nil {
+		log.Criticalf("Error reading suites: %q", err)
+	}
+
+	for rows.Next() {
+		var s structs.Suite
+		err = rows.Scan(&s.Name, &s.Description, &s.Owner, &s.Notes)
+		if err != nil {
+			log.Criticalf("Error reading row into struct: %q", err)
+		}
+
+		suites = append(suites, s)
+	}
+
+	log.Debugf("Found %d suites in DB", len(suites))
+	return suites
 }
 
 // May return nil

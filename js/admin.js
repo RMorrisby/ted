@@ -1,16 +1,84 @@
 // Get the total number of results in the store
 function getResultCount() {
-  $.get("/admin/getcount", function (data) {
+  $.get("/admin/getresultcount", function (data) {
     document.getElementById("resultcount").textContent = " " + data;
+  });
+}
+// Get the total number of tests in the store
+function getTestCount() {
+  $.get("/admin/gettestcount", function (data) {
+    document.getElementById("testcount").textContent = " " + data;
+  });
+}
+
+// Get the total number of suites in the store
+function getSuiteCount() {
+  $.get("/admin/getsuitecount", function (data) {
+    document.getElementById("suitecount").textContent = " " + data;
   });
 }
 
 // Deletes all results from the store
 function deleteAllResults() {
-  $.post("/admin/deleteall", function (data) {
-    document.getElementById("resultcount").textContent = " " + data;
+  $.ajax({
+    url: "/admin/deleteallresults",
+    method: "DELETE",
+    contentType: "application/json",
+    success: function (data) {
+      document.getElementById("resultcount").textContent = " " + data;
+      document.getElementById("test-run-list").innerHTML = "";
+    },
+    error: function (request, msg, error) {
+      console.error("Failed to delete all results");
+      // TODO more?
+    },
   });
-  document.getElementById("test-run-list").innerHTML = "";
+  // $.delete("/admin/deleteallresults", function (data) {
+  //   document.getElementById("resultcount").textContent = " " + data;
+  // });
+  // document.getElementById("test-run-list").innerHTML = "";
+}
+
+// Deletes all tests from the store
+function deleteAllTests() {
+  $.ajax({
+    url: "/admin/deletealltests",
+    method: "DELETE",
+    contentType: "application/json",
+    success: function (data) {
+      document.getElementById("testcount").textContent = " " + data;
+      // document.getElementById("test-list").innerHTML = "";// TODO add this?
+    },
+    error: function (request, msg, error) {
+      console.error("Failed to delete all tests");
+      // TODO more?
+    },
+  });
+  // $.delete("/admin/deletealltests", function (data) {
+  //   document.getElementById("testcount").textContent = " " + data;
+  // });
+  // document.getElementById("test-list").innerHTML = "";
+}
+
+// Deletes all suites from the store
+function deleteAllSuites() {
+  $.ajax({
+    url: "/admin/deleteallsuites",
+    method: "DELETE",
+    contentType: "application/json",
+    success: function (data) {
+      document.getElementById("suitecount").textContent = " " + data;
+      // document.getElementById("suite-list").innerHTML = ""; // TODO add this?
+    },
+    error: function (request, msg, error) {
+      console.error("Failed to delete all suites");
+      // TODO more?
+    },
+  });
+  // $.delete("/admin/deleteallsuites", function (data) {
+  //   document.getElementById("suitecount").textContent = " " + data;
+  // });
+  // document.getElementById("suite-list").innerHTML = "";
 }
 
 // Get the names & test counts of all known test runs in the store
