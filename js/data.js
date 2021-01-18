@@ -64,20 +64,39 @@ try {
 
 function addResultToPage(r) {
   var e = document.getElementById("results-table-body");
+
+  if (r.StartTimestamp != null) {
+    // toISOString should yield a date in this format : 2021-01-17T19:41:00.000Z
+    // We want 2021-01-17 19:41
+    // TODO This needs to handle non-GMT timestamps properly - we're not displaying the timezone, so to
+    // the user it looks like a local time
+    // The page also needs to warn / declare this
+    // Incredibly, JS doesn't have any handling for format-strings. So we have to brute-force this somewhat.
+    var startDate = new Date(r.StartTimestamp).toISOString().replace(/(T|Z)/g, " ").slice(0, 16);
+  } else {
+    var startDate = null;
+  }
+
+  if (r.EndTimestamp != null) {
+    var endDate = new Date(r.EndTimestamp).toISOString().replace(/(T|Z)/g, " ").slice(0, 16);
+  } else {
+    var endDate = null;
+  }
+
   e.innerHTML += `
-    <tr>
-        <td>${r.Categories}</td>
-        <td>${r.Dir}</td>
-        <td>${r.TestName}</td>
-        <td>${r.TestRunIdentifier}</td>
-        <td>${r.Status}</td>
-        <td>${r.Priority}</td>
-        <td>${r.StartTimestamp}</td>
-        <td>${r.EndTimestamp}</td>
-        <td>${r.RanBy}</td>
-        <td>${r.Message}</td>
-        <td>${r.TedStatus}</td>
-        <td>${r.TedNotes}</td>
+    <tr id="${r.TestName}-${r.TestRunIdentifier}">
+        <td id="categories">${r.Categories}</td>
+        <td id="dir">${r.Dir}</td>
+        <td id="testname">${r.TestName}</td>
+        <td id="testrun">${r.TestRunIdentifier}</td>
+        <td id="status">${r.Status}</td>
+        <td id="priority">${r.Priority}</td>
+        <td id="start">${startDate}</td>
+        <td id="end">${endDate}</td>
+        <td id="ranby">${r.RanBy}</td>
+        <td id="message">${r.Message}</td>
+        <td id="tedstatus">${r.TedStatus}</td>
+        <td id="tednotes">${r.TedNotes}</td>
     </tr>
     `;
 }
