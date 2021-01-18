@@ -107,4 +107,6 @@ function getAllTestRuns() {
 window.onload = function () {
   getResultCount();
   getAllTestRuns();
+  getTestCount();
+  getSuiteCount();
 };

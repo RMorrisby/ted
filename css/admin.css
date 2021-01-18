@@ -1,0 +1,33 @@
+#admintable {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  height: 100%;
+  width: 100%;
+  /* border-collapse: collapse; */
+}
+#admintable-results,
+#admintable-tests,
+#admintable-suites {
+  /* background: green; */
+  padding: 2em;
+}
+.fixed {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+
+  /* flex: 1; */
+  background: red;
+}
+.flex-item {
+  display: flex;
+  flex-direction: column;
+
+  flex: 1;
+  /* flex-grow: 1; */
+}
+
+.adminbutton {
+  height: 25px;
+}
