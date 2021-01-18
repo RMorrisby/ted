@@ -3,7 +3,7 @@ package pages
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	_ "fmt"
 	"net/http"
 	"strconv"
 	"ted/pkg/constants"
@@ -102,8 +102,7 @@ func AdminDeleteAllSuites(w http.ResponseWriter, r *http.Request) {
 // REST endpoint to get the total number of results
 func AdminGetResultCount(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("") // print a new-line to help make the logs be more readable
-	log.Debug("AdminGetTestCount called")
+	help.LogNewAPICall("AdminGetResultCount")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -115,11 +114,24 @@ func AdminGetResultCount(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strconv.Itoa(count)))
 }
 
+// REST endpoint to get all known tests
+func AdminGetAllTests(w http.ResponseWriter, r *http.Request) {
+
+	help.LogNewAPICall("AdminGetAllTests")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tests := dataio.ReadAllTests()
+	help.MarshalJSONAndWriteToResponse(tests, w)
+}
+
 // REST endpoint to get the total number of tests
 func AdminGetTestCount(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("") // print a new-line to help make the logs be more readable
-	log.Debug("AdminGetTestCount called")
+	help.LogNewAPICall("AdminGetTestCount")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -131,11 +143,24 @@ func AdminGetTestCount(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(strconv.Itoa(count)))
 }
 
+// REST endpoint to get all known suites
+func AdminGetAllSuites(w http.ResponseWriter, r *http.Request) {
+
+	help.LogNewAPICall("AdminGetAllSuites")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	suites := dataio.ReadAllSuites()
+	help.MarshalJSONAndWriteToResponse(suites, w)
+}
+
 // REST endpoint to get the total number of suites
 func AdminGetSuiteCount(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("") // print a new-line to help make the logs be more readable
-	log.Debug("AdminGetSuiteCount called")
+	help.LogNewAPICall("AdminGetSuiteCount")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -150,8 +175,7 @@ func AdminGetSuiteCount(w http.ResponseWriter, r *http.Request) {
 // REST endpoint to get the total number of known test runs, and the number of results in each run
 func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("") // print a new-line to help make the logs be more readable
-	log.Debug("AdminGetAllTestRunCounts called")
+	help.LogNewAPICall("AdminGetAllTestRunCounts")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

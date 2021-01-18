@@ -1,3 +1,15 @@
+// Returns the string with all non-alphanumeric replaced with underscores, and with all letters in lowercase
+function downcaseAndUnderscore(s) {
+  return s.replace(/\W+/g, "_").toLowerCase();
+}
+
+// When parts of the page are updated (e.g. after deleting a suite), it is likely that the result-count
+// info (and other parts) will need to be refreshed
+function resultInfoRefresh() {
+  getResultCount();
+  getAllTestRuns();
+}
+
 // Get the total number of results in the store
 function getResultCount() {
   $.get("/admin/getresultcount", function (data) {
@@ -8,6 +20,27 @@ function getResultCount() {
 function getTestCount() {
   $.get("/admin/gettestcount", function (data) {
     document.getElementById("testcount").textContent = " " + data;
+    if (data == 0) {
+      document.getElementById("test-list").innerHTML = "";
+    }
+  });
+
+  $.get("/admin/tests", function (data) {
+    var json = JSON.parse(data);
+    if (json == null) {
+      return; // json is null if there are no tests
+    }
+    console.log(`Received ${json.length} tests`);
+
+    var e = document.getElementById("test-list");
+    e.innerHTML = ``;
+    for (var i = 0; i < json.length; i++) {
+      var obj = json[i];
+      console.log("Received test " + obj.Name);
+      e.innerHTML += `<li id=test-list-${downcaseAndUnderscore(obj.Name)}>${obj.Name} :: <button onclick="deleteTest('${
+        obj.Name
+      }')">Delete ${obj.Name}</button></li>`;
+    }
   });
 }
 
@@ -15,6 +48,26 @@ function getTestCount() {
 function getSuiteCount() {
   $.get("/admin/getsuitecount", function (data) {
     document.getElementById("suitecount").textContent = " " + data;
+    if (data == 0) {
+      document.getElementById("suite-list").innerHTML = "";
+    }
+  });
+  $.get("/admin/suites", function (data) {
+    var json = JSON.parse(data);
+    if (json == null) {
+      return; // json is null if there are no suites
+    }
+    console.log(`Received ${json.length} suites`);
+
+    var e = document.getElementById("suite-list");
+    e.innerHTML = ``;
+    for (var i = 0; i < json.length; i++) {
+      var obj = json[i];
+      console.log("Received suite " + obj.Name);
+      e.innerHTML += `<li id=suite-list-${downcaseAndUnderscore(obj.Name)}>${
+        obj.Name
+      } :: <button onclick="deleteSuite('${obj.Name}')">Delete ${obj.Name}</button></li>`;
+    }
   });
 }
 
@@ -33,10 +86,6 @@ function deleteAllResults() {
       // TODO more?
     },
   });
-  // $.delete("/admin/deleteallresults", function (data) {
-  //   document.getElementById("resultcount").textContent = " " + data;
-  // });
-  // document.getElementById("test-run-list").innerHTML = "";
 }
 
 // Deletes all tests from the store
@@ -47,17 +96,41 @@ function deleteAllTests() {
     contentType: "application/json",
     success: function (data) {
       document.getElementById("testcount").textContent = " " + data;
-      // document.getElementById("test-list").innerHTML = "";// TODO add this?
+      document.getElementById("test-list").innerHTML = "";
+
+      // Refresh other parts of the page
+      resultInfoRefresh();
     },
     error: function (request, msg, error) {
       console.error("Failed to delete all tests");
       // TODO more?
     },
   });
-  // $.delete("/admin/deletealltests", function (data) {
-  //   document.getElementById("testcount").textContent = " " + data;
-  // });
-  // document.getElementById("test-list").innerHTML = "";
+}
+
+// Deletes a specific test from the store
+function deleteTest(name) {
+  $.ajax({
+    url: `/test?test=${name}`,
+    method: "DELETE",
+    contentType: "application/json",
+    success: function (data) {
+      console.log(`Deleted test ${name}`);
+      e = document.getElementById(`test-list-${downcaseAndUnderscore(name)}`);
+      e.parentNode.removeChild(e);
+
+      // Decrement the test-count
+      e = $("#testcount");
+      e.text(Number(e.text()) - 1);
+
+      // Refresh other parts of the page
+      resultInfoRefresh();
+    },
+    error: function (request, msg, error) {
+      console.error("Failed to delete test " + name);
+      // TODO more?
+    },
+  });
 }
 
 // Deletes all suites from the store
@@ -68,17 +141,41 @@ function deleteAllSuites() {
     contentType: "application/json",
     success: function (data) {
       document.getElementById("suitecount").textContent = " " + data;
-      // document.getElementById("suite-list").innerHTML = ""; // TODO add this?
+      document.getElementById("suite-list").innerHTML = "";
+
+      // Refresh other parts of the page
+      resultInfoRefresh();
     },
     error: function (request, msg, error) {
       console.error("Failed to delete all suites");
       // TODO more?
     },
   });
-  // $.delete("/admin/deleteallsuites", function (data) {
-  //   document.getElementById("suitecount").textContent = " " + data;
-  // });
-  // document.getElementById("suite-list").innerHTML = "";
+}
+
+// Deletes a specific suite from the store
+function deleteSuite(name) {
+  $.ajax({
+    url: `/suite?suite=${name}`,
+    method: "DELETE",
+    contentType: "application/json",
+    success: function (data) {
+      console.log(`Deleted suite ${name}`);
+      e = document.getElementById(`suite-list-${downcaseAndUnderscore(name)}`);
+      e.parentNode.removeChild(e);
+
+      // Decrement the suite-count
+      e = $("#suitecount");
+      e.text(Number(e.text()) - 1);
+
+      // Refresh other parts of the page
+      resultInfoRefresh();
+    },
+    error: function (request, msg, error) {
+      console.error("Failed to delete suite " + name);
+      // TODO more?
+    },
+  });
 }
 
 // Get the names & test counts of all known test runs in the store
@@ -91,13 +188,11 @@ function getAllTestRuns() {
 
     console.log(`Received ${json.length} test runs`);
     var e = document.getElementById("test-run-list");
+    e.innerHTML = ``;
     for (var i = 0; i < json.length; i++) {
-      e.innerHTML = ``;
-      for (var i = 0; i < json.length; i++) {
-        var obj = json[i];
-        console.log("Received " + obj.TestRunName + " and " + obj.Count);
-        e.innerHTML += `<li>${obj.TestRunName} :: ${obj.Count}</li>`;
-      }
+      var obj = json[i];
+      console.log("Received " + obj.TestRunName + " and " + obj.Count);
+      e.innerHTML += `<li>${obj.TestRunName} :: ${obj.Count}</li>`;
     }
   });
 }

@@ -7,6 +7,7 @@
 <p>And the time is {{.Time}}</p>
 <p></p>
 <div id="admintable">
+  <!-- Results -->
   <div id="admintable-results">
     <div id="resultcountdiv" class="fixed">
       <span> <span>Result count :</span><span id="resultcount"></span> </span>
@@ -23,9 +24,8 @@
       <ul id="test-run-list"></ul>
     </div>
   </div>
-  <!-- <br /> -->
-  <!-- <br /> -->
 
+  <!-- Tests -->
   <div id="admintable-tests">
     <div id="testcountdiv" class="flex-item">
       <span><span>Test count :</span><span id="testcount"></span></span>
@@ -35,9 +35,12 @@
       Get total test count
     </button>
     <button class="adminbutton" onclick="deleteAllTests()">Delete all tests</button>
+    <div id="test-list-div">
+      <ul id="test-list"></ul>
+    </div>
   </div>
-  <!-- <br />
-  <br /> -->
+
+  <!-- Suites -->
   <div id="admintable-suites">
     <div id="suitecountdiv" class="flex-item">
       <span><span>Suite count :</span><span id="suitecount"></span></span>
@@ -46,6 +49,9 @@
       Get total suite count
     </button>
     <button class="adminbutton" onclick="deleteAllSuites()">Delete all suites</button>
+    <div id="suite-list-div">
+      <ul id="suite-list"></ul>
+    </div>
   </div>
 </div>
 {{ template "_footer.html" . }}

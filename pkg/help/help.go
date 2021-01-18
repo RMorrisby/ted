@@ -1,12 +1,22 @@
 package help
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"os"
 
 	log "github.com/romana/rlog"
 )
 
 var IsLocal bool // cache the fact that we are running locally (or not) // should be available globally
+
+// Common logging helper so that eacn API can log in a more common way
+func LogNewAPICall(methodName string) {
+	fmt.Println("") // print a new-line to help make the logs be more readable
+	log.Debug(methodName, "called")
+}
 
 // If "PORT" is set, we are not running locally
 func IsTEDRunningLocally() bool {
@@ -61,4 +71,12 @@ func Contains(listOfStrings []string, myString string) bool {
 		}
 	}
 	return false
+}
+
+// Common method for sending some data to the REST responsean (as JSON)
+func MarshalJSONAndWriteToResponse(obj interface{}, w http.ResponseWriter) {
+
+	message, _ := json.Marshal(obj)
+	messageBytes := bytes.TrimSpace([]byte(message))
+	w.Write(messageBytes)
 }

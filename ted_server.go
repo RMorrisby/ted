@@ -70,11 +70,10 @@ func main() {
 	// http.HandleFunc("/suite/exists", SuiteExistsHandler) // path to GET new suites into TED
 	// http.HandleFunc("/suites", pages.DataGetAllSuites)
 	http.HandleFunc("/test", TestHandler) // path to POST new tests into TED
-	// http.HandleFunc("/tests", pages.DataGetAllTests)
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
 	http.HandleFunc("/result", ResultHandler)            // path to POST new results into TED
 	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI
-
+	
 	http.HandleFunc("/admin/deleteallresults", pages.AdminDeleteAllResults)
 	http.HandleFunc("/admin/deletealltests", pages.AdminDeleteAllTests)
 	http.HandleFunc("/admin/deleteallsuites", pages.AdminDeleteAllSuites)
@@ -82,6 +81,8 @@ func main() {
 	http.HandleFunc("/admin/getalltestruncounts", pages.AdminGetAllTestRunCounts)
 	http.HandleFunc("/admin/gettestcount", pages.AdminGetTestCount)
 	http.HandleFunc("/admin/getsuitecount", pages.AdminGetSuiteCount)
+	http.HandleFunc("/admin/suites", pages.AdminGetAllSuites)
+	http.HandleFunc("/admin/tests", pages.AdminGetAllTests)
 
 	// Misc
 	http.HandleFunc("/favicon.ico", pages.Favicon)
@@ -252,9 +253,29 @@ func SuiteHandler(w http.ResponseWriter, r *http.Request) {
 
 		dataio.WriteSuiteToDBIfNew(suite)
 		w.WriteHeader(http.StatusCreated) // return a 201
+	case "DELETE":
+
+		name := r.URL.Query().Get("suite")
+		if name == "" {
+			// A suite name must be supplied
+			s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /suite?suite=___"
+			log.Error(s)
+			http.Error(w, s, http.StatusBadRequest)
+			return
+		}
+
+		success, err := dataio.DeleteSuite(name)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		} else if success {
+			w.WriteHeader(http.StatusOK) // return a 200
+		} else {
+			http.Error(w, "ERROR - not successful but no error returned!", 500)
+		}
+
 	default:
 		log.Debug(r.Method, "/suite called")
-		http.Error(w, "Only GET and POST are supported for /suite", http.StatusMethodNotAllowed)
+		http.Error(w, "Only GET, POST, DELETE are supported for /suite", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -312,9 +333,28 @@ func TestHandler(w http.ResponseWriter, r *http.Request) {
 
 		dataio.WriteTestToDBIfNew(test)
 		w.WriteHeader(http.StatusCreated) // return a 201
+
+	case "DELETE":
+		name := r.URL.Query().Get("test")
+		if name == "" {
+			// A test name must be supplied
+			s := "No test name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /test?test=___"
+			log.Error(s)
+			http.Error(w, s, http.StatusBadRequest)
+			return
+		}
+
+		success, err := dataio.DeleteTest(name)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		} else if success {
+			w.WriteHeader(http.StatusOK) // return a 200
+		} else {
+			http.Error(w, "ERROR - not successful but no error returned!", 500)
+		}
 	default:
 		log.Debug(r.Method, "/test called")
-		http.Error(w, "Only POST is supported for /test", http.StatusMethodNotAllowed)
+		http.Error(w, "Only GET, POST, DELETE are supported for /test", http.StatusMethodNotAllowed)
 	}
 }
 
