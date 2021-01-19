@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"ted/pkg/constants"
-	_ "ted/pkg/handler" // TODO enable
 
 	log "github.com/romana/rlog"
 )

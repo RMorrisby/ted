@@ -88,6 +88,12 @@ Created with
 `heroku config` will show
 DATABASE_URL: postgres://odpwvcfjzdxhom:c3cf3a8184dac6aed218ba4540996ff3b2c31ba163728232ba3921a9295cc4a0@ec2-3-90-124-60.compute-1.amazonaws.com:5432/d8hic8bk4o5ecj
 
+To connect to the DB locally, set up your .env file :
+`heroku config:get DATABASE_URL -s  -a arcane-ravine-69473 >> .env`
+
+(see also https://devcenter.heroku.com/articles/heroku-local)
+
+
 `heroku pg` show more DB statistics
 
 Get Go's PostGres module : `go get github.com/lib/pq@v1`

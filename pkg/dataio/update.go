@@ -19,7 +19,6 @@ package dataio
 // 	_ "net/http"
 // 	"os"
 // 	"ted/pkg/constants"
-// 	_ "ted/pkg/handler" // TODO enable
 // 	"ted/pkg/help"
 // 	"ted/pkg/structs"
 // 	_ "ted/pkg/structs"

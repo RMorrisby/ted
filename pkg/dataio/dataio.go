@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"os"
-	_ "ted/pkg/handler" // TODO enable
 
 	_ "github.com/lib/pq" // This import is necessary - we must use it with the _
 

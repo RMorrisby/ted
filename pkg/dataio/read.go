@@ -2,7 +2,6 @@ package dataio
 
 import (
 	"ted/pkg/constants"
-	_ "ted/pkg/handler" // TODO enable
 	"ted/pkg/structs"
 
 	log "github.com/romana/rlog"

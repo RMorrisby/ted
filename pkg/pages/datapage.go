@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
-	_ "ted/pkg/handler" // TODO enable
 	"ted/pkg/help"
 	"ted/pkg/structs"
 	"time"

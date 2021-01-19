@@ -9,11 +9,11 @@ import (
 	"net/http"
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
-	_ "ted/pkg/handler" // TODO enable
 	"ted/pkg/help"
 	"ted/pkg/pages"
 	"ted/pkg/structs"
 	"ted/pkg/ws"
+	"ted/pkg/handler"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -62,18 +62,22 @@ func main() {
 	// Pages
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/data", pages.DataPage)
+		http.HandleFunc("/history", pages.HistoryPage)
 	http.HandleFunc("/admin", pages.AdminPage)
 
 	// APIs
 	http.HandleFunc("/is-alive", IsAliveHandler)
-	http.HandleFunc("/suite", SuiteHandler) // path to POST new suites into TED
+	http.HandleFunc("/suite", handler.SuiteHandler) // path to POST new suites into TED
 	// http.HandleFunc("/suite/exists", SuiteExistsHandler) // path to GET new suites into TED
 	// http.HandleFunc("/suites", pages.DataGetAllSuites)
-	http.HandleFunc("/test", TestHandler) // path to POST new tests into TED
+	http.HandleFunc("/test", handler.TestHandler) // path to POST new tests into TED
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
-	http.HandleFunc("/result", ResultHandler)            // path to POST new results into TED
+	http.HandleFunc("/result", handler.ResultHandler)            // path to POST new results into TED
 	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI
 	
+
+	http.HandleFunc("/history/suite", handler.GetHistoryForSuite) // path to POST new tests into TED
+
 	http.HandleFunc("/admin/deleteallresults", pages.AdminDeleteAllResults)
 	http.HandleFunc("/admin/deletealltests", pages.AdminDeleteAllTests)
 	http.HandleFunc("/admin/deleteallsuites", pages.AdminDeleteAllSuites)
@@ -151,256 +155,8 @@ func IsAliveHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, data)
 }
 
-// ResultHandler handles the /result POST request path for receiving new test results
-func ResultHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("/result called")
-	switch r.Method {
-	case "POST":
 
-		// Now try to parse the POST body from JSON
-		var result structs.Result
-		d := json.NewDecoder(r.Body)
-		d.DisallowUnknownFields() // catch unwanted fields
 
-		err := d.Decode(&result)
-		if err != nil {
-			// bad JSON or unrecognized json field
-			log.Error("Bad JSON or unrecognized json field", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		result = result.Trim()
-
-		// 'name' field is mandatory
-		if result.TestName == "" {
-			http.Error(w, "Missing field 'TestName' from JSON object", http.StatusBadRequest)
-			return
-		}
-
-		log.Debug("Result received for test", result.TestName)
-		log.Debug(result)
-		IncrementCounts(result)
-
-		// If the test is not registered, return an error
-		if !dataio.TestExists(result.TestName) {
-			s := "Result referred to a test that was not registered"
-			log.Error(s)
-			http.Error(w, s, http.StatusBadRequest)
-			return
-		}
-
-		dataio.WriteResultToStore(result)
-		w.WriteHeader(http.StatusCreated) // return a 201
-	default:
-		log.Println(r.Method, "/result called")
-		http.Error(w, "Only POST is supported for /result", http.StatusMethodNotAllowed)
-	}
-}
-
-// SuiteHandler handles the /suite POST request path for receiving new test suites
-func SuiteHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("/suite called")
-	switch r.Method {
-	case "GET":
-		log.Println(r.Method, "GET /suite called")
-		log.Println(r.URL)
-		log.Println(r.URL.Query())
-		log.Println(r.URL.Query().Get("suite"))
-		log.Println(r.URL.Query().Get("suite") != "")
-
-		name := r.URL.Query().Get("suite")
-		if name == "" {
-			// A suite name must be supplied
-			s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /suite?suite=___"
-			log.Error(s)
-			http.Error(w, s, http.StatusBadRequest)
-			return
-		}
-
-		suite := dataio.GetSuite(name)
-		if suite == nil {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Suite '" + name + "' is not registered in TED"))
-		} else {
-			fmt.Fprintf(w, suite.ToJSON())
-		}
-
-	case "POST":
-
-		// Now try to parse the POST body from JSON
-		var suite structs.Suite
-		d := json.NewDecoder(r.Body)
-		d.DisallowUnknownFields() // catch unwanted fields
-
-		err := d.Decode(&suite)
-		if err != nil {
-			// bad JSON or unrecognized json field
-			log.Error("Bad JSON or unrecognized json field", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// result = result.Trim()
-
-		// 'name' field is mandatory
-		if suite.Name == "" {
-			http.Error(w, "Missing field 'name' from JSON object", http.StatusBadRequest)
-			return
-		}
-
-		log.Println("New suite received :", suite.Name)
-
-		dataio.WriteSuiteToDBIfNew(suite)
-		w.WriteHeader(http.StatusCreated) // return a 201
-	case "DELETE":
-
-		name := r.URL.Query().Get("suite")
-		if name == "" {
-			// A suite name must be supplied
-			s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /suite?suite=___"
-			log.Error(s)
-			http.Error(w, s, http.StatusBadRequest)
-			return
-		}
-
-		success, err := dataio.DeleteSuite(name)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		} else if success {
-			w.WriteHeader(http.StatusOK) // return a 200
-		} else {
-			http.Error(w, "ERROR - not successful but no error returned!", 500)
-		}
-
-	default:
-		log.Debug(r.Method, "/suite called")
-		http.Error(w, "Only GET, POST, DELETE are supported for /suite", http.StatusMethodNotAllowed)
-	}
-}
-
-// TestHandler handles the /test POST request path for receiving new tests
-func TestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug(r.Method, "/test called")
-	switch r.Method {
-	case "GET":
-		log.Println(r.URL)
-		log.Println(r.URL.Query())
-		log.Println(r.URL.Query().Get("test"))
-		log.Println(r.URL.Query().Get("test") != "")
-
-		name := r.URL.Query().Get("test")
-		if name == "" {
-			// A test name must be supplied
-			s := "No test name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /test?test=___"
-			log.Error(s)
-			http.Error(w, s, http.StatusBadRequest)
-			return
-		}
-
-		test := dataio.GetTest(name)
-		if test == nil {
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Test '" + name + "' is not registered in TED"))
-		} else {
-			fmt.Fprintf(w, test.ToJSON())
-		}
-
-	case "POST":
-
-		// Now try to parse the POST body from JSON
-		var test structs.Test
-		d := json.NewDecoder(r.Body)
-		d.DisallowUnknownFields() // catch unwanted fields
-
-		err := d.Decode(&test)
-		if err != nil {
-			// bad JSON or unrecognized json field
-			log.Error("Bad JSON or unrecognized json field", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// result = result.Trim()
-
-		// 'name' field is mandatory
-		if test.Name == "" {
-			http.Error(w, "Missing field 'name' from JSON object", http.StatusBadRequest)
-			return
-		}
-
-		log.Println("New test received :", test.Name)
-
-		dataio.WriteTestToDBIfNew(test)
-		w.WriteHeader(http.StatusCreated) // return a 201
-
-	case "DELETE":
-		name := r.URL.Query().Get("test")
-		if name == "" {
-			// A test name must be supplied
-			s := "No test name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /test?test=___"
-			log.Error(s)
-			http.Error(w, s, http.StatusBadRequest)
-			return
-		}
-
-		success, err := dataio.DeleteTest(name)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		} else if success {
-			w.WriteHeader(http.StatusOK) // return a 200
-		} else {
-			http.Error(w, "ERROR - not successful but no error returned!", 500)
-		}
-	default:
-		log.Debug(r.Method, "/test called")
-		http.Error(w, "Only GET, POST, DELETE are supported for /test", http.StatusMethodNotAllowed)
-	}
-}
-
-func IncrementCounts(result structs.Result) {
-	switch result.Status {
-	case "PASSED":
-		// log.Println("SuccessCount : ", SuccessCount)
-		SuccessCount++
-		// log.Println("SuccessCount : ", SuccessCount)
-	case "FAILED":
-		FailCount++
-	default:
-		log.Debug("Result contained unrecognised status", result.Status)
-	}
-}
-
-// func InitResultsCSV() {
-
-// 	needToWriteHeader := false
-// 	if _, err := os.Stat(resultCSVFilename); os.IsNotExist(err) {
-// 		abs, _ := filepath.Abs(resultCSVFilename)
-// 		log.Println("Initialising results file", abs)
-// 		needToWriteHeader = true
-// 	}
-
-// 	// If the file doesn't exist, create it, or append to the file
-// 	f, err := os.OpenFile(resultCSVFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-
-// 	if err != nil {
-// 		log.Fatal("Failed to ", err)
-// 	}
-
-// 	// If the file is new/empty, write the header
-// 	if needToWriteHeader {
-
-// 		writer := csv.NewWriter(f)
-
-// 		err = writer.Write(structs.ResultHeader())
-// 		CheckError("Cannot write header to file", err)
-// 		writer.Flush()
-// 	}
-
-// 	if err := f.Close(); err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
 
 ////////////////////////
 
@@ -432,4 +188,38 @@ func startServer() {
 // 	ws.WSHub.Broadcast <- messageBytes
 
 // 	log.Println("Result sent to WS: ", message)
+// }
+
+//////////////////////////////////
+
+
+// func InitResultsCSV() {
+
+// 	needToWriteHeader := false
+// 	if _, err := os.Stat(resultCSVFilename); os.IsNotExist(err) {
+// 		abs, _ := filepath.Abs(resultCSVFilename)
+// 		log.Println("Initialising results file", abs)
+// 		needToWriteHeader = true
+// 	}
+
+// 	// If the file doesn't exist, create it, or append to the file
+// 	f, err := os.OpenFile(resultCSVFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+// 	if err != nil {
+// 		log.Fatal("Failed to ", err)
+// 	}
+
+// 	// If the file is new/empty, write the header
+// 	if needToWriteHeader {
+
+// 		writer := csv.NewWriter(f)
+
+// 		err = writer.Write(structs.ResultHeader())
+// 		CheckError("Cannot write header to file", err)
+// 		writer.Flush()
+// 	}
+
+// 	if err := f.Close(); err != nil {
+// 		log.Fatal(err)
+// 	}
 // }

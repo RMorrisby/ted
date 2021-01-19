@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"ted/pkg/constants"
-	_ "ted/pkg/handler" // TODO enable
 	_ "ted/pkg/help"
 	"ted/pkg/structs"
 	"ted/pkg/ws"
