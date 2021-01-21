@@ -1,9 +1,8 @@
 package handler
 
-
 import (
 	"encoding/json"
-	// "fmt"
+	"fmt"
 
 	"net/http"
 	// "ted/pkg/constants"

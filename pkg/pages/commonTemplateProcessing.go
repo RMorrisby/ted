@@ -7,7 +7,7 @@ import (
 )
 
 // Templates contains all of our HTML templates, cached for re-use
-var Templates = template.Must(template.ParseFiles("index.html", "data.html", "admin.html", "_header.html", "_footer.html"))
+var Templates = template.Must(template.ParseFiles("index.html", "history.html", "data.html", "admin.html", "_header.html", "_footer.html"))
 
 // Favicon yields a generic favicon
 func Favicon(w http.ResponseWriter, r *http.Request) {

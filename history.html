@@ -1,0 +1,57 @@
+{{ template "_header.html" . }}
+
+<link rel="stylesheet" type="text/css" href="/css/history.css" />
+<script src="/js/history.js"></script>
+
+<p></p>
+<div id="history-div">
+  <div id="suite-stats-div">
+    Showing results for suite <span id="suite-name">{{ .SuiteName }}</span> Total :
+    <span id="suite-test-total">{{ .TotalCount }}</span> Pass :
+    <span id="suite-test-pass">{{ .SuccessCount }}</span> Fail : <span id="suite-test-fail">{{ .FailCount }}</span> Not
+    run : <span id="suite-test-not-run">{{ .NotRunCount }}</span> Known issue :
+    <span id="suite-test-known-issue">{{ .KnownIssueCount }}</span>
+  </div>
+  <div id="latest-test"><span id="latest-test-announcement"></span></div>
+  <br />
+  <table id="history-table">
+    <thead>
+      <tr id="history-table-header">
+        <th id="history-table-header-dir">Dir</td>
+        <th id="history-table-header-test">Test</th>
+        <th id="history-table-header-categories">Categories</th>
+        {{ range $testrun := .TestRuns }}
+        <th id="{{ $testrun }}">{{ $testrun }}</th>
+        {{ end }}
+      </tr>
+    </thead>
+
+    <tbody id="history-table-body">
+      {{range $i, $test := .Tests}}
+      
+      <!-- Use JS script to enable downcaseAndUnderscore() to be evaluated. This is messy. -->
+      <script type="text/javascript">
+        document.write(`<tr class=\"history-table-row\" id=\"history-table-row-${downcaseAndUnderscore('{{ $test.Name }}')}\" >`);
+        document.write(`<td id=\"history-table-dir-${downcaseAndUnderscore('{{ $test.Name }}')}\" >{{ $test.Dir }}</td>`);
+        document.write(`<td id=\"history-table-test-${downcaseAndUnderscore('{{ $test.Name }}')}\" >{{ $test.Name }}</td>`);
+        document.write(`<td id=\"history-table-categories-${downcaseAndUnderscore('{{ $test.Name }}')}\" >{{ $test.Categories }}</td>`);
+      </script>
+      
+      
+        {{range $k, $testrun := $.TestRuns}}
+        {{ with $historyTestRun := index $.TestRunMap $testrun}}
+        {{ with $result := index $historyTestRun.ResultList $i}}
+        <!-- Use JS script to enable downcaseAndUnderscore() to be evaluated. This is messy. -->
+        <script type="text/javascript">
+            document.write(`<td class=\"test-${downcaseAndUnderscore('{{ $result.TedStatus }}')}\" id=\"history-table-${downcaseAndUnderscore('{{ $result.TestRunIdentifier }}')}\">{{ $result.TedStatus }}</td>`);
+        </script>
+          {{ end }} {{ end }} {{ end }}
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+
+
+
+{{ template "_footer.html" . }}

@@ -1,6 +1,8 @@
 package dataio
 
 import (
+	"fmt"
+	"strings"
 	"ted/pkg/constants"
 	"ted/pkg/structs"
 
@@ -113,6 +115,69 @@ func ReadAllResults() []structs.Result {
 
 	log.Debugf("Found %d results in DB", len(results))
 	return results
+}
+
+func ReadAllResultsForSuite(suiteName string) []structs.Result {
+	log.Println("Reading results from DB for suite ", suiteName)
+
+	// "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by,
+	//         result.message, result.ted_status, result.ted_notes
+	// FROM " + ResultTable + " result
+	// LEFT JOIN " + SuiteTable + " suite ON result.suite_id = suite.id
+	// LEFT JOIN " + RegisteredTestTable + " test ON result.test_id = test.id"
+
+	sql := fmt.Sprintf("%s WHERE suite.name = '%s' ORDER BY result.testrun ASC, test.name ASC", constants.ResultTableSelectAllNoSortingSQL, suiteName)
+	log.Println("SQL :", sql)
+	rows, err := DBConn.Query(sql)
+	if err != nil {
+		log.Criticalf("Error reading results: %q", err)
+	}
+
+	var results []structs.Result
+	for rows.Next() {
+
+		var r structs.Result
+		// var rowID int
+		err = rows.Scan(&r.SuiteName, &r.TestName, &r.TestRunIdentifier, &r.Status, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
+		if err != nil {
+			log.Criticalf("Error reading row into struct: %q", err)
+		}
+
+		results = append(results, r)
+	}
+
+	log.Debugf("Found %d results in DB for suite %s", len(results), suiteName)
+	return results
+}
+
+// Get the set of all test runs for the given suite.
+// Because tests runs are not linked directly to a suite, we have to get all of the results for the suite
+// then get the set of test runs for those results.
+func GetAllTestRunsForSuite(suiteName string) []string {
+	log.Println("Reading distinct test runs from DB for suite ", suiteName)
+
+	sql := fmt.Sprintf("%s WHERE suite.name = '%s' ORDER BY result.testrun ASC", constants.ResultTableSelectDistinctTestRunNoSortingSQL, suiteName)
+	log.Println("SQL :", sql)
+	rows, err := DBConn.Query(sql)
+	if err != nil {
+		log.Criticalf("Error reading results: %q", err)
+	}
+
+	var testruns []string
+	for rows.Next() {
+
+		var s string
+		// var rowID int
+		err = rows.Scan(&s)
+		if err != nil {
+			log.Criticalf("Error reading test run string from SQL results: %q", err)
+		}
+
+		testruns = append(testruns, s)
+	}
+
+	log.Debugf("Found %d test runs in DB for suite %s", len(testruns), suiteName)
+	return testruns
 }
 
 func ReadAllTests() (tests []structs.Test) {
@@ -228,4 +293,37 @@ func TestExists(name string) bool {
 		return false
 	}
 	return true
+}
+
+// For each test name supplied, return a partial structs.Test; this contains the test name, dir and categories.
+func GetTestSummariesFromNames(names []string) []structs.Test {
+	log.Printf("Reading tests from DB; want %d tests", len(names))
+
+	nameListSQL := "'" + strings.Join(names, "', '") + "'"
+	sql := "SELECT name, dir, categories from " + constants.RegisteredTestTable + " WHERE test.name in (" + nameListSQL + ")"
+	log.Println("SQL :", sql)
+
+	var tests []structs.Test
+
+	log.Println("SQL :", sql)
+	rows, err := DBConn.Query(sql)
+	if err != nil {
+		log.Criticalf("Error reading tests: %q", err)
+	}
+	for rows.Next() {
+		var t structs.Test
+		err = rows.Scan(&t.Name, &t.Dir, &t.Categories)
+		if err != nil {
+			log.Criticalf("Error reading row into struct: %q", err)
+		}
+
+		tests = append(tests, t)
+	}
+
+	log.Debugf("Retrieved %d tests in DB", len(tests))
+	if len(names) != len(tests) {
+		log.Errorf("Wanted summaries of %d tests, but only retrieved %d tests", len(names), len(tests))
+	}
+
+	return tests
 }

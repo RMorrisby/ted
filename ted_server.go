@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/joho/godotenv"
@@ -9,11 +8,11 @@ import (
 	"net/http"
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
+	"ted/pkg/handler"
 	"ted/pkg/help"
 	"ted/pkg/pages"
 	"ted/pkg/structs"
 	"ted/pkg/ws"
-	"ted/pkg/handler"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -62,7 +61,7 @@ func main() {
 	// Pages
 	http.HandleFunc("/", IndexPage)
 	http.HandleFunc("/data", pages.DataPage)
-		http.HandleFunc("/history", pages.HistoryPage)
+	http.HandleFunc("/history", pages.HistoryPage)
 	http.HandleFunc("/admin", pages.AdminPage)
 
 	// APIs
@@ -72,11 +71,10 @@ func main() {
 	// http.HandleFunc("/suites", pages.DataGetAllSuites)
 	http.HandleFunc("/test", handler.TestHandler) // path to POST new tests into TED
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
-	http.HandleFunc("/result", handler.ResultHandler)            // path to POST new results into TED
+	http.HandleFunc("/result", handler.ResultHandler)    // path to POST new results into TED
 	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI
-	
 
-	http.HandleFunc("/history/suite", handler.GetHistoryForSuite) // path to POST new tests into TED
+	// http.HandleFunc("/history/suite", handler.GetHistoryForSuite) // path to GET suite test history // TODO needed?
 
 	http.HandleFunc("/admin/deleteallresults", pages.AdminDeleteAllResults)
 	http.HandleFunc("/admin/deletealltests", pages.AdminDeleteAllTests)
@@ -103,18 +101,7 @@ func startup() {
 	help.IsLocal = help.IsTEDRunningLocally()
 	log.Debug("Running locally?", help.IsLocal)
 	dataio.InitDB()
-	existingResults := dataio.ReadResultStore()
-	CalcResultCounts(existingResults)
 	log.Debug("Startup() completed")
-}
-
-var SuccessCount int
-var FailCount int
-
-func CalcResultCounts(results []structs.Result) {
-	for _, result := range results {
-		IncrementCounts(result)
-	}
 }
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
@@ -134,8 +121,6 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 		Date:         now.Format(constants.LayoutDateISO),
 		Time:         now.Format(constants.LayoutTimeISO),
 		Port:         help.GetHostAndPort(),
-		SuccessCount: SuccessCount,
-		FailCount:    FailCount,
 	}
 
 	err := pages.Templates.ExecuteTemplate(w, "index.html", IndexPageVars)
@@ -154,9 +139,6 @@ func IsAliveHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, data)
 }
-
-
-
 
 ////////////////////////
 
@@ -191,7 +173,6 @@ func startServer() {
 // }
 
 //////////////////////////////////
-
 
 // func InitResultsCSV() {
 

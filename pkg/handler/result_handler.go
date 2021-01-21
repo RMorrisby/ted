@@ -1,6 +1,5 @@
 package handler
 
-
 import (
 	"encoding/json"
 	// "fmt"
@@ -54,6 +53,12 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Users should supply the TedStatus field too, but if it is absent we should use the Status field
+		if result.TedStatus == "" {
+			result.TedStatus = result.Status
+		}
+
+		// The result has passed validation, so now we can write it to the DB and then return the response
 		dataio.WriteResultToStore(result)
 		w.WriteHeader(http.StatusCreated) // return a 201
 	default:

@@ -7,6 +7,22 @@ import (
 	"strings"
 )
 
+/*
+Statuses    : PASSED, FAILED
+TedStatuses : PASSED, FAILED, NOT RUN, UNKNOWN, KNOWN ISSUE, INTERMITTENT
+
+NOT RUN == TED has received a registration for the test for the upcoming test run.
+			Should be used by users to tell TED which tests they intend to execute as part of a test run.
+			When the test result comes in, TedStatus should be overwritten.
+UNKNOWN == TED did not receive a registration for the test for the upcoming test run.
+			This effectively means that TED has no result for the test for the given test run.
+			Should only be used internally, to indicate that there is no known result for a given test & test run,
+			to assist with summary & historical analysis.
+KNOWN ISSUE == A user has marked this test as being affected by a Known Issue. TedNotes field should contain the
+				pertinent info.
+INTERMITTENT == TODO A user (or TED?) has marked this test as being inconsistent, and failing intermittently.
+				TedNotes field should contain the pertinent info.
+*/
 type Result struct {
 	TestName          string
 	SuiteName         string

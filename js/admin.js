@@ -1,7 +1,3 @@
-// Returns the string with all non-alphanumeric replaced with underscores, and with all letters in lowercase
-function downcaseAndUnderscore(s) {
-  return s.replace(/\W+/g, "_").toLowerCase();
-}
 
 // When parts of the page are updated (e.g. after deleting a suite), it is likely that the result-count
 // info (and other parts) will need to be refreshed

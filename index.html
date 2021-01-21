@@ -1,5 +1,8 @@
 {{ template "_header.html" . }}
 
+<link rel="stylesheet" type="text/css" href="/css/index.css" />
+<script src="/js/index.js"></script>
+
 <p>The date today is {{.Date}}</p>
 <p>And the time is {{.Time}}</p>
 <p></p>
@@ -11,6 +14,19 @@ Failed tests :     {{.FailCount}}
 </pre>
 <p></p>
 <p></p>
-        
-{{ template "_footer.html" . }}
 
+<!-- Suites -->
+<div id="admintable-suites">
+  <!-- <div id="suitecountdiv" class="flex-item">
+    <span><span>Suite count :</span><span id="suitecount"></span></span>
+  </div>
+  <button class="adminbutton" onclick="getSuiteCount()">
+    Get total suite count
+  </button> -->
+
+  <div id="suite-list-div">
+    <ul id="suite-list"></ul>
+  </div>
+</div>
+
+{{ template "_footer.html" . }}
