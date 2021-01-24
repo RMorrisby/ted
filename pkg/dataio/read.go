@@ -9,6 +9,9 @@ import (
 	log "github.com/romana/rlog"
 )
 
+var LatestTestRun = ""
+var LatestSuite = ""
+
 // TODO remove this and just call  ReadAllResults()
 func ReadResultStore() (results []structs.Result) {
 	// if help.IsLocal {
@@ -20,7 +23,7 @@ func ReadResultStore() (results []structs.Result) {
 }
 
 // func ReadResultCSV() []structs.Result {
-// 	log.Println("Will now read results from file :", constants.ResultCSVFilename)
+// 	log.Debug("Will now read results from file :", constants.ResultCSVFilename)
 // 	f, err := os.Open(constants.ResultCSVFilename)
 // 	if err != nil {
 // 		panic(err)
@@ -52,17 +55,27 @@ func ReadResultStore() (results []structs.Result) {
 // 	// debugging
 // 	/*
 // 		for _, r := range records {
-// 			log.Println(r.Status)
+// 			log.Debug(r.Status)
 // 		}*/
 
 // 	return records
 // }
 
-func ReadAllResultsForUI() []structs.ResultForUI {
-	log.Println("Reading results from DB for the UI")
+// Read all results. This will be sent to the UI, so we need to retrieve the extra information like the test name, etc.,
+// which is stored in adjacent tables
+func ReadAllResultsForUI(testrun string) []structs.ResultForUI {
+	log.Debug("Reading results from DB for the UI")
+	log.Debug("testrun :", testrun)
 
 	sql := constants.ResultTableSelectAllResultsForUISQL
-	log.Println("SQL :", sql)
+	if testrun != "" {
+		// i := strings.Index(sql, " ORDER BY")
+		var i = strings.Index(sql, " ORDER BY")
+		before := sql[:i]
+		after := sql[i:]
+		sql = before + " WHERE testrun = '" + testrun + "'" + after
+	}
+	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Criticalf("Error reading results: %q", err)
@@ -87,10 +100,10 @@ func ReadAllResultsForUI() []structs.ResultForUI {
 }
 
 func ReadAllResults() []structs.Result {
-	log.Println("Reading results from DB")
+	log.Debug("Reading results from DB")
 
 	sql := constants.ResultTableSelectAllSQL
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Criticalf("Error reading results: %q", err)
@@ -118,7 +131,7 @@ func ReadAllResults() []structs.Result {
 }
 
 func ReadAllResultsForSuite(suiteName string) []structs.Result {
-	log.Println("Reading results from DB for suite ", suiteName)
+	log.Debug("Reading results from DB for suite ", suiteName)
 
 	// "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by,
 	//         result.message, result.ted_status, result.ted_notes
@@ -127,7 +140,7 @@ func ReadAllResultsForSuite(suiteName string) []structs.Result {
 	// LEFT JOIN " + RegisteredTestTable + " test ON result.test_id = test.id"
 
 	sql := fmt.Sprintf("%s WHERE suite.name = '%s' ORDER BY result.testrun ASC, test.name ASC", constants.ResultTableSelectAllNoSortingSQL, suiteName)
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Criticalf("Error reading results: %q", err)
@@ -154,10 +167,10 @@ func ReadAllResultsForSuite(suiteName string) []structs.Result {
 // Because tests runs are not linked directly to a suite, we have to get all of the results for the suite
 // then get the set of test runs for those results.
 func GetAllTestRunsForSuite(suiteName string) []string {
-	log.Println("Reading distinct test runs from DB for suite ", suiteName)
+	log.Debug("Reading distinct test runs from DB for suite ", suiteName)
 
 	sql := fmt.Sprintf("%s WHERE suite.name = '%s' ORDER BY result.testrun ASC", constants.ResultTableSelectDistinctTestRunNoSortingSQL, suiteName)
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Criticalf("Error reading results: %q", err)
@@ -185,7 +198,7 @@ func ReadAllTests() (tests []structs.Test) {
 	log.Debug("Reading tests from DB")
 
 	sql := constants.RegisteredTestTableSelectAllSQL
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Criticalf("Error reading tests: %q", err)
@@ -210,7 +223,7 @@ func ReadAllSuites() (suites []structs.Suite) {
 	log.Debug("Reading suites from DB")
 
 	sql := constants.SuiteTableSelectAllSQL
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Criticalf("Error reading suites: %q", err)
@@ -236,7 +249,7 @@ func GetSuite(name string) *structs.Suite {
 	log.Printf("Reading suites from DB; want suite '%s'", name)
 
 	sql := constants.SuiteTableSelectAllSQL + " WHERE name = '" + name + "'"
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 
 	suite := structs.Suite{}
 	// QueryRow is supposed to return an error if there was no row
@@ -268,7 +281,7 @@ func GetTest(name string) *structs.Test {
 	log.Printf("Reading tests from DB; want test '%s'", name)
 	// = "SELECT name, dir, priority, categories, description, notes, is_known_issue, known_issue_description from "
 	sql := constants.RegisteredTestTableSelectAllSQL + " WHERE test.name = '" + name + "'"
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 
 	test := structs.Test{}
 	// QueryRow is supposed to return an error if there was no row
@@ -301,11 +314,11 @@ func GetTestSummariesFromNames(names []string) []structs.Test {
 
 	nameListSQL := "'" + strings.Join(names, "', '") + "'"
 	sql := "SELECT name, dir, categories from " + constants.RegisteredTestTable + " WHERE test.name in (" + nameListSQL + ")"
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 
 	var tests []structs.Test
 
-	log.Println("SQL :", sql)
+	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Criticalf("Error reading tests: %q", err)
@@ -326,4 +339,52 @@ func GetTestSummariesFromNames(names []string) []structs.Test {
 	}
 
 	return tests
+}
+
+// Return the name of the latest test run. This is determined from the most recent result.
+// If users wish to do test runs out-of-order, that's their choice.
+// Latest == most recent.
+// May return "" (only if there are no results, which is sn extremely small edge-case)
+func GetLatestTestRun() string {
+	log.Debug("Reading latest test run from DB")
+
+	// SQL ideas :
+	// SELECT timestamp,value,card FROM my_table WHERE id=(select max(id) from my_table)
+	// SELECT id,value,card FROM my_table ORDER BY id DESC LIMIT 1;
+	sql := "SELECT testrun FROM " + constants.ResultTable + " WHERE id=(SELECT MAX(id) from " + constants.ResultTable + ")"
+	log.Debug("SQL :", sql)
+
+	var latestTestRun string
+	// QueryRow is supposed to return an error if there was no row
+	// If there was no error, then there was a row
+	err := DBConn.QueryRow(sql).Scan(&latestTestRun)
+	if err != nil {
+		log.Error("Failed to determine the most recent test run from the DB")
+		return ""
+	}
+
+	log.Debug("Latest test run :", latestTestRun)
+	return latestTestRun
+}
+
+// Return the name of the suite for the latest result.
+// Latest == most recent.
+// May return "" (only if there are no results, which is sn extremely small edge-case)
+func GetSuiteForLatestResult() string {
+	log.Debug("Reading suite for latest result from DB")
+
+	sql := "SELECT suite.name FROM " + constants.ResultTable + " result LEFT JOIN " + constants.SuiteTable + " suite ON result.suite_id = suite.id WHERE result.id=(SELECT MAX(id) from " + constants.ResultTable + ")"
+	log.Debug("SQL :", sql)
+
+	var latestSuite string
+	// QueryRow is supposed to return an error if there was no row
+	// If there was no error, then there was a row
+	err := DBConn.QueryRow(sql).Scan(&latestSuite)
+	if err != nil {
+		log.Error("Failed to determine the suite for the most recent result from the DB")
+		return ""
+	}
+
+	log.Debug("Suite for latest result :", latestSuite)
+	return latestSuite
 }

@@ -22,11 +22,8 @@ func HistoryPage(w http.ResponseWriter, r *http.Request) {
 
 	name := r.URL.Query().Get("suite")
 	if name == "" {
-		// A suite name must be supplied
-		s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /history?suite=___"
-		log.Error(s)
-		http.Error(w, s, http.StatusBadRequest)
-		return
+		// If no suite has been specified, default to the suite for the latest result
+		name = dataio.LatestSuite
 	}
 
 	suite := dataio.GetSuite(name)

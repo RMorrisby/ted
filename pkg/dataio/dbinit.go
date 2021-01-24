@@ -20,6 +20,11 @@ func InitDB() {
 	InitTableResult()
 }
 
+func InitVariables() {
+	LatestTestRun = GetLatestTestRun()
+	LatestSuite = GetSuiteForLatestResult()
+}
+
 // TODO remove all CSV methods
 func InitResultStore() {
 	// if help.IsLocal {

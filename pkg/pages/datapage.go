@@ -20,11 +20,18 @@ func DataPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	testrun := r.URL.Query().Get("testrun")
+	if testrun == "" {
+		// If no testrun has been specified, default to the latest run
+		testrun = dataio.LatestTestRun
+	}
+
 	now := time.Now()                      // find the time right now
 	DataPageVars := structs.PageVariables{ //store the date and time in a struct
-		Date:        now.Format(constants.LayoutDateISO),
-		Time:        now.Format(constants.LayoutTimeISO),
-		HostAndPort: help.GetHostAndPortExplicit(),
+		Date:          now.Format(constants.LayoutDateISO),
+		Time:          now.Format(constants.LayoutTimeISO),
+		HostAndPort:   help.GetHostAndPortExplicit(),
+		LatestTestRun: testrun,
 	}
 
 	// ws.ServeWs(ws.WSHub, w, r)
@@ -45,11 +52,17 @@ func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results := dataio.ReadAllResultsForUI()
+	testrun := r.URL.Query().Get("testrun")
+	if testrun == "" {
+		// If no testrun has been specified, default to the latest run
+		testrun = dataio.LatestTestRun
+	}
+
+	results := dataio.ReadAllResultsForUI(testrun)
 
 	log.Debug("Total result count : ", len(results))
 
-	// TODO sort the results
+	// TODO sort the results ???
 	// - group them by version ID
 	// - TODO check that the version IDs are in the right order by comparing the timestamps
 	// - (maybe the version IDs haven't been written in a sortable way)
@@ -58,8 +71,4 @@ func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 	// message := results.ToJSON() // stats is an array, but ToJSON() is on the object
 	messageBytes := bytes.TrimSpace([]byte(message))
 	w.Write(messageBytes)
-
-// TODO write SQL to pull out the result info that the UI wants. Don't issue repeated DB calls.
-
-
 }

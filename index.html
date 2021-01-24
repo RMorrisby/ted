@@ -2,6 +2,7 @@
 
 <link rel="stylesheet" type="text/css" href="/css/index.css" />
 <script src="/js/index.js"></script>
+<script src="/js/common.js"></script>
 
 <p>The date today is {{.Date}}</p>
 <p>And the time is {{.Time}}</p>
@@ -13,10 +14,16 @@ Successful tests : {{.SuccessCount}}
 Failed tests :     {{.FailCount}}
 </pre>
 <p></p>
+Latest test run :
+<script type="text/javascript">
+  var latest = downcaseAndUnderscore("{{ .LatestTestRun }}");
+  document.write(`<a href=\"data?testrun=${latest}\">{{ .LatestTestRun }}</a>`);
+</script>
 <p></p>
 
 <!-- Suites -->
 <div id="admintable-suites">
+  Suites
   <!-- <div id="suitecountdiv" class="flex-item">
     <span><span>Suite count :</span><span id="suitecount"></span></span>
   </div>

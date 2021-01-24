@@ -21,7 +21,11 @@
         <th id="history-table-header-test">Test</th>
         <th id="history-table-header-categories">Categories</th>
         {{ range $testrun := .TestRuns }}
-        <th id="{{ $testrun }}">{{ $testrun }}</th>
+        <th id="{{ $testrun }}">
+          <script type="text/javascript">
+            document.write(`<a href=\"data?testrun=${downcaseAndUnderscore('{{ $testrun }}')}\">{{ $testrun }}</a>`);
+          </script>
+        </th>
         {{ end }}
       </tr>
     </thead>

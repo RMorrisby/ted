@@ -72,10 +72,11 @@ func main() {
 	http.HandleFunc("/test", handler.TestHandler) // path to POST new tests into TED
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
 	http.HandleFunc("/result", handler.ResultHandler)    // path to POST new results into TED
-	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI
+	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI // called by data.js
 
 	// http.HandleFunc("/history/suite", handler.GetHistoryForSuite) // path to GET suite test history // TODO needed?
 
+	// TODO block calls to these endpoints if they are made by a browser (but not if they are made by some JS within the page)?
 	http.HandleFunc("/admin/deleteallresults", pages.AdminDeleteAllResults)
 	http.HandleFunc("/admin/deletealltests", pages.AdminDeleteAllTests)
 	http.HandleFunc("/admin/deleteallsuites", pages.AdminDeleteAllSuites)
@@ -101,6 +102,7 @@ func startup() {
 	help.IsLocal = help.IsTEDRunningLocally()
 	log.Debug("Running locally?", help.IsLocal)
 	dataio.InitDB()
+	dataio.InitVariables()
 	log.Debug("Startup() completed")
 }
 
@@ -118,9 +120,10 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now()                       // find the time right now
 	IndexPageVars := structs.PageVariables{ //store the date and time in a struct
-		Date:         now.Format(constants.LayoutDateISO),
-		Time:         now.Format(constants.LayoutTimeISO),
-		Port:         help.GetHostAndPort(),
+		Date:          now.Format(constants.LayoutDateISO),
+		Time:          now.Format(constants.LayoutTimeISO),
+		Port:          help.GetHostAndPort(),
+		LatestTestRun: dataio.GetLatestTestRun(),
 	}
 
 	err := pages.Templates.ExecuteTemplate(w, "index.html", IndexPageVars)

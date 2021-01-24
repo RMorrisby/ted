@@ -60,6 +60,17 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 
 		// The result has passed validation, so now we can write it to the DB and then return the response
 		dataio.WriteResultToStore(result)
+
+		// If this result does not belong to the latest test run, update the cached variable
+		if result.TestRunIdentifier != dataio.LatestTestRun {
+			dataio.LatestTestRun = result.TestRunIdentifier
+		}
+
+		// If this result does not belong to the latest suite, update the cached variable
+		if result.SuiteName != dataio.LatestSuite {
+			dataio.LatestSuite = result.SuiteName
+		}
+
 		w.WriteHeader(http.StatusCreated) // return a 201
 	default:
 		log.Println(r.Method, "/result called")

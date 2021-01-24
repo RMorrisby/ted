@@ -1,4 +1,3 @@
-
 // ############# Websocket stuff
 
 /**
@@ -106,7 +105,9 @@ function addResultToPage(r) {
 function getAllResults() {
   console.log("Requesting all results...");
 
-  $.get("/results", function (data) {
+  var x = $(location).attr("search");
+
+  $.get("/results" + x, function (data) {
     console.log("Received all results");
     var json = JSON.parse(data);
 
