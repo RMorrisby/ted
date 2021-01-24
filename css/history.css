@@ -1,72 +1,69 @@
-#history-div table
-{
-   width:           100%;
-   table-layout:    auto;
-   border-collapse: collapse;
+#history-div table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+  height: 800px;
+  display: block;
 }
-#history-div table tbody
-{
-   width:    100%;
-   overflow: auto;
-/*   height:   400px; /* table height, inc. all rows */*/
-}
-#history-div table thead
-{
-   background: rgb(191, 191, 191);
-font-size: 1.2em;
 
+#history-div table tbody {
+  width: 100%;
+  overflow: auto;
 }
-#history-div table th
-{
-   padding:     0 5px;
-   text-align:  center;
-/*   font-family: monospace;*/
-   white-space: nowrap;
-   border:      1px solid rgb(153, 153, 153);
+
+#history-div table thead {
+  background: rgb(191, 191, 191);
+  font-size: 1.2em;
 }
-#history-div table td
-{
-   padding:     0 5px;
-   text-align:  center;
-/*   font-family: monospace;*/
-   white-space: nowrap;
-   border:      1px solid rgb(153, 153, 153);
+#history-div table th {
+  padding: 0 5px;
+  text-align: center;
+  /*   font-family: monospace;*/
+  white-space: nowrap;
+  border: 1px solid rgb(153, 153, 153);
+}
+#history-div table td {
+  padding: 0 5px;
+  text-align: center;
+  /*   font-family: monospace;*/
+  white-space: nowrap;
+  border: 1px solid rgb(153, 153, 153);
 }
 #history-div table td:last-child {
-    width: 100%;
+  width: 100%;
 }
 body {
-      font-family: "Gill Sans", sans-serif;
-      background-color: aliceblue;
-      color: black;
-    }
-    #content {
-      margin: 30px auto 30px auto;
-    }
-    #footer {
-      font-size: 0.8em;
-    }
+  font-family: "Gill Sans", sans-serif;
+  background-color: aliceblue;
+  color: black;
+}
+#content {
+  margin: 30px auto 30px auto;
+}
+#footer {
+  font-size: 0.8em;
+}
 
 .test-passed {
-   background-color: lightgreen;
+  background-color: lightgreen;
 }
 
 .test-failed {
-   background-color: rgb(228, 104, 104);
+  background-color: rgb(228, 104, 104);
 }
 
 .test-unknown {
-   background-color: rgb(129, 129, 129);
+  background-color: rgb(129, 129, 129);
 }
 
 .test-not_run {
-   background-color: rgb(243, 222, 104);
+  background-color: rgb(243, 222, 104);
 }
 
 .test-known_issue {
-   background-color: rgb(170, 51, 194);
+  background-color: rgb(170, 51, 194);
 }
 
 .test-intermittent {
-   background-color: rgb(63, 122, 211);
+  background-color: rgb(63, 122, 211);
 }

@@ -2,6 +2,12 @@
 
 <link rel="stylesheet" type="text/css" href="/css/history.css" />
 <script src="/js/history.js"></script>
+<script>
+  // works
+  $(document).ready(function(){
+    $("html,body").scrollLeft(10000);
+});
+  </script>
 
 <p></p>
 <div id="history-div">
@@ -50,6 +56,13 @@
             document.write(`<td class=\"test-${downcaseAndUnderscore('{{ $result.TedStatus }}')}\" id=\"history-table-${downcaseAndUnderscore('{{ $result.TestRunIdentifier }}')}\">{{ $result.TedStatus }}</td>`);
         </script>
           {{ end }} {{ end }} {{ end }}
+        <script type="text/javascript">
+          if (`{{ $test.IsKnownIssue }}` == true) {
+            document.write(`<button test=\"{{ $test.Name }}\" class=known-issue-clear id=\"history-table-button-known-issue-clear-${downcaseAndUnderscore('{{ $test.Name }}')}\">N</button>`);
+          }
+          document.write(`<button test=\"{{ $test.Name }}\" class=known-issue-set id=\"history-table-button-known-issue-set-${downcaseAndUnderscore('{{ $test.Name }}')}\">Y</button>`);
+          document.write(`<input test=\"{{ $test.Name }}\" class=known-issue-text id=\"history-table-input-known-issue-${downcaseAndUnderscore('{{ $test.Name }}')}\">{{ $test.KnownIssueDescription }}</input>`);
+        </script>
       </tr>
       {{ end }}
     </tbody>
