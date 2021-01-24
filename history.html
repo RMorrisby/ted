@@ -4,9 +4,9 @@
 <script src="/js/history.js"></script>
 <script>
   // works
-  $(document).ready(function(){
-    $("html,body").scrollLeft(10000);
-});
+//   $(document).ready(function(){
+//     $("html,body").scrollLeft(10000);
+// });
   </script>
 
 <p></p>
@@ -23,9 +23,11 @@
   <table id="history-table">
     <thead>
       <tr id="history-table-header">
-        <th id="history-table-header-dir">Dir</td>
+        <div class=history-table-sticky-left>
+        <th class="history-table-dir" id="history-table-header-dir">Dir</td>
         <th id="history-table-header-test">Test</th>
         <th id="history-table-header-categories">Categories</th>
+        </div>
         {{ range $testrun := .TestRuns }}
         <th id="{{ $testrun }}">
           <script type="text/javascript">
@@ -42,9 +44,11 @@
       <!-- Use JS script to enable downcaseAndUnderscore() to be evaluated. This is messy. -->
       <script type="text/javascript">
         document.write(`<tr class=\"history-table-row\" id=\"history-table-row-${downcaseAndUnderscore('{{ $test.Name }}')}\" >`);
-        document.write(`<td id=\"history-table-dir-${downcaseAndUnderscore('{{ $test.Name }}')}\" >{{ $test.Dir }}</td>`);
+          document.write(`<div class=history-table-sticky-left>`);
+        document.write(`<td class="history-table-dir" id=\"history-table-dir-${downcaseAndUnderscore('{{ $test.Name }}')}\" >{{ $test.Dir }}</td>`);
         document.write(`<td id=\"history-table-test-${downcaseAndUnderscore('{{ $test.Name }}')}\" >{{ $test.Name }}</td>`);
         document.write(`<td id=\"history-table-categories-${downcaseAndUnderscore('{{ $test.Name }}')}\" >{{ $test.Categories }}</td>`);
+        document.write(`</div`);
       </script>
       
       

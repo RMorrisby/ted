@@ -22,6 +22,10 @@
   /*   font-family: monospace;*/
   white-space: nowrap;
   border: 1px solid rgb(153, 153, 153);
+
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
 }
 
 #history-div table td {
@@ -34,6 +38,12 @@
 
 #history-div table td:last-child {
   width: 100%;
+}
+
+#history-div table .history-table-sticky-left {
+  position: -webkit-sticky;
+  position: sticky;
+  left: 0;
 }
 
 body {
