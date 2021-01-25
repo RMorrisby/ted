@@ -72,27 +72,21 @@ function buildHistoryTable() {
       tr.className = "history-table-row";
       tr.id = "history-table-row-" + testNameDown;
 
-      // Create the sticky-div
-      var stickyDiv = document.createElement("div");
-      stickyDiv.className = "history-table-sticky-left";
-
       var td = document.createElement("td");
       td.className = "history-table-dir";
       td.id = "history-table-dir-" + testNameDown;
       td.appendChild(document.createTextNode(test.Dir));
-      stickyDiv.appendChild(td);
+      tr.appendChild(td);
 
       var td = document.createElement("td");
       td.id = "history-table-test-" + testNameDown;
       td.appendChild(document.createTextNode(test.Name));
-      stickyDiv.appendChild(td);
+      tr.appendChild(td);
 
       var td = document.createElement("td");
       td.id = "history-table-categories-" + testNameDown;
       td.appendChild(document.createTextNode(test.Categories));
-      stickyDiv.appendChild(td);
-
-      tr.appendChild(stickyDiv);
+      tr.appendChild(td);
 
       // Write each result for the test
       for (var k = 0; k < json.TestRuns.length; k++) {
@@ -144,25 +138,21 @@ function buildHistoryTable() {
     var tr = document.createElement("tr");
     tr.id = "history-table-header";
 
-    var stickyHeaderDiv = document.createElement("div");
-    stickyHeaderDiv.className = "history-table-sticky-left";
     var th = document.createElement("th");
     th.className = "history-table-dir";
     th.id = "history-table-header-dir";
     th.appendChild(document.createTextNode("Dir"));
-    stickyHeaderDiv.appendChild(th);
+    tr.appendChild(th);
 
     var th = document.createElement("th");
     th.id = "history-table-header-test";
     th.appendChild(document.createTextNode("Test"));
-    stickyHeaderDiv.appendChild(th);
+    tr.appendChild(th);
 
     var th = document.createElement("th");
     th.id = "history-table-header-categories";
     th.appendChild(document.createTextNode("Categories"));
-    stickyHeaderDiv.appendChild(th);
-
-    tr.appendChild(stickyHeaderDiv);
+    tr.appendChild(th);
 
     // Add headers for each test run
     for (var i = 0; i < json.TestRuns.length; i++) {
@@ -177,15 +167,9 @@ function buildHistoryTable() {
       th.appendChild(a);
       tr.appendChild(th);
     }
-    // Headers for the Known Issue buttons & input field
-    // var th = document.createElement("th");
-    // th.className = "history-table-header-known-issue-clear";
-    // tr.appendChild(th);
-    // var th = document.createElement("th");
-    // th.className = "history-table-header-known-issue-set";
-    // tr.appendChild(th);
+    // Header for the Known Issue buttons & input field
     var th = document.createElement("th");
-    th.className = "history-table-header-known-issue-input";
+    th.className = "history-table-header-known-issue";
     tr.appendChild(th);
 
     head.appendChild(tr);
