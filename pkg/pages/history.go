@@ -56,13 +56,59 @@ func HistoryOfSuite(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("suite")
 	if name == "" {
 		// A suite name must be supplied
-		s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /history?suite=___"
+		s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /historydata?suite=___"
 		log.Error(s)
 		http.Error(w, s, http.StatusBadRequest)
 		return
 	}
 
 	history := GetHistoryForSuite(name)
+
+	message, _ := json.Marshal(history)
+	messageBytes := bytes.TrimSpace([]byte(message))
+	w.Write(messageBytes)
+}
+
+// REST endpoint to get the history data for a suite, to be displayed in the UI
+// This deliberately only returns the history data for the last 5 test runs, so that they fit in the UI
+// TODO fix the UI page so all data can be displayed, with the header & test-name columns always visible
+func HistoryOfSuiteRecent(w http.ResponseWriter, r *http.Request) {
+
+	help.LogNewAPICall("HistoryOfSuiteRecent")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	name := r.URL.Query().Get("suite")
+	if name == "" {
+		// A suite name must be supplied
+		s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /historydatarecent?suite=___"
+		log.Error(s)
+		http.Error(w, s, http.StatusBadRequest)
+		return
+	}
+
+	history := GetHistoryForSuite(name)
+	// s[len(s)-3:]
+	count := len(history.TestRuns)
+	maxCount := 6
+	if count > maxCount {
+		history.TestRuns = history.TestRuns[count-maxCount:]
+		for testrun := range history.TestRunMap {
+			if !help.Contains(history.TestRuns, testrun) {
+				delete(history.TestRunMap, testrun)
+			}
+		}
+
+		// 	for i, testrun := range history.TestRuns {
+		// 	_, ok := history.TestRunMap[testrun];
+		// if !ok {
+		//     delete(history.TestRunMap, testrun);
+		// }
+
+	}
 
 	message, _ := json.Marshal(history)
 	messageBytes := bytes.TrimSpace([]byte(message))
