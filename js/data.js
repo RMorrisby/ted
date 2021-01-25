@@ -24,7 +24,7 @@ function tryConnectToReload(address) {
 
 function announceLatestResult(r) {
   var e = document.getElementById("latest-test");
-  e.innerHTML = "<span>Latest test : " + r.TestName + "    " + r.Status + " on " + r.Timestamp + "</span>";
+  e.innerHTML = "<span>Latest test : " + r.TestName + "    " + r.Status + " on " + r.EndTimestamp + "</span>";
 }
 
 try {
@@ -82,20 +82,20 @@ function addResultToPage(r) {
   } else {
     var endDate = null;
   }
-
+  var className = "test-" + downcaseAndUnderscore(r.TedStatus);
   e.innerHTML += `
     <tr id="${r.TestName}-${r.TestRunIdentifier}">
         <td id="categories">${r.Categories}</td>
         <td id="dir">${r.Dir}</td>
         <td id="testname">${r.TestName}</td>
         <td id="testrun">${r.TestRunIdentifier}</td>
-        <td id="status">${r.Status}</td>
+        <td class=${className} id="status">${r.Status}</td>
         <td id="priority">${r.Priority}</td>
         <td id="start">${startDate}</td>
         <td id="end">${endDate}</td>
         <td id="ranby">${r.RanBy}</td>
         <td id="message">${r.Message}</td>
-        <td id="tedstatus">${r.TedStatus}</td>
+        <td class=${className} id="tedstatus">${r.TedStatus}</td>
         <td id="tednotes">${r.TedNotes}</td>
     </tr>
     `;

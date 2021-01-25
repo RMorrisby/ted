@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"ted/pkg/structs"
 
 	log "github.com/romana/rlog"
 )
@@ -79,4 +80,23 @@ func MarshalJSONAndWriteToResponse(obj interface{}, w http.ResponseWriter) {
 	message, _ := json.Marshal(obj)
 	messageBytes := bytes.TrimSpace([]byte(message))
 	w.Write(messageBytes)
+}
+
+// Takes a Result and a Test, and forms the matching ResultForUI object
+func FormResultForUI(result structs.Result, test *structs.Test) (resultForUI structs.ResultForUI) {
+
+	resultForUI.TestName = result.TestName
+	resultForUI.TestRunIdentifier = result.TestRunIdentifier
+	resultForUI.Status = result.Status
+	resultForUI.StartTimestamp = result.StartTimestamp
+	resultForUI.EndTimestamp = result.EndTimestamp
+	resultForUI.RanBy = result.RanBy
+	resultForUI.Message = result.Message
+	resultForUI.TedStatus = result.TedStatus
+	resultForUI.TedNotes = result.TedNotes
+
+	resultForUI.Categories = test.Categories
+	resultForUI.Dir = test.Dir
+	resultForUI.Priority = test.Priority
+	return
 }

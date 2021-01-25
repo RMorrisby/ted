@@ -101,78 +101,6 @@ function buildHistoryTable(data) {
   // TODO the rest of this div
   body.appendChild(suiteStatsDiv);
 
-  // Build the table body
-  var tbody = document.createElement("tbody");
-  tbody.id = "history-table-body";
-
-  for (var i = 0; i < json.Tests.length; i++) {
-    var test = json.Tests[i];
-    var testNameDown = downcaseAndUnderscore(test.Name);
-
-    // Create the tr
-    var tr = document.createElement("tr");
-    tr.className = "history-table-row";
-    tr.id = "history-table-row-" + testNameDown;
-
-    var td = document.createElement("td");
-    td.className = "history-table-dir";
-    td.id = "history-table-dir-" + testNameDown;
-    td.appendChild(document.createTextNode(test.Dir));
-    tr.appendChild(td);
-
-    var td = document.createElement("td");
-    td.id = "history-table-test-" + testNameDown;
-    td.appendChild(document.createTextNode(test.Name));
-    tr.appendChild(td);
-
-    var td = document.createElement("td");
-    td.id = "history-table-categories-" + testNameDown;
-    td.appendChild(document.createTextNode(test.Categories));
-    tr.appendChild(td);
-
-    // Write each result for the test
-    for (var k = 0; k < json.TestRuns.length; k++) {
-      var testrun = json.TestRuns[k];
-      var testrunHistory = json.TestRunMap[testrun];
-      var result = testrunHistory.ResultList[i];
-
-      var td = document.createElement("td");
-      td.className = "test-" + downcaseAndUnderscore(result.TedStatus);
-      td.id = "history-table-" + downcaseAndUnderscore(result.TestRunIdentifier);
-      td.appendChild(document.createTextNode(result.TedStatus));
-      tr.appendChild(td);
-    }
-
-    // Button to clear the Known Issue value
-    var buttonClear = document.createElement("button");
-    buttonClear.className = "known-issue-clear";
-    buttonClear.id = "history-table-button-known-issue-clear-" + testNameDown;
-    buttonClear.appendChild(document.createTextNode("N"));
-    buttonClear.setAttribute("test", test.Name);
-
-    // Button to set the Known Issue value
-    var buttonSet = document.createElement("button");
-    buttonSet.className = "known-issue-set";
-    buttonSet.id = "history-table-button-known-issue-set-" + testNameDown;
-    buttonSet.appendChild(document.createTextNode("Y"));
-    buttonSet.setAttribute("test", test.Name);
-
-    // Input field for the Known Issue value
-    var input = document.createElement("input");
-    input.className = "known-issue-input";
-    input.id = "history-table-input-known-issue-" + testNameDown;
-    input.appendChild(document.createTextNode(test.KnownIssueDescription));
-    input.setAttribute("test", test.Name);
-
-    var td = document.createElement("td");
-    td.appendChild(buttonClear);
-    td.appendChild(buttonSet);
-    td.appendChild(input);
-    tr.appendChild(td);
-    tbody.appendChild(tr);
-  }
-  // console.log(data);
-
   // Build the table header
   var table = document.createElement("table");
   table.id = "history-table";
@@ -215,9 +143,149 @@ function buildHistoryTable(data) {
   tr.appendChild(th);
 
   head.appendChild(tr);
+
+  // Build the table body
+  var tbody = document.createElement("tbody");
+  tbody.id = "history-table-body";
+
+  for (var i = 0; i < json.Tests.length; i++) {
+    var test = json.Tests[i];
+    var testNameDown = downcaseAndUnderscore(test.Name);
+
+    // Create the tr
+    var tr = document.createElement("tr");
+    tr.className = "history-table-row";
+    tr.id = "history-table-row-" + testNameDown;
+
+    var td = document.createElement("td");
+    td.className = "history-table-dir";
+    td.id = "history-table-dir-" + testNameDown;
+    td.appendChild(document.createTextNode(test.Dir));
+    tr.appendChild(td);
+
+    var td = document.createElement("td");
+    td.id = "history-table-test-" + testNameDown;
+    td.appendChild(document.createTextNode(test.Name));
+    tr.appendChild(td);
+
+    var td = document.createElement("td");
+    td.id = "history-table-categories-" + testNameDown;
+    td.appendChild(document.createTextNode(test.Categories));
+    tr.appendChild(td);
+
+    // Write each result for the test
+    for (var k = 0; k < json.TestRuns.length; k++) {
+      var testrun = json.TestRuns[k];
+      var testrunHistory = json.TestRunMap[testrun];
+      var result = testrunHistory.ResultList[i];
+
+      var td = document.createElement("td");
+      td.className = "test-" + downcaseAndUnderscore(result.TedStatus);
+      td.id = "history-table-" + downcaseAndUnderscore(result.TestRunIdentifier);
+      td.appendChild(document.createTextNode(result.TedStatus));
+      tr.appendChild(td);
+    }
+
+    var lastTestRun = json.TestRuns.slice(-1).pop();
+
+    // Button to clear the Known Issue value
+    var buttonClear = document.createElement("button");
+    buttonClear.className = "known-issue-clear";
+    buttonClear.id = "history-table-button-known-issue-clear-" + testNameDown;
+    buttonClear.appendChild(document.createTextNode("N"));
+    buttonClear.setAttribute("test", test.Name);
+    buttonClear.setAttribute("testrun", lastTestRun);
+    buttonClear.setAttribute("is-known-issue", false);
+    $(buttonClear).on("click", function () {
+      sendKnownIssueForTest(this);
+    });
+    // buttonClear.onclick = function () {
+    //   $.ajax({
+    //     url: "/testupdate",
+    //     method: "POST",
+    //     contentType: "application/json; charset=utf-8",
+    //     dataType: "json",
+
+    //     data: JSON.stringify({ TestName: test.Name, TestRun: lastTestRun, IsKnownIssue: false }),
+
+    //     success: function (data) {
+    //       console.log(`Updated known-issue status for test ${test.Name}`);
+    //     },
+    //     error: function (request, msg, error) {
+    //       console.error("Failed to update test's Known Issue fields");
+    //       // TODO more?
+    //     },
+    //   });
+    // };
+
+    // Button to set the Known Issue value
+    var buttonSet = document.createElement("button");
+    buttonSet.className = "known-issue-set";
+    buttonSet.id = "history-table-button-known-issue-set-" + testNameDown;
+    buttonSet.appendChild(document.createTextNode("Y"));
+    buttonSet.setAttribute("test", test.Name);
+    buttonSet.setAttribute("testrun", lastTestRun);
+    buttonSet.setAttribute("is-known-issue", true);
+    $(buttonSet).on("click", function () {
+      sendKnownIssueForTest(this);
+    });
+
+    // Input field for the Known Issue value
+    var input = document.createElement("input");
+    input.className = "known-issue-input";
+    input.id = "history-table-input-known-issue-" + testNameDown;
+    input.value = test.KnownIssueDescription;
+    input.setAttribute("test", test.Name);
+
+    var td = document.createElement("td");
+    td.appendChild(buttonClear);
+    td.appendChild(buttonSet);
+    td.appendChild(input);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+  // console.log(data);
+
   table.appendChild(head);
   table.appendChild(tbody);
   body.appendChild(table);
+}
+
+// Send to TED the desired Known Issue value for the test, either setting it or clearing it
+function sendKnownIssueForTest(button) {
+  var testName = button.getAttribute("test");
+  var testNameDown = downcaseAndUnderscore(testName);
+  var lastTestRun = button.getAttribute("testrun");
+  console.log("In setKI; 1 2 3 :: " + testNameDown + " :: " + testName + " :: " + lastTestRun);
+  var desc = $("input#history-table-input-known-issue-" + testNameDown).val();
+  console.log("Desc : " + desc);
+  var isKnownIssue = stringToBoolean(button.getAttribute("is-known-issue"));
+  // If we are clearing the Known Issue, set desc to ""
+  if (isKnownIssue == false) {
+    desc = "";
+  }
+
+  $.ajax({
+    url: "/testupdate",
+    method: "POST",
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+
+    data: JSON.stringify({
+      TestName: testName,
+      TestRun: lastTestRun,
+      IsKnownIssue: isKnownIssue,
+      KnownIssueDescription: desc,
+    }),
+
+    statusCode: {
+      200: function (xhr) {
+        if (isKnownIssue == false) {
+          $("input#history-table-input-known-issue-" + testNameDown).val("");
+        }
+      },
+    },
+  });
 }
 
 // On page load, adorn the table with whstever extra elements we need

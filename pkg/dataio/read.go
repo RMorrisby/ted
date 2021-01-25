@@ -99,6 +99,26 @@ func ReadAllResultsForUI(testrun string) []structs.ResultForUI {
 	return results
 }
 
+// Read a single result from the DB
+func ReadResult(testname string, testrun string) *structs.Result {
+	log.Debug("Reading result from DB")
+
+	sql := "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + constants.ResultTable + " result LEFT JOIN " + constants.SuiteTable + " suite ON result.suite_id = suite.id LEFT JOIN " + constants.RegisteredTestTable + " test ON result.test_id = test.id WHERE result.testrun = " + testrun + " AND test.name = " + testname
+	log.Debug("SQL :", sql)
+
+	r := structs.Result{}
+	// QueryRow is supposed to return an error if there was no row
+	// If there was no error, then there was a row
+	err := DBConn.QueryRow(sql).Scan(&r.SuiteName, &r.TestName, &r.TestRunIdentifier, &r.Status, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
+	if err != nil {
+		log.Debugf("Result %s :: %s was not found in the DB", testname, testrun)
+		return nil
+	}
+
+	log.Debugf("Found result %s :: %s", testname, testrun)
+	return &r
+}
+
 func ReadAllResults() []structs.Result {
 	log.Debug("Reading results from DB")
 
@@ -308,12 +328,12 @@ func TestExists(name string) bool {
 	return true
 }
 
-// For each test name supplied, return a partial structs.Test; this contains the test name, dir and categories.
+// For each test name supplied, return a partial structs.Test; this contains the test name, dir and categories, and the known-issue info.
 func GetTestSummariesFromNames(names []string) []structs.Test {
 	log.Printf("Reading tests from DB; want %d tests", len(names))
 
 	nameListSQL := "'" + strings.Join(names, "', '") + "'"
-	sql := "SELECT name, dir, categories from " + constants.RegisteredTestTable + " WHERE test.name in (" + nameListSQL + ")"
+	sql := "SELECT name, dir, categories, is_known_issue, known_issue_description from " + constants.RegisteredTestTable + " WHERE test.name in (" + nameListSQL + ") ORDER BY name ASC"
 	log.Debug("SQL :", sql)
 
 	var tests []structs.Test
@@ -325,11 +345,11 @@ func GetTestSummariesFromNames(names []string) []structs.Test {
 	}
 	for rows.Next() {
 		var t structs.Test
-		err = rows.Scan(&t.Name, &t.Dir, &t.Categories)
+		err = rows.Scan(&t.Name, &t.Dir, &t.Categories, &t.IsKnownIssue, &t.KnownIssueDescription)
 		if err != nil {
 			log.Criticalf("Error reading row into struct: %q", err)
 		}
-
+		log.Debug(t) // TODO remove
 		tests = append(tests, t)
 	}
 
@@ -344,7 +364,7 @@ func GetTestSummariesFromNames(names []string) []structs.Test {
 // Return the name of the latest test run. This is determined from the most recent result.
 // If users wish to do test runs out-of-order, that's their choice.
 // Latest == most recent.
-// May return "" (only if there are no results, which is sn extremely small edge-case)
+// May return "" (only if there are no results, which is an extremely small edge-case)
 func GetLatestTestRun() string {
 	log.Debug("Reading latest test run from DB")
 

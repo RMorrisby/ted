@@ -101,13 +101,6 @@ func HistoryOfSuiteRecent(w http.ResponseWriter, r *http.Request) {
 				delete(history.TestRunMap, testrun)
 			}
 		}
-
-		// 	for i, testrun := range history.TestRuns {
-		// 	_, ok := history.TestRunMap[testrun];
-		// if !ok {
-		//     delete(history.TestRunMap, testrun);
-		// }
-
 	}
 
 	message, _ := json.Marshal(history)
@@ -123,7 +116,8 @@ func GetHistoryForSuite(suiteName string) structs.HistorySuite {
 
 	// This list should already be sorted by the testrun (ascending)
 	allResults := dataio.ReadAllResultsForSuite(suiteName)
-
+	// log.Debug("ALL RESULTS ")
+	// log.Debug(allResults)
 	// Some validation, just to be sure
 	for _, result := range allResults {
 		if result.SuiteName != suiteName {
@@ -160,15 +154,21 @@ func GetHistoryForSuite(suiteName string) structs.HistorySuite {
 	// log.Debugf("FIN")
 
 	// Get the list of test names
-	var testNames []string // set of test names
+	// This list will not be in the desired final order, so we will need to rebuild it later
+	var tempTestNames []string // A set of test names
 	for _, r := range allResults {
-		if !help.Contains(testNames, r.TestName) {
-			testNames = append(testNames, r.TestName)
+		if !help.Contains(tempTestNames, r.TestName) {
+			tempTestNames = append(tempTestNames, r.TestName)
 		}
 	}
 
 	// Get the summary of each test & store in history
-	tests := dataio.GetTestSummariesFromNames(testNames)
+	tests := dataio.GetTestSummariesFromNames(tempTestNames)
+	var testNames = make([]string, len(tests))
+
+	for i, t := range tests {
+		testNames[i] = t.Name
+	}
 
 	// Each list in this map will be the same length (extra results will be inserted to eliminate sparseness)
 	tempResultsMap := make(map[string][]structs.Result) // TestRun::[]Result // will have extra results inserted where necessary
@@ -185,10 +185,11 @@ func GetHistoryForSuite(suiteName string) structs.HistorySuite {
 	// log.Debug("NOW ADDING UNKNOWN RESULTS")
 	// log.Debug("")
 	// log.Debug(tempResultsMap)
-	for _, testName := range testNames {
-		for _, testRun := range testRuns {
+	for _, testRun := range testRuns {
+		// log.Debug("Test run : ", testRun)
+		for _, testName := range testNames {
+			// log.Debug("Testname : ", testName)
 			// log.Debug("")
-			// for testRun, knownResults := range tempSparseResultsMap {
 			knownResults := tempSparseResultsMap[testRun]
 			// log.Debug("testrun         : ", testRun)
 			// log.Debug("known results   : ", knownResults)
@@ -271,6 +272,11 @@ func GetHistoryForSuite(suiteName string) structs.HistorySuite {
 	history.NotRunCount = lastTestRunSummary.NotRunCount
 	history.KnownIssueCount = lastTestRunSummary.KnownIssueCount
 
+	// message, _ := json.Marshal(history)
+	// log.Debug("History JSON")
+	// log.Debug(string(message))
+	// log.Debug("")
+	// log.Debug("")
 	return history
 }
 

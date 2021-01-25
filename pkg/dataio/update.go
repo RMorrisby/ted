@@ -1,84 +1,43 @@
 package dataio
 
-// import (
-// 	"bytes"
-// 	"encoding/csv"
-// 	_ "encoding/json"
-// 	"fmt"
-// 	_ "html/template"
-// 	_ "path/filepath"
+import (
+	"fmt"
+	"ted/pkg/constants"
+	"ted/pkg/structs"
+	"ted/pkg/enums"
 
-// 	_ "database/sql"
+	log "github.com/romana/rlog"
+)
 
-// 	_ "github.com/gorilla/websocket"
-// 	_ "github.com/lib/pq"
+// Update the Known Issue fields for the given test
+func WriteTestKnownIssueUpdate(update structs.KnownIssueUpdate) {
 
-// 	// "io/ioutil"
-// 	_ "encoding/csv"
-// 	log "github.com/romana/rlog"
-// 	_ "net/http"
-// 	"os"
-// 	"ted/pkg/constants"
-// 	"ted/pkg/help"
-// 	"ted/pkg/structs"
-// 	_ "ted/pkg/structs"
-// 	"ted/pkg/ws"
-// 	_ "time"
+	log.Println("Updating test in DB")
+	sql := fmt.Sprintf("UPDATE %s SET is_known_issue = %t, known_issue_description = '%s' WHERE name = '%s'", constants.RegisteredTestTable, update.IsKnownIssue, update.KnownIssueDescription, update.TestName)
+	log.Println("SQL :", sql)
+	if _, err := DBConn.Exec(sql); err != nil {
+		log.Criticalf("Error writing result to DB: %q", err)
+	}
+}
 
-// log "github.com/romana/rlog"
-// )
+// Update the Known Issue fields for the given result
+func WriteResultKnownIssueUpdate(update structs.KnownIssueUpdate) {
 
-// TODO this is a placeholder file
+	log.Println("Updating result in DB")
 
-// func WriteResultToStore(result structs.Result) {
-// 	if help.IsLocal {
-// 		WriteResultToCSV(result)
-// 	} else {
-// 		WriteResultToDB(result)
-// 	}
-// 	log.Println("Result written to store")
-// 	SendReload(result) // after writing, reload the page so that it shows the new results
-// 	log.Println("After SendReload")
-// }
-
-// func SendReload(result structs.Result) {
-// 	log.Println("Will try to send result to WS")
-// 	message := result.ToJSON()
-// 	messageBytes := bytes.TrimSpace([]byte(message))
-// 	ws.WSHub.Broadcast <- messageBytes
-
-// 	log.Println("Result sent to WS: ", message)
-// }
-
-// func WriteResultToCSV(result structs.Result) {
-// 	log.Println("Will now write result to file :", result)
-// 	// TODO use PSV instead of CSV
-// 	// TODO don't write duplicates?
-// 	f, err := os.OpenFile(constants.ResultCSVFilename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	defer f.Close()
-
-// 	writer := csv.NewWriter(f)
-// 	defer writer.Flush()
-
-// 	resultArray := result.ToA()
-
-// 	err = writer.Write(resultArray)
-// 	help.CheckError("Cannot write to file", err)
-
-// 	log.Println("Wrote result to file")
-// }
-
-// func WriteResultToDB(result structs.Result) {
-// 	log.Println("Writing result to DB")
-// 	sql := constants.ResultsTableInsertSQL + fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s')", result.TestName, result.TestRunIdentifier, result.Category, result.Status, result.Timestamp, result.Message)
-// 	log.Println("SQL :", sql)
-// 	if _, err := DBConn.Exec(sql); err != nil {
-// 		log.Criticalf("Error writing result to DB: %q", err)
-// 	}
-// 	// TODO
-
-// }
+	var tedStatus string
+	var tedNotes string
+	if update.IsKnownIssue {
+		tedStatus = enums.KnownIssue
+		tedNotes = update.KnownIssueDescription
+	} else {
+		test := ReadResult(update.TestName, update.TestRun)
+		tedStatus = test.Status // reset the TedStatus to the Status of the test // Might be PASSED, might be FAILED
+		tedNotes = ""
+	}
+	sql := fmt.Sprintf("UPDATE %s result LEFT JOIN %s test ON result.test_id = test.id SET result.ted_status = '%s', result.ted_notes = '%s' WHERE test.name = '%s' AND result.TestRunIdentifier = '%s'", constants.ResultTable, constants.RegisteredTestTable, tedStatus, tedNotes, update.TestName, update.TestRun)
+	log.Println("SQL :", sql)
+	if _, err := DBConn.Exec(sql); err != nil {
+		log.Criticalf("Error writing result to DB: %q", err)
+	}
+}

@@ -7,3 +7,19 @@ function downcaseAndUnderscore(s) {
   // return s.replace(/\s+/g, "_").toLowerCase();
   return s.replace(/[^a-zA-Z0-9.-_=+]+/g, "_").toLowerCase();
 }
+
+function stringToBoolean(string) {
+  switch (string.toLowerCase().trim()) {
+    case "true":
+    case "yes":
+    case "1":
+      return true;
+    case "false":
+    case "no":
+    case "0":
+    case null:
+      return false;
+    default:
+      return Boolean(string);
+  }
+}

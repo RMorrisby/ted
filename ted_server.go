@@ -70,6 +70,7 @@ func main() {
 	// http.HandleFunc("/suite/exists", SuiteExistsHandler) // path to GET new suites into TED
 	// http.HandleFunc("/suites", pages.DataGetAllSuites)
 	http.HandleFunc("/test", handler.TestHandler) // path to POST new tests into TED
+	http.HandleFunc("/testupdate", handler.TestUpdateHandler)    // path to PATCH existing tests (e.g. if Known Issue)
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
 	http.HandleFunc("/result", handler.ResultHandler)    // path to POST new results into TED
 	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI // called by data.js
