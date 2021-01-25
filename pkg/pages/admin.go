@@ -1,8 +1,6 @@
 package pages
 
 import (
-	"bytes"
-	"encoding/json"
 	_ "fmt"
 	"net/http"
 	"strconv"
@@ -225,10 +223,5 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// log.Debug("Stats of all test runs : ", stats)
-
-	message, _ := json.Marshal(stats)
-	// message := stats.ToJSON() // stats is an array, but ToJSON() is on the object
-	messageBytes := bytes.TrimSpace([]byte(message))
-	w.Write(messageBytes)
-	// w.Write([]byte(strconv.Itoa(count)))
+	help.MarshalJSONAndWriteToResponse(stats, w)
 }

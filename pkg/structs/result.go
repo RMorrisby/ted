@@ -34,6 +34,7 @@ type Result struct {
 	Message           string
 	TedStatus         string
 	TedNotes          string
+	Overwrite         bool `json:",omitempty"` // used only for reruns/result updates
 }
 
 // func ResultHeader() []string {

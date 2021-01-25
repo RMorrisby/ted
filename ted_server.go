@@ -74,6 +74,7 @@ func main() {
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
 	http.HandleFunc("/result", handler.ResultHandler)    // path to POST new results into TED
 	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI // called by data.js
+	http.HandleFunc("/reruns", handler.RerunHandler)    // path to POST new results into TED
 	http.HandleFunc("/historydata", pages.HistoryOfSuite)
 	http.HandleFunc("/historydatarecent", pages.HistoryOfSuiteRecent)
 

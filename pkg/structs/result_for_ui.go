@@ -9,18 +9,18 @@ import (
 // In effect, this is the Result struct with additional values from the Test and Suite it is linked to.
 
 type ResultForUI struct {
-	Categories        string
-	Dir               string
-	TestName          string
-	TestRunIdentifier string
-	Status            string
-	Priority          int
-	StartTimestamp    string
-	EndTimestamp      string
-	RanBy             string
-	Message           string
-	TedStatus         string
-	TedNotes          string
+	Categories        string `json:",omitempty"`
+	Dir               string `json:",omitempty"`
+	TestName          string `json:",omitempty"`
+	TestRunIdentifier string `json:",omitempty"`
+	Status            string `json:",omitempty"`
+	Priority          int    `json:",omitempty"`
+	StartTimestamp    string `json:",omitempty"`
+	EndTimestamp      string `json:",omitempty"`
+	RanBy             string `json:",omitempty"`
+	Message           string `json:",omitempty"`
+	TedStatus         string `json:",omitempty"`
+	TedNotes          string `json:",omitempty"`
 }
 
 func (r ResultForUI) ToJSON() string {

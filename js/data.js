@@ -83,6 +83,12 @@ function addResultToPage(r) {
     var endDate = null;
   }
   var className = "test-" + downcaseAndUnderscore(r.TedStatus);
+  console.log(r); // TODO remove
+  // If it is absent, set the message to an empty string
+  if (r.Message == null) {
+    r.Message = "";
+  }
+
   e.innerHTML += `
     <tr id="${r.TestName}-${r.TestRunIdentifier}">
         <td id="categories">${r.Categories}</td>

@@ -1,8 +1,6 @@
 package pages
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
 	"ted/pkg/constants"
 	"ted/pkg/dataio"
@@ -67,8 +65,5 @@ func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 	// - TODO check that the version IDs are in the right order by comparing the timestamps
 	// - (maybe the version IDs haven't been written in a sortable way)
 
-	message, _ := json.Marshal(results)
-	// message := results.ToJSON() // stats is an array, but ToJSON() is on the object
-	messageBytes := bytes.TrimSpace([]byte(message))
-	w.Write(messageBytes)
+	help.MarshalJSONAndWriteToResponse(results, w)
 }

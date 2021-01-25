@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	// "fmt"
+	"fmt"
 
 	"net/http"
 	// "ted/pkg/constants"
@@ -19,7 +19,9 @@ import (
 func ResultHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debug("/result called")
 	switch r.Method {
+	// POST is for new results, PUT is for reruns/updates
 	case "POST":
+	case "PUT":
 
 		// Now try to parse the POST body from JSON
 		var result structs.Result
@@ -51,6 +53,43 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			log.Error(s)
 			http.Error(w, s, http.StatusBadRequest)
 			return
+		}
+
+		// If this is a rerun/update but there is no existing result for this testrun, reject it
+		existingResult := dataio.ReadResult(result.TestName, result.TestRunIdentifier)
+		if r.Method == "PUT" {
+			if existingResult == nil {
+				e := fmt.Sprintf("Result received on PUT, but there was no existing result in the DB for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
+				log.Error(e)
+				http.Error(w, e, http.StatusBadRequest)
+				return
+			}
+
+			// PUT requires the Overwrite flag
+			if result.Overwrite == false {
+				e := fmt.Sprintf("Result received on PUT, but the Overwrite flag was false for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
+				log.Error(e)
+				http.Error(w, e, http.StatusBadRequest)
+				return
+			}
+		}
+
+		// If the test already has a result for this testrun, and this result is not a rerun/update, reject it
+		if r.Method == "POST" {
+			if existingResult != nil {
+				e := fmt.Sprintf("Result received on POST, but there was an existing result in the DB for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
+				log.Error(e)
+				http.Error(w, e, http.StatusBadRequest)
+				return
+			}
+
+			// POST requires no Overwrite flag
+			if result.Overwrite == true {
+				e := fmt.Sprintf("Result received on POST, but the Overwrite flag was true for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
+				log.Error(e)
+				http.Error(w, e, http.StatusBadRequest)
+				return
+			}
 		}
 
 		// Users should supply the TedStatus field too, but if it is absent we should use the Status field

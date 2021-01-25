@@ -1,8 +1,6 @@
 package pages
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
 	"ted/pkg/dataio"
 	"ted/pkg/enums"
@@ -64,9 +62,7 @@ func HistoryOfSuite(w http.ResponseWriter, r *http.Request) {
 
 	history := GetHistoryForSuite(name)
 
-	message, _ := json.Marshal(history)
-	messageBytes := bytes.TrimSpace([]byte(message))
-	w.Write(messageBytes)
+	help.MarshalJSONAndWriteToResponse(history, w)
 }
 
 // REST endpoint to get the history data for a suite, to be displayed in the UI
@@ -103,9 +99,7 @@ func HistoryOfSuiteRecent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	message, _ := json.Marshal(history)
-	messageBytes := bytes.TrimSpace([]byte(message))
-	w.Write(messageBytes)
+	help.MarshalJSONAndWriteToResponse(history, w)
 }
 
 // Get the test history for the given suite
