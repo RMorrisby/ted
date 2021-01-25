@@ -73,6 +73,8 @@ func main() {
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
 	http.HandleFunc("/result", handler.ResultHandler)    // path to POST new results into TED
 	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI // called by data.js
+	http.HandleFunc("/historydata", pages.HistoryOfSuite)
+	
 
 	// http.HandleFunc("/history/suite", handler.GetHistoryForSuite) // path to GET suite test history // TODO needed?
 

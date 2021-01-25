@@ -1,8 +1,8 @@
 package pages
 
 import (
-	// "bytes"
-	// "encoding/json"
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"ted/pkg/dataio"
 	"ted/pkg/enums"
@@ -35,11 +35,38 @@ func HistoryPage(w http.ResponseWriter, r *http.Request) {
 
 	// ws.ServeWs(ws.WSHub, w, r)
 
-	err := Templates.ExecuteTemplate(w, "history.html", GetHistoryForSuite(name)) //execute the template and pass it the struct to fill in the gaps
+	// err := Templates.ExecuteTemplate(w, "history.html", GetHistoryForSuite(name)) //execute the template and pass it the struct to fill in the gaps
+	err := Templates.ExecuteTemplate(w, "history.html", name)
 
 	if err != nil {
 		log.Debug("template executing error: ", err)
 	}
+}
+
+// REST endpoint to get the history data for a suite, to be displayed in the UI
+func HistoryOfSuite(w http.ResponseWriter, r *http.Request) {
+
+	help.LogNewAPICall("HistoryOfSuite")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	name := r.URL.Query().Get("suite")
+	if name == "" {
+		// A suite name must be supplied
+		s := "No suite name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /history?suite=___"
+		log.Error(s)
+		http.Error(w, s, http.StatusBadRequest)
+		return
+	}
+
+	history := GetHistoryForSuite(name)
+
+	message, _ := json.Marshal(history)
+	messageBytes := bytes.TrimSpace([]byte(message))
+	w.Write(messageBytes)
 }
 
 // Get the test history for the given suite
