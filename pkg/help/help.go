@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
+	"sort"
+	"strconv"
 	"ted/pkg/structs"
 
 	log "github.com/romana/rlog"
@@ -99,4 +102,50 @@ func FormResultForUI(result structs.Result, test *structs.Test) (resultForUI str
 	resultForUI.Dir = test.Dir
 	resultForUI.Priority = test.Priority
 	return
+}
+
+// Takes an array of test run names (e.g. v1.10.2, v1.11.11, v1.9.9) and sorts them properly
+// This sorts in-place
+func SortTestRuns(testruns []string) {
+
+	sort.SliceStable(testruns, func(i, k int) bool {
+		r := regexp.MustCompile(`(\d+).(\d+).(\d+)`)
+		rs := r.FindStringSubmatch(testruns[i])
+
+		major1, _ := strconv.Atoi(rs[1])
+		minor1, _ := strconv.Atoi(rs[2])
+		patch1, _ := strconv.Atoi(rs[3])
+
+		rs = r.FindStringSubmatch(testruns[k])
+
+		major2, _ := strconv.Atoi(rs[1])
+		minor2, _ := strconv.Atoi(rs[2])
+		patch2, _ := strconv.Atoi(rs[3])
+
+		// Sort by Major
+		if major1 < major2 {
+			return true
+		}
+		if major1 > major2 {
+			return false
+		}
+
+		// Sort by Minor
+		if minor1 < minor2 {
+			return true
+		}
+		if minor1 > minor2 {
+			return false
+		}
+
+		// Sort by Patch
+		if patch1 < patch2 {
+			return true
+		}
+		if patch1 > patch2 {
+			return false
+		}
+
+		return true
+	})
 }

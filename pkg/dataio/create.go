@@ -75,21 +75,6 @@ func WriteFullResultToDB(result structs.Result) (resultForUI structs.ResultForUI
 	// Get the test
 	test := GetTest(result.TestName)
 	return help.FormResultForUI(result, test)
-
-	// resultForUI.TestName = result.TestName
-	// resultForUI.TestRunIdentifier = result.TestRunIdentifier
-	// resultForUI.Status = result.Status
-	// resultForUI.StartTimestamp = result.StartTimestamp
-	// resultForUI.EndTimestamp = result.EndTimestamp
-	// resultForUI.RanBy = result.RanBy
-	// resultForUI.Message = result.Message
-	// resultForUI.TedStatus = result.TedStatus
-	// resultForUI.TedNotes = result.TedNotes
-
-	// resultForUI.Categories = test.Categories
-	// resultForUI.Dir = test.Dir
-	// resultForUI.Priority = test.Priority
-	// return
 }
 
 // Write the suite to the DB, if the DB does not already contain a suite of that name

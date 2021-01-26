@@ -87,7 +87,6 @@ func HistoryOfSuiteRecent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	history := GetHistoryForSuite(name)
-	// s[len(s)-3:]
 	count := len(history.TestRuns)
 	maxCount := 6
 	if count > maxCount {
@@ -173,6 +172,9 @@ func GetHistoryForSuite(suiteName string) structs.HistorySuite {
 
 	// We also need to use this list to sort the results for each test
 	testRuns := dataio.GetAllTestRunsForSuite(suiteName)
+
+	// This needs to be approriately sorted
+	help.SortTestRuns(testRuns)
 
 	// Fill out the non-sparse results map with fake results where necessary
 	// Add each result in order of each testrun

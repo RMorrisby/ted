@@ -50,25 +50,29 @@ body {
 }
 
 .test-passed {
-  background-color: lightgreen;
+  background-color: rgba(59, 238, 83, 0.527);
+}
+
+.test-passed_on_rerun {
+  background-color: rgba(1, 226, 121, 0.527);
 }
 
 .test-failed {
-  background-color: rgb(228, 104, 104);
+  background-color: rgba(228, 104, 104, 0.5);
 }
 
 .test-unknown {
-  background-color: rgb(129, 129, 129);
+  background-color: rgba(129, 129, 129, 0.5);
 }
 
 .test-not_run {
-  background-color: rgb(243, 222, 104);
+  background-color: rgba(243, 222, 104, 0.5);
 }
 
 .test-known_issue {
-  background-color: rgb(170, 51, 194);
+  background-color: rgba(170, 51, 194, 0.5);
 }
 
 .test-intermittent {
-  background-color: rgb(63, 122, 211);
+  background-color: rgba(63, 122, 211, 0.5);
 }

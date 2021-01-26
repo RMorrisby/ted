@@ -3,8 +3,9 @@ package dataio
 import (
 	"fmt"
 	"ted/pkg/constants"
-	"ted/pkg/structs"
 	"ted/pkg/enums"
+	"ted/pkg/help"
+	"ted/pkg/structs"
 
 	log "github.com/romana/rlog"
 )
@@ -35,9 +36,50 @@ func WriteResultKnownIssueUpdate(update structs.KnownIssueUpdate) {
 		tedStatus = test.Status // reset the TedStatus to the Status of the test // Might be PASSED, might be FAILED
 		tedNotes = ""
 	}
-	sql := fmt.Sprintf("UPDATE %s result LEFT JOIN %s test ON result.test_id = test.id SET result.ted_status = '%s', result.ted_notes = '%s' WHERE test.name = '%s' AND result.TestRunIdentifier = '%s'", constants.ResultTable, constants.RegisteredTestTable, tedStatus, tedNotes, update.TestName, update.TestRun)
+
+	testID := fmt.Sprintf("(SELECT id FROM test WHERE test.name = '%s')", update.TestName)
+
+	sql := fmt.Sprintf("UPDATE %s SET ted_status = '%s', ted_notes = '%s' WHERE test_id = %s AND testrun = '%s'", constants.ResultTable, tedStatus, tedNotes, testID, update.TestRun)
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
 		log.Criticalf("Error writing result to DB: %q", err)
 	}
+}
+
+// Overwrite the existing result with the given result
+func WriteResultUpdate(update structs.Result, existing *structs.Result) structs.ResultForUI {
+
+	// suiteID := fmt.Sprintf("(SELECT id from suite where suite.name = '%s')", update.SuiteName)
+	testID := fmt.Sprintf("(SELECT id FROM test WHERE test.name = '%s')", update.TestName)
+
+	log.Println("Updating result in DB")
+
+	// (suite_id, test_id, testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes)
+
+	var tedStatus string
+	var tedNotes string
+
+	tedNotes = existing.TedNotes // TODO what are we doing with this field?
+	tedStatus = update.Status
+	// Failed -> passed
+	if existing.Status == string(enums.Failed) && update.Status == string(enums.Passed) {
+		tedStatus = string(enums.PassedOnRerun)
+	}
+	// Passed -> Failed // why was this rerun? On a whim?
+	if existing.Status == string(enums.Passed) && update.Status == string(enums.Failed) {
+		tedStatus = string(enums.Intermittent)
+	}
+
+	// sql := fmt.Sprintf("UPDATE %s result SET result.status = '%s', result.start_time = '%s', result.end_time = '%s', result.ran_by = '%s', result.message = '%s', result.ted_status = '%s', result.ted_notes = '%s' WHERE result.test_id = %s AND result.testrun = '%s'", constants.ResultTable, update.Status, update.StartTimestamp, update.EndTimestamp, update.RanBy, update.Message, tedStatus, tedNotes, testID, update.TestRunIdentifier)
+
+	sql := fmt.Sprintf("UPDATE %s SET status = '%s', start_time = '%s', end_time = '%s', ran_by = '%s', message = '%s', ted_status = '%s', ted_notes = '%s' WHERE test_id = %s AND testrun = '%s'", constants.ResultTable, update.Status, update.StartTimestamp, update.EndTimestamp, update.RanBy, update.Message, tedStatus, tedNotes, testID, update.TestRunIdentifier)
+
+	log.Println("SQL :", sql)
+	if _, err := DBConn.Exec(sql); err != nil {
+		log.Criticalf("Error updating result in DB: %q", err)
+	}
+	// Now gather the info we need for the ResultForUI object
+	// Get the test
+	test := GetTest(update.TestName)
+	return help.FormResultForUI(update, test)
 }

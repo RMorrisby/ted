@@ -16,14 +16,15 @@ import (
 )
 
 // ResultHandler handles the /result POST request path for receiving new test results
+// Also handles the /result PUT request path for receiving test result updates
 func ResultHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println()
 	log.Debug("/result called")
+
 	switch r.Method {
 	// POST is for new results, PUT is for reruns/updates
-	case "POST":
-	case "PUT":
-
-		// Now try to parse the POST body from JSON
+	case "POST", "PUT":
+		// Now try to parse the body from JSON
 		var result structs.Result
 		d := json.NewDecoder(r.Body)
 		d.DisallowUnknownFields() // catch unwanted fields
@@ -55,18 +56,17 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// If this is a rerun/update but there is no existing result for this testrun, reject it
-		existingResult := dataio.ReadResult(result.TestName, result.TestRunIdentifier)
-		if r.Method == "PUT" {
-			if existingResult == nil {
-				e := fmt.Sprintf("Result received on PUT, but there was no existing result in the DB for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
+		if result.Overwrite {
+			// POST requires no Overwrite flag
+			if r.Method == "POST" {
+				e := fmt.Sprintf("Result received on POST, but the Overwrite flag was true for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
 				log.Error(e)
 				http.Error(w, e, http.StatusBadRequest)
 				return
 			}
-
+		} else {
 			// PUT requires the Overwrite flag
-			if result.Overwrite == false {
+			if r.Method == "PUT" {
 				e := fmt.Sprintf("Result received on PUT, but the Overwrite flag was false for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
 				log.Error(e)
 				http.Error(w, e, http.StatusBadRequest)
@@ -74,18 +74,19 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		// If this is a rerun/update but there is no existing result for this testrun, reject it
 		// If the test already has a result for this testrun, and this result is not a rerun/update, reject it
-		if r.Method == "POST" {
-			if existingResult != nil {
+		existingResult := dataio.ReadResult(result.TestName, result.TestRunIdentifier)
+		if existingResult != nil {
+			if r.Method == "POST" {
 				e := fmt.Sprintf("Result received on POST, but there was an existing result in the DB for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
 				log.Error(e)
 				http.Error(w, e, http.StatusBadRequest)
 				return
 			}
-
-			// POST requires no Overwrite flag
-			if result.Overwrite == true {
-				e := fmt.Sprintf("Result received on POST, but the Overwrite flag was true for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
+		} else {
+			if r.Method == "PUT" {
+				e := fmt.Sprintf("Result received on PUT, but there was no existing result in the DB for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
 				log.Error(e)
 				http.Error(w, e, http.StatusBadRequest)
 				return
@@ -98,7 +99,21 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// The result has passed validation, so now we can write it to the DB and then return the response
-		dataio.WriteResultToStore(result)
+
+		switch r.Method {
+		// POST is for new results, PUT is for reruns/updates
+		case "POST":
+			dataio.WriteResultToStore(result)
+			w.WriteHeader(http.StatusCreated) // return a 201
+		case "PUT":
+			dataio.WriteResultUpdate(result, existingResult)
+			w.WriteHeader(http.StatusOK) // return a 200
+
+			// debugging only
+			existingResult2 := dataio.ReadResult(result.TestName, result.TestRunIdentifier)
+			log.Debug(":: Result after rerun ::")
+			log.Debug(existingResult2)
+		}
 
 		// If this result does not belong to the latest test run, update the cached variable
 		if result.TestRunIdentifier != dataio.LatestTestRun {
@@ -110,7 +125,6 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			dataio.LatestSuite = result.SuiteName
 		}
 
-		w.WriteHeader(http.StatusCreated) // return a 201
 	default:
 		log.Println(r.Method, "/result called")
 		http.Error(w, "Only POST is supported for /result", http.StatusMethodNotAllowed)

@@ -104,7 +104,7 @@ func ReadAllResultsForUI(testrun string) []structs.ResultForUI {
 func ReadResult(testname string, testrun string) *structs.Result {
 	log.Debug("Reading result from DB")
 
-	sql := "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + constants.ResultTable + " result LEFT JOIN " + constants.SuiteTable + " suite ON result.suite_id = suite.id LEFT JOIN " + constants.RegisteredTestTable + " test ON result.test_id = test.id WHERE result.testrun = " + testrun + " AND test.name = " + testname
+	sql := fmt.Sprintf("SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM %s result LEFT JOIN %s suite ON result.suite_id = suite.id LEFT JOIN %s test ON result.test_id = test.id WHERE result.testrun = '%s' AND test.name = '%s'", constants.ResultTable, constants.SuiteTable, constants.RegisteredTestTable, testrun, testname)
 	log.Debug("SQL :", sql)
 
 	r := structs.Result{}
