@@ -9,7 +9,7 @@ type HistorySuite struct {
 	SuiteName       string
 	TestRuns        []string                  // list of all of the test runs the suite has any results for
 	TestRunMap      map[string]HistoryTestRun // map of the test run name and its results (Result struct)
-	Tests           []Test                    // list of all of the tests the suite has any results for
+	Tests           []Test                    // (Test Summary) list of all of the tests the suite has any results for
 	TotalCount      int                       // the total number of executed tests in the most recent test run
 	SuccessCount    int                       // the number of test successes in the most recent test run
 	FailCount       int                       // the number of test failures in the most recent test run

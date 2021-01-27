@@ -104,7 +104,9 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			result.TedNotes = ""
 		}
 
-		determineTEDStatusForNewResult(&result)
+		log.Debug("Result received :", result)
+		DetermineTEDStatusForNewResult(&result)
+		log.Debug("Result received :", result)
 
 		// The result has passed validation, so now we can write it to the DB and then return the response
 
@@ -140,7 +142,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Sets the result's TED status & TED Notes according to what is stored against the test
-func determineTEDStatusForNewResult(result *structs.Result) {
+func DetermineTEDStatusForNewResult(result *structs.Result) {
 	test := dataio.GetTest(result.TestName)
 
 	if test.IsKnownIssue {

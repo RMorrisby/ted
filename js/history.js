@@ -73,7 +73,7 @@ function buildHistoryTable(data) {
   // SuiteName       string
   // TestRuns        []string                  // list of all of the test runs the suite has any results for
   // TestRunMap      map[string]HistoryTestRun // map of the test run name and its results (Result struct)
-  // Tests           []Test                    // list of all of the tests the suite has any results for
+  // Tests           []Test                    // (Test Summary) list of all of the tests the suite has any results for
   // TotalCount      int                       // the total number of executed tests in the most recent test run
   // SuccessCount    int                       // the number of test successes in the most recent test run
   // FailCount       int                       // the number of test failures in the most recent test run
@@ -184,24 +184,23 @@ function buildHistoryTable(data) {
 
       var td = document.createElement("td");
       // Give the cell two statuses - the test status and the TED status
-      // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup 
+      // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup
       td.classList.add("test-" + downcaseAndUnderscore(result.Status));
       td.classList.add("test-" + downcaseAndUnderscore(result.TedStatus));
 
       // If this is the last testrun, also give the cell a fixed class that can be used to get the cell (within the row)
       if (testrun == lastTestRun) {
-        td.classList.add("tedstatus")
+        td.classList.add("tedstatus");
       }
       td.id = "history-table-" + downcaseAndUnderscore(result.TestRunIdentifier);
       td.appendChild(document.createTextNode(result.TedStatus));
       tr.appendChild(td);
     }
 
-
-    addKnownIssueFieldsToTableRow(tr, test, lastTestRun);
+    addKnownIssueFieldsToTableRow(tr, test.Name, lastTestRun, test.KnownIssueDescription);
     tbody.appendChild(tr);
   }
-  // console.log(data);
+  console.log(data); // TODO remove
 
   table.appendChild(head);
   table.appendChild(tbody);

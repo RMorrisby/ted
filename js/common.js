@@ -24,22 +24,21 @@ function stringToBoolean(string) {
   }
 }
 
-
-
 // To the table row e, append the Known Issue fields
 // Takes : e : element (the tr)
-//         test : Test object
-//         lastTestRun : string (the value of the last test run)  
-function addKnownIssueFieldsToTableRow(e, test, lastTestRun) {
-
-  var testNameDown = downcaseAndUnderscore(test.Name)
+//         testName : string (the test name)
+//         lastTestRun : string (the value of the last test run)
+//         knownIssueDesc : string (the Known Issue for this test)
+// function addKnownIssueFieldsToTableRow(e, test, lastTestRun) {
+function addKnownIssueFieldsToTableRow(e, testName, lastTestRun, knownIssueDesc) {
+  var testNameDown = downcaseAndUnderscore(testName);
 
   // Button to clear the Known Issue value
   var buttonClear = document.createElement("button");
   buttonClear.className = "known-issue-clear";
   buttonClear.id = "history-table-button-known-issue-clear-" + testNameDown;
   buttonClear.appendChild(document.createTextNode("N"));
-  buttonClear.setAttribute("test", test.Name);
+  buttonClear.setAttribute("test", testName);
   buttonClear.setAttribute("testrun", lastTestRun);
   buttonClear.setAttribute("is-known-issue", false);
   $(buttonClear).on("click", function () {
@@ -69,7 +68,7 @@ function addKnownIssueFieldsToTableRow(e, test, lastTestRun) {
   buttonSet.className = "known-issue-set";
   buttonSet.id = "history-table-button-known-issue-set-" + testNameDown;
   buttonSet.appendChild(document.createTextNode("Y"));
-  buttonSet.setAttribute("test", test.Name);
+  buttonSet.setAttribute("test", testName);
   buttonSet.setAttribute("testrun", lastTestRun);
   buttonSet.setAttribute("is-known-issue", true);
   $(buttonSet).on("click", function () {
@@ -80,8 +79,8 @@ function addKnownIssueFieldsToTableRow(e, test, lastTestRun) {
   var input = document.createElement("input");
   input.className = "known-issue-input";
   input.id = "history-table-input-known-issue-" + testNameDown;
-  input.value = test.KnownIssueDescription;
-  input.setAttribute("test", test.Name);
+  input.value = knownIssueDesc;
+  input.setAttribute("test", testName);
 
   var td = document.createElement("td");
   td.appendChild(buttonClear);
@@ -89,7 +88,6 @@ function addKnownIssueFieldsToTableRow(e, test, lastTestRun) {
   td.appendChild(input);
   e.appendChild(td);
 }
-
 
 // Send to TED the desired Known Issue value for the test, either setting it or clearing it
 function sendKnownIssueForTest(button) {
@@ -120,17 +118,18 @@ function sendKnownIssueForTest(button) {
 
     statusCode: {
       200: function (xhr) {
-        // var resultFieldID = "" // TODO
-        button.parent().getElementById("")
+        // TODO useful?
+        // tedNotesE = button.parentNode.getElementsByClassName("tednotes");
         if (isKnownIssue == false) {
           // Clear the Known Issue input
           $("input#history-table-input-known-issue-" + testNameDown).val("");
-          // Add the 'known_issue' class to the result field
+          // TODO
+          // Remove the 'known_issue' class from the result field
           // document.getElementById(resultFieldID).classList.remove('.test-known_issue');
         } else {
+          // TODO
           // Add the 'known_issue' class to the result field
           // document.getElementById(resultFieldID).classList.add('.test-known_issue');
-
         }
       },
     },

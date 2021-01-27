@@ -63,7 +63,7 @@ try {
 // ############# END Websocket stuff
 
 function addResultToPage(r) {
-  var e = document.getElementById("results-table-body");
+  var tbody = document.getElementById("results-table-body");
 
   if (r.StartTimestamp != null) {
     // toISOString should yield a date in this format : 2021-01-17T19:41:00.000Z
@@ -91,35 +91,102 @@ function addResultToPage(r) {
   if (r.Message == null) {
     r.Message = "";
   }
+  // If it is absent, set the TedNotes to an empty string
+  if (r.TedNotes == null) {
+    r.TedNotes = "";
+  }
+  // tbody.innerHTML += `
+  //   <tr id="${r.TestName}-${r.TestRunIdentifier}">
+  //       <td class="categories">${r.Categories}</td>
+  //       <td class="dir">${r.Dir}</td>
+  //       <td class="testname">${r.TestName}</td>
+  //       <td class="testrun">${r.TestRunIdentifier}</td>
+  //       <td class=${testStatusClass}>${r.Status}</td>
+  //       <td class="priority">${r.Priority}</td>
+  //       <td class="start">${startDate}</td>
+  //       <td class="end">${endDate}</td>
+  //       <td class="ranby">${r.RanBy}</td>
+  //       <td class="message">${r.Message}</td>
+  //       <td class="tedstatus">${r.TedStatus}</td>
+  //       <td class="tednotes">${r.TedNotes}</td>
+  //   </tr>
+  //   `;
 
-  e.innerHTML += `
-    <tr id="${r.TestName}-${r.TestRunIdentifier}">
-        <td id="categories">${r.Categories}</td>
-        <td id="dir">${r.Dir}</td>
-        <td id="testname">${r.TestName}</td>
-        <td id="testrun">${r.TestRunIdentifier}</td>
-        <td class=${testStatusClass} id="status">${r.Status}</td>
-        <td id="priority">${r.Priority}</td>
-        <td id="start">${startDate}</td>
-        <td id="end">${endDate}</td>
-        <td id="ranby">${r.RanBy}</td>
-        <td id="message">${r.Message}</td>
-        <td id="tedstatus">${r.TedStatus}</td>
-        <td id="tednotes">${r.TedNotes}</td>
-    </tr>
-    `;
+  var tr = document.createElement("tr");
+  tr.id = `${r.TestName}-${r.TestRunIdentifier}`;
 
-  // Give the TED status cell two statuses - the test status and the TED status
-  // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup 
-  e.getElementById("tedstatus").classList.add(testStatusClass);
-  e.getElementById("tedstatus").classList.add(tedStatusClass);
+  var td = document.createElement("td");
+  td.className = "categories";
+  td.appendChild(document.createTextNode(r.Categories));
+  tr.appendChild(td);
 
-  // Also give the TED status cell a fixed class that can be used to get the cell (within the row)
-  td.classList.add("tedstatus")
+  var td = document.createElement("td");
+  td.className = "dir";
+  td.appendChild(document.createTextNode(r.Dir));
+  tr.appendChild(td);
 
-  addKnownIssueFieldsToTableRow(e);
+  var td = document.createElement("td");
+  td.className = "testname";
+  td.appendChild(document.createTextNode(r.TestName));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "testrun";
+  td.appendChild(document.createTextNode(r.TestRunIdentifier));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.classList.add(testStatusClass);
+  td.classList.add("status");
+  td.appendChild(document.createTextNode(r.Status));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "priority";
+  td.appendChild(document.createTextNode(r.Priority));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "start";
+  td.appendChild(document.createTextNode(startDate));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "end";
+  td.appendChild(document.createTextNode(endDate));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "ranby";
+  td.appendChild(document.createTextNode(r.RanBy));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "message";
+  td.appendChild(document.createTextNode(r.Message));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "tedstatus";
+  td.appendChild(document.createTextNode(r.TedStatus));
+  tr.appendChild(td);
+
+  // Add to the TED status cell two statuses - the test status and the TED status
+  // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup
+  // td = tbody.getElementsByClassName("tedstatus")[-1];
+  td.classList.add(testStatusClass);
+  td.classList.add(tedStatusClass);
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "tednotes";
+  td.appendChild(document.createTextNode(r.TedNotes));
+  tr.appendChild(td);
+
+  // tr = tbody.getElementsByTagName("tr")[-1];
+  addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
+  tbody.appendChild(tr);
 }
-
 
 // Get all existing results from the DB
 function getAllResults() {
