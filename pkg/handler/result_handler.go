@@ -7,6 +7,8 @@ import (
 	"net/http"
 	// "ted/pkg/constants"
 	"ted/pkg/dataio"
+	"ted/pkg/enums"
+
 	// "ted/pkg/help"
 	// "ted/pkg/pages"
 	"ted/pkg/structs"
@@ -93,10 +95,16 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		// Users should supply the TedStatus field too, but if it is absent we should use the Status field
-		if result.TedStatus == "" {
-			result.TedStatus = result.Status
+		// TODO users should NOT supply TedStatus or TedNoted fields
+		// Amend Result struct
+		if result.TedStatus != "" {
+			result.TedStatus = ""
 		}
+		if result.TedNotes != "" {
+			result.TedNotes = ""
+		}
+
+		determineTEDStatusForNewResult(&result)
 
 		// The result has passed validation, so now we can write it to the DB and then return the response
 
@@ -129,4 +137,19 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.Method, "/result called")
 		http.Error(w, "Only POST is supported for /result", http.StatusMethodNotAllowed)
 	}
+}
+
+// Sets the result's TED status & TED Notes according to what is stored against the test
+func determineTEDStatusForNewResult(result *structs.Result) {
+	test := dataio.GetTest(result.TestName)
+
+	if test.IsKnownIssue {
+		result.TedStatus = enums.KnownIssue
+		result.TedNotes = test.KnownIssueDescription
+	} else {
+		result.TedStatus = result.Status
+		result.TedNotes = ""
+	}
+
+	// TODO detect intermittency
 }

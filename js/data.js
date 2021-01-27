@@ -82,7 +82,10 @@ function addResultToPage(r) {
   } else {
     var endDate = null;
   }
-  var className = "test-" + downcaseAndUnderscore(r.TedStatus);
+
+  var testStatusClass = "test-" + downcaseAndUnderscore(r.Status);
+  var tedStatusClass = "test-" + downcaseAndUnderscore(r.TedStatus);
+
   console.log(r); // TODO remove
   // If it is absent, set the message to an empty string
   if (r.Message == null) {
@@ -95,17 +98,28 @@ function addResultToPage(r) {
         <td id="dir">${r.Dir}</td>
         <td id="testname">${r.TestName}</td>
         <td id="testrun">${r.TestRunIdentifier}</td>
-        <td class=${className} id="status">${r.Status}</td>
+        <td class=${testStatusClass} id="status">${r.Status}</td>
         <td id="priority">${r.Priority}</td>
         <td id="start">${startDate}</td>
         <td id="end">${endDate}</td>
         <td id="ranby">${r.RanBy}</td>
         <td id="message">${r.Message}</td>
-        <td class=${className} id="tedstatus">${r.TedStatus}</td>
+        <td id="tedstatus">${r.TedStatus}</td>
         <td id="tednotes">${r.TedNotes}</td>
     </tr>
     `;
+
+  // Give the TED status cell two statuses - the test status and the TED status
+  // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup 
+  e.getElementById("tedstatus").classList.add(testStatusClass);
+  e.getElementById("tedstatus").classList.add(tedStatusClass);
+
+  // Also give the TED status cell a fixed class that can be used to get the cell (within the row)
+  td.classList.add("tedstatus")
+
+  addKnownIssueFieldsToTableRow(e);
 }
+
 
 // Get all existing results from the DB
 function getAllResults() {
