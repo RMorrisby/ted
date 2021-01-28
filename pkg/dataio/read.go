@@ -130,10 +130,6 @@ func ReadAllResults() []structs.Result {
 		log.Criticalf("Error reading results: %q", err)
 	}
 
-	// cols, _ := rows.Columns()
-	// log.Printf("Found %d columns in DB", len(cols))
-	// log.Printf("Found %d results in DB", resultCount)
-
 	var results []structs.Result
 	for rows.Next() {
 

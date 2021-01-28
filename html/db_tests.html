@@ -1,0 +1,28 @@
+{{ template "_header.html" . }}
+
+<link rel="stylesheet" type="text/css" href="/css/data.css" />
+<script src="/js/db_tests.js"></script>
+
+<p></p>
+<div id="results-div">
+  <div id="info">Viewing entire Test table</div>
+  <br />
+  <table id="tests-table">
+    <thead>
+      <tr id="tests-table-header">
+        <th id="header-testname">Name</th>
+        <th id="header-dir">Dir</th>
+        <th id="header-priority">Priority</th>
+        <th id="header-categories">Categories</th>
+        <th id="header-desc">Description</th>
+        <th id="header-notes">Notes</th>
+        <th id="header-owner">Owner</th>
+        <th id="header-is-known-issue">Is Known Issue</th>
+        <th id="header-known-issue-desc">Known Issue Desc</th>
+      </tr>
+    </thead>
+    <tbody id="tests-table-body"></tbody>
+  </table>
+</div>
+
+{{ template "_footer.html" . }}

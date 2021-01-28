@@ -1,0 +1,29 @@
+{{ template "_header.html" . }}
+
+<link rel="stylesheet" type="text/css" href="/css/data.css" />
+<script src="/js/db_results.js"></script>
+
+<p></p>
+<div id="results-div">
+  <div id="info">Viewing entire Result table</div>
+  <br />
+  <table id="results-table">
+    <thead>
+      <tr id="results-table-header">
+        <th id="header-testname">Test</th>
+        <th id="header-suitename">Suite</th>
+        <th id="header-testrun">Test Run</th>
+        <th id="header-status">Status</th>
+        <th id="header-start">Start</th>
+        <th id="header-end">End</th>
+        <th id="header-ranby">Ran By</th>
+        <th id="header-message">Message</th>
+        <th id="header-tedstatus">TED Status</th>
+        <th id="header-tednotes">TED Notes</th>
+      </tr>
+    </thead>
+    <tbody id="results-table-body"></tbody>
+  </table>
+</div>
+
+{{ template "_footer.html" . }}
