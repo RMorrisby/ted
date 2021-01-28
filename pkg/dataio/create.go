@@ -65,7 +65,7 @@ func WriteFullResultToDB(result structs.Result) (resultForUI structs.ResultForUI
 
 	log.Println("Writing result to DB")
 	// (suite_id, test_id, testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes)
-	sql := constants.ResultTableInsertFullRowSQL + fmt.Sprintf("(%s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.StartTimestamp, result.EndTimestamp, result.RanBy, result.Message, result.Status, "")
+	sql := constants.ResultTableInsertFullRowSQL + fmt.Sprintf("(%s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.StartTimestamp, result.EndTimestamp, result.RanBy, result.Message, result.TedStatus, result.TedNotes)
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
 		log.Criticalf("Error writing result to DB: %q", err)

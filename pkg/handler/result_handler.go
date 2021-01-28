@@ -3,8 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-
 	"net/http"
+
 	// "ted/pkg/constants"
 	"ted/pkg/dataio"
 	"ted/pkg/enums"
@@ -27,8 +27,12 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 	// POST is for new results, PUT is for reruns/updates
 	case "POST", "PUT":
 		// Now try to parse the body from JSON
+		body := r.Body
+		// data, _ := ioutil.ReadAll(body)
+		// log.Debug(string(data))
+		// log.Debug("Result body received :", body)
 		var result structs.Result
-		d := json.NewDecoder(r.Body)
+		d := json.NewDecoder(body)
 		d.DisallowUnknownFields() // catch unwanted fields
 
 		err := d.Decode(&result)
@@ -95,6 +99,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		log.Debug("Result received :", result.ToJSON())
 		// TODO users should NOT supply TedStatus or TedNoted fields
 		// Amend Result struct
 		if result.TedStatus != "" {
@@ -104,9 +109,8 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			result.TedNotes = ""
 		}
 
-		log.Debug("Result received :", result)
-		DetermineTEDStatusForNewResult(&result)
-		log.Debug("Result received :", result)
+		DetermineTEDStatusAndNotesForNewResult(&result)
+		log.Debug("Result after amendment :", result.ToJSON())
 
 		// The result has passed validation, so now we can write it to the DB and then return the response
 
@@ -142,7 +146,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Sets the result's TED status & TED Notes according to what is stored against the test
-func DetermineTEDStatusForNewResult(result *structs.Result) {
+func DetermineTEDStatusAndNotesForNewResult(result *structs.Result) {
 	test := dataio.GetTest(result.TestName)
 
 	if test.IsKnownIssue {

@@ -101,7 +101,7 @@ func main() {
 
 	// Do everything else above this line
 
-	log.Info("TED started")
+	log.Info("TED started\n\n")
 	startReloadServer()
 	// log.Fatal(http.ListenAndServe(getHostAndPort(), nil))
 }

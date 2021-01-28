@@ -214,7 +214,7 @@ func ReadAllTests() (tests []structs.Test) {
 
 	log.Debug("Reading tests from DB")
 
-	sql := constants.RegisteredTestTableSelectAllSQL
+	sql := constants.RegisteredTestTableSelectAllSQL + " ORDER BY dir ASC, name ASC"
 	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {

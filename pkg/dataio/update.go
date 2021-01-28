@@ -49,6 +49,8 @@ func WriteResultKnownIssueUpdate(update structs.KnownIssueUpdate) {
 // Overwrite the existing result with the given result
 func WriteResultUpdate(update structs.Result, existing *structs.Result) structs.ResultForUI {
 
+	log.Debug("Result update :", update.ToJSON())
+
 	// suiteID := fmt.Sprintf("(SELECT id from suite where suite.name = '%s')", update.SuiteName)
 	testID := fmt.Sprintf("(SELECT id FROM test WHERE test.name = '%s')", update.TestName)
 
@@ -59,8 +61,8 @@ func WriteResultUpdate(update structs.Result, existing *structs.Result) structs.
 	var tedStatus string
 	var tedNotes string
 
-	tedNotes = existing.TedNotes // TODO what are we doing with this field?
-	tedStatus = update.Status
+	tedNotes = update.TedNotes // TedNotes is == Known Issue // TODO do anything more with this field?
+	tedStatus = update.TedStatus
 	// Failed -> passed
 	if existing.Status == string(enums.Failed) && update.Status == string(enums.Passed) {
 		tedStatus = string(enums.PassedOnRerun)
@@ -69,6 +71,7 @@ func WriteResultUpdate(update structs.Result, existing *structs.Result) structs.
 	if existing.Status == string(enums.Passed) && update.Status == string(enums.Failed) {
 		tedStatus = string(enums.Intermittent)
 	}
+	log.Debugf("TED Status : %s; TED Notes : %s", tedStatus, tedNotes)
 
 	// sql := fmt.Sprintf("UPDATE %s result SET result.status = '%s', result.start_time = '%s', result.end_time = '%s', result.ran_by = '%s', result.message = '%s', result.ted_status = '%s', result.ted_notes = '%s' WHERE result.test_id = %s AND result.testrun = '%s'", constants.ResultTable, update.Status, update.StartTimestamp, update.EndTimestamp, update.RanBy, update.Message, tedStatus, tedNotes, testID, update.TestRunIdentifier)
 
