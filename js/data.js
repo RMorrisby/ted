@@ -168,12 +168,15 @@ function addResultToPage(r) {
 
   var td = document.createElement("td");
   td.className = "tedstatus";
-  td.appendChild(document.createTextNode(r.TedStatus));
+  var text = r.TedStatus;
+  if (r.TedNotes != null && r.TedNotes != "") {
+    text = r.TedNotes;
+  }
+  td.appendChild(document.createTextNode(text));
   tr.appendChild(td);
 
   // Add to the TED status cell two statuses - the test status and the TED status
   // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup
-  // td = tbody.getElementsByClassName("tedstatus")[-1];
   td.classList.add(testStatusClass);
   td.classList.add(tedStatusClass);
   tr.appendChild(td);
@@ -184,6 +187,7 @@ function addResultToPage(r) {
   tr.appendChild(td);
 
   // tr = tbody.getElementsByTagName("tr")[-1];
+  // var knownIssueText
   addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
   tbody.appendChild(tr);
 }

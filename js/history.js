@@ -193,7 +193,11 @@ function buildHistoryTable(data) {
         td.classList.add("tedstatus");
       }
       td.id = "history-table-" + downcaseAndUnderscore(result.TestRunIdentifier);
-      td.appendChild(document.createTextNode(result.TedStatus));
+      var text = result.TedStatus;
+      if (result.TedNotes != null && result.TedNotes != "") {
+        text = result.TedNotes;
+      }
+      td.appendChild(document.createTextNode(text));
       tr.appendChild(td);
     }
 

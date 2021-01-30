@@ -66,10 +66,12 @@ func WriteResultUpdate(update structs.Result, existing *structs.Result) structs.
 	// Failed -> passed
 	if existing.Status == string(enums.Failed) && update.Status == string(enums.Passed) {
 		tedStatus = string(enums.PassedOnRerun)
+		// tedNotes = "Passed on rerun"
 	}
 	// Passed -> Failed // why was this rerun? On a whim?
 	if existing.Status == string(enums.Passed) && update.Status == string(enums.Failed) {
 		tedStatus = string(enums.Intermittent)
+		tedNotes = "Failed on rerun"
 	}
 	log.Debugf("TED Status : %s; TED Notes : %s", tedStatus, tedNotes)
 
