@@ -192,11 +192,16 @@ function buildHistoryTable(data) {
       if (testrun == lastTestRun) {
         td.classList.add("tedstatus");
       }
-      td.id = "history-table-" + downcaseAndUnderscore(result.TestRunIdentifier);
+      td.id = "history-table-" + testNameDown + "_" + downcaseAndUnderscore(result.TestRunIdentifier);
       var text = result.TedStatus;
       if (result.TedNotes != null && result.TedNotes != "") {
         text = result.TedNotes;
       }
+      var tooltip = result.StartTimestamp + " &#xa; " + result.EndTimestamp + ". "
+      tooltip += "Ran by: " + result.RanBy + ". "
+      tooltip += "<br/>Priority: " + test.Priority + ". "
+      td.setAttribute("data-tooltip-position", "bottom");
+      td.setAttribute("data-tooltip", tooltip);
       td.appendChild(document.createTextNode(text));
       tr.appendChild(td);
     }
