@@ -197,11 +197,12 @@ function buildHistoryTable(data) {
       if (result.TedNotes != null && result.TedNotes != "") {
         text = result.TedNotes;
       }
-      var tooltip = result.StartTimestamp + " &#xa; " + result.EndTimestamp + ". "
-      tooltip += "Ran by: " + result.RanBy + ". "
-      tooltip += "<br/>Priority: " + test.Priority + ". "
-      td.setAttribute("data-tooltip-position", "bottom");
+      var tooltip = result.StartTimestamp + "\n" + result.EndTimestamp + "\n";
+      tooltip += "Ran by: " + result.RanBy + "\n";
+      tooltip += "Priority: " + test.Priority;
+           td.setAttribute("data-tooltip-position", "bottom");
       td.setAttribute("data-tooltip", tooltip);
+      td.setAttribute("data-html", true);
       td.appendChild(document.createTextNode(text));
       tr.appendChild(td);
     }
