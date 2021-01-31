@@ -193,16 +193,24 @@ function buildHistoryTable(data) {
         td.classList.add("tedstatus");
       }
       td.id = "history-table-" + testNameDown + "_" + downcaseAndUnderscore(result.TestRunIdentifier);
-      var text = result.TedStatus;
+      var text = makeStatusesMoreReadable(result.TedStatus);
       if (result.TedNotes != null && result.TedNotes != "") {
         text = result.TedNotes;
       }
-      var tooltip = result.StartTimestamp + "\n" + result.EndTimestamp + "\n";
-      tooltip += "Ran by: " + result.RanBy + "\n";
-      tooltip += "Priority: " + test.Priority;
-           td.setAttribute("data-tooltip-position", "bottom");
-      td.setAttribute("data-tooltip", tooltip);
-      td.setAttribute("data-html", true);
+
+      var shouldAddTooltip = true;
+      if (result.TedStatus == "UNKNOWN" || result.TedStatus == "NOT RUN") {
+        shouldAddTooltip = false;
+      }
+      if (shouldAddTooltip) {
+        var tooltip = `Start: ${makeTimestampHumanReadable(result.StartTimestamp)}
+                       End: ${makeTimestampHumanReadable(result.EndTimestamp)}`;
+        tooltip += "\nRan by: " + result.RanBy;
+        // tooltip += "\nPriority: " + test.Priority;
+        td.setAttribute("data-tooltip-position", "bottom");
+        td.setAttribute("data-tooltip", tooltip);
+        td.setAttribute("data-html", true);
+      }
       td.appendChild(document.createTextNode(text));
       tr.appendChild(td);
     }

@@ -24,6 +24,27 @@ function stringToBoolean(string) {
   }
 }
 
+// Turns a timestamp in T-Z format (2021-01-17T19:41:00.000Z) into a more readable one (2021-01-17 19:41)
+function makeTimestampHumanReadable(t) {
+  if (!t) {
+    return "";
+  }
+  console.log(t);
+  // toISOString should yield a date in this format : 2021-01-17T19:41:00.000Z
+  // We want 2021-01-17 19:41
+  // TODO This needs to handle non-GMT timestamps properly - we're not displaying the timezone, so to
+  // the user it looks like a local time
+  // The page also needs to warn / declare this
+  // Incredibly, JS doesn't have any handling for format-strings. So we have to brute-force this somewhat.
+  var date = new Date(t).toISOString().replace(/(T|Z)/g, " ").slice(0, 16);
+  return date;
+}
+
+// The statuses in the DB are all uppercase (e.g. FAILED, PASSED ON RERUN). These take up
+function makeStatusesMoreReadable(status) {
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+}
+
 // To the table row e, append the Known Issue fields
 // Takes : e : element (the tr)
 //         testName : string (the test name)

@@ -66,19 +66,13 @@ function addResultToPage(r) {
   var tbody = document.getElementById("results-table-body");
 
   if (r.StartTimestamp != null) {
-    // toISOString should yield a date in this format : 2021-01-17T19:41:00.000Z
-    // We want 2021-01-17 19:41
-    // TODO This needs to handle non-GMT timestamps properly - we're not displaying the timezone, so to
-    // the user it looks like a local time
-    // The page also needs to warn / declare this
-    // Incredibly, JS doesn't have any handling for format-strings. So we have to brute-force this somewhat.
-    var startDate = new Date(r.StartTimestamp).toISOString().replace(/(T|Z)/g, " ").slice(0, 16);
+    var startDate = makeTimestampHumanReadable(r.StartTimestamp);
   } else {
     var startDate = null;
   }
 
   if (r.EndTimestamp != null) {
-    var endDate = new Date(r.EndTimestamp).toISOString().replace(/(T|Z)/g, " ").slice(0, 16);
+    var endDate = makeTimestampHumanReadable(r.EndTimestamp);
   } else {
     var endDate = null;
   }
@@ -138,7 +132,7 @@ function addResultToPage(r) {
   var td = document.createElement("td");
   td.classList.add(testStatusClass);
   td.classList.add("status");
-  td.appendChild(document.createTextNode(r.Status));
+  td.appendChild(document.createTextNode(makeStatusesMoreReadable(r.Status)));
   tr.appendChild(td);
 
   var td = document.createElement("td");
@@ -168,7 +162,7 @@ function addResultToPage(r) {
 
   var td = document.createElement("td");
   td.className = "tedstatus";
-  var text = r.TedStatus;
+  var text = makeStatusesMoreReadable(r.TedStatus);
   if (r.TedNotes != null && r.TedNotes != "") {
     text = r.TedNotes;
   }
