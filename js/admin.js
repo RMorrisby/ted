@@ -212,7 +212,6 @@ function getAllTestRuns() {
     for (var i = 0; i < json.length; i++) {
       var obj = json[i];
       console.log("Received " + obj.TestRunName + " and " + obj.Count);
-      e.innerHTML += `<li>${obj.TestRunName} :: ${obj.Count}</li>`;
       e.innerHTML += `<li id=test-run-${downcaseAndUnderscore(obj.TestRunName)}>${obj.TestRunName} :: ${
         obj.Count
       } <button onclick="deleteTestRun('${obj.TestRunName}')">Delete ${obj.TestRunName}</button></li>`;
