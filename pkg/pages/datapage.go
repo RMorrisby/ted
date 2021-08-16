@@ -41,6 +41,8 @@ func DataPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Gets all results
+// If testrun is supplied as a query parameter then only results for that testrun will be returned
 func DataGetAllResults(w http.ResponseWriter, r *http.Request) {
 
 	log.Debug("DataGetAllResults called")

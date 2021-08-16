@@ -206,6 +206,7 @@ function getAllResults() {
 
 // On page load, get the existing results
 // JS requires this function-wrapping
+// If testrun is supplied as a query parameter in the URL, that query parameter will be read and only results for that testrun will be returned
 window.onload = function () {
   getAllResults();
 };

@@ -64,17 +64,21 @@ func ReadResultStore() (results []structs.Result) {
 
 // Read all results. This will be sent to the UI, so we need to retrieve the extra information like the test name, etc.,
 // which is stored in adjacent tables
+// If testrun is supplied (not "") then only results for that testrun will be returned
 func ReadAllResultsForUI(testrun string) []structs.ResultForUI {
 	log.Debug("Reading results from DB for the UI")
 	log.Debug("testrun :", testrun)
 
 	sql := constants.ResultTableSelectAllResultsForUISQL
+	// If testrun has been specified, add a WHERE clause to the SQL 
+	// and change the ORDER BY so that it sorts by result start-time (so that the results are shown in execution-order)
 	if testrun != "" {
 		// i := strings.Index(sql, " ORDER BY")
 		var i = strings.Index(sql, " ORDER BY")
 		before := sql[:i]
-		after := sql[i:]
-		sql = before + " WHERE testrun = '" + testrun + "'" + after
+		// after := sql[i:]
+		// sql = before + " WHERE testrun = '" + testrun + "'" + after
+		sql = before + " WHERE testrun = '" + testrun + "' ORDER BY result.start_time ASC" 
 	}
 	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
