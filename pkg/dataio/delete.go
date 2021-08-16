@@ -78,6 +78,7 @@ func DeleteAllResultsForTest(testName string) (bool, error) {
 
 	return true, nil
 }
+
 func DeleteAllResultsForSuite(suiteName string) (bool, error) {
 
 	log.Println("Will now delete all results for suite", suiteName, "from DB")
@@ -93,6 +94,28 @@ func DeleteAllResultsForSuite(suiteName string) (bool, error) {
 	numDeleted, err := r.RowsAffected()
 	if err != nil {
 		log.Criticalf("Error deleting results for suite %s: %q", suiteName, err)
+	}
+
+	log.Printf("Deleted %d results from the DB", numDeleted)
+
+	return true, nil
+}
+
+func DeleteTestRun(testRunName string) (bool, error) {
+
+	log.Println("Will now delete test run", testRunName, "from DB")
+
+	sql := fmt.Sprintf("DELETE FROM %s r WHERE r.testrun = '%s'", constants.ResultTable, testRunName)
+	log.Println("SQL :", sql)
+	r, err := DBConn.Exec(sql)
+	if err != nil {
+		log.Criticalf("Error deleting test run %s: %q", testRunName, err)
+		return false, err
+	}
+
+	numDeleted, err := r.RowsAffected()
+	if err != nil {
+		log.Criticalf("Error deleting test run %s: %q", testRunName, err)
 	}
 
 	log.Printf("Deleted %d results from the DB", numDeleted)

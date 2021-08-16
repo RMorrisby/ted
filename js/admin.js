@@ -1,4 +1,3 @@
-
 // When parts of the page are updated (e.g. after deleting a suite), it is likely that the result-count
 // info (and other parts) will need to be refreshed
 function resultInfoRefresh() {
@@ -79,6 +78,31 @@ function deleteAllResults() {
     },
     error: function (request, msg, error) {
       console.error("Failed to delete all results");
+      // TODO more?
+    },
+  });
+}
+
+// Deletes a specific test run from the store
+function deleteTestRun(name) {
+  $.ajax({
+    url: `/testrun?testrun=${name}`,
+    method: "DELETE",
+    contentType: "application/json",
+    success: function (data) {
+      console.log(`Deleted test run ${name}`);
+      e = document.getElementById(`test-run-${downcaseAndUnderscore(name)}`);
+      e.parentNode.removeChild(e);
+
+      // // Decrement the test-count
+      // e = $("#testcount");
+      // e.text(Number(e.text()) - 1);
+
+      // Refresh other parts of the page
+      resultInfoRefresh();
+    },
+    error: function (request, msg, error) {
+      console.error("Failed to delete test run " + name);
       // TODO more?
     },
   });
@@ -189,6 +213,9 @@ function getAllTestRuns() {
       var obj = json[i];
       console.log("Received " + obj.TestRunName + " and " + obj.Count);
       e.innerHTML += `<li>${obj.TestRunName} :: ${obj.Count}</li>`;
+      e.innerHTML += `<li id=test-run-${downcaseAndUnderscore(obj.TestRunName)}>${obj.TestRunName} :: ${
+        obj.Count
+      } <button onclick="deleteTestRun('${obj.TestRunName}')">Delete ${obj.TestRunName}</button></li>`;
     }
   });
 }

@@ -68,9 +68,10 @@ func main() {
 
 	// APIs
 	http.HandleFunc("/is-alive", IsAliveHandler)
-	http.HandleFunc("/suite", handler.SuiteHandler) // path to POST new suites into TED
+	http.HandleFunc("/suite", handler.SuiteHandler) // path to POST new suites into TED & delete suites
 	// http.HandleFunc("/suite/exists", SuiteExistsHandler) // path to GET new suites into TED
 	// http.HandleFunc("/suites", pages.DataGetAllSuites)
+	http.HandleFunc("/testrun", handler.TestRunHandler)     // path to DELETE test runs from TED
 	http.HandleFunc("/test", handler.TestHandler)             // path to POST new tests into TED
 	http.HandleFunc("/testupdate", handler.TestUpdateHandler) // path to PATCH existing tests (e.g. if Known Issue)
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
