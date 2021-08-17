@@ -71,13 +71,15 @@ func main() {
 	http.HandleFunc("/suite", handler.SuiteHandler) // path to POST new suites into TED & delete suites
 	// http.HandleFunc("/suite/exists", SuiteExistsHandler) // path to GET new suites into TED
 	// http.HandleFunc("/suites", pages.DataGetAllSuites)
-	http.HandleFunc("/testrun", handler.TestRunHandler)     // path to DELETE test runs from TED
-	http.HandleFunc("/test", handler.TestHandler)             // path to POST new tests into TED
-	http.HandleFunc("/testupdate", handler.TestUpdateHandler) // path to PATCH existing tests (e.g. if Known Issue)
+	
+	http.HandleFunc("/testrunid/latest", handler.TestRunIDLatestHandler) // path to GET the latest test run ID from TED
+	http.HandleFunc("/testrunid/next", handler.TestRunIDNextHandler)     // path to GET the next test run ID from TED
+	http.HandleFunc("/test", handler.TestHandler)                        // path to POST new tests into TED
+	http.HandleFunc("/testupdate", handler.TestUpdateHandler)            // path to POST a test's Known Issue values
 	// http.HandleFunc("/test/<test_name>", TestReadHandler) // path to GET a test
-	http.HandleFunc("/result", handler.ResultHandler)    // path to POST new results into TED
+	http.HandleFunc("/result", handler.ResultHandler)    // path to POST new results into TED and PUT result updates
 	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI // called by data.js
-	http.HandleFunc("/reruns", handler.RerunHandler)     // path to POST new results into TED
+	http.HandleFunc("/reruns", handler.RerunHandler)     // path to GET the list of failed tests
 	http.HandleFunc("/historydata", pages.HistoryOfSuite)
 	http.HandleFunc("/historydatarecent", pages.HistoryOfSuiteRecent)
 
@@ -93,6 +95,8 @@ func main() {
 	http.HandleFunc("/admin/getsuitecount", pages.AdminGetSuiteCount)
 	http.HandleFunc("/admin/suites", pages.AdminGetAllSuites)
 	http.HandleFunc("/admin/tests", pages.AdminGetAllTests)
+
+	http.HandleFunc("/testrun", handler.TestRunHandler)                  // path to DELETE test run IDs (and therefore all related test results) from TED
 
 	http.HandleFunc("/db_tests_get_all", pages.DBGetEntireTestTable)     // debugging only // TODO hide this from regular users
 	http.HandleFunc("/db_results_get_all", pages.DBGetEntireResultTable) // debugging only // TODO hide this from regular users

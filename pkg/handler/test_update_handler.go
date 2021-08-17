@@ -15,7 +15,7 @@ import (
 	log "github.com/romana/rlog"
 )
 
-// TestUpdateHandler handles the /testupdate POST request path for updating existing tests
+// TestUpdateHandler handles the /testupdate POST request path for updating a test's Known Issue
 func TestUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debug("/testupdate called")
 	switch r.Method {

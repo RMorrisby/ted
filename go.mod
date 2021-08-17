@@ -5,6 +5,7 @@ go 1.15
 
 require (
 	github.com/gorilla/websocket v1.4.2
+	github.com/huandu/xstrings v1.3.2
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.9.0
 	github.com/romana/rlog v0.0.0-20171115192701-f018bc92e7d7

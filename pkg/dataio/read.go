@@ -70,7 +70,7 @@ func ReadAllResultsForUI(testrun string) []structs.ResultForUI {
 	log.Debug("testrun :", testrun)
 
 	sql := constants.ResultTableSelectAllResultsForUISQL
-	// If testrun has been specified, add a WHERE clause to the SQL 
+	// If testrun has been specified, add a WHERE clause to the SQL
 	// and change the ORDER BY so that it sorts by result start-time (so that the results are shown in execution-order)
 	if testrun != "" {
 		// i := strings.Index(sql, " ORDER BY")
@@ -78,7 +78,7 @@ func ReadAllResultsForUI(testrun string) []structs.ResultForUI {
 		before := sql[:i]
 		// after := sql[i:]
 		// sql = before + " WHERE testrun = '" + testrun + "'" + after
-		sql = before + " WHERE testrun = '" + testrun + "' ORDER BY result.start_time ASC" 
+		sql = before + " WHERE testrun = '" + testrun + "' ORDER BY result.start_time ASC"
 	}
 	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
@@ -263,6 +263,7 @@ func ReadAllTests() (tests []structs.Test) {
 // 	return tests
 // }
 // Get all tests for the given testrun that did not pass
+// Will also return tests registered for that testrun that were not run
 func GetFailedTestsForTestrun(testrun string) []structs.ResultForUI {
 	log.Debug("Reading failed results from DB for testrun", testrun)
 
