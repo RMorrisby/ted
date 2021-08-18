@@ -41,12 +41,6 @@
 
 // Get the known test suites
 function getSuites() {
-  // $.get("/admin/getsuitecount", function (data) {
-  //   document.getElementById("suitecount").textContent = " " + data;
-  //   if (data == 0) {
-  //     document.getElementById("suite-list").innerHTML = "";
-  //   }
-  // });
   $.get("/admin/suites", function (data) {
     var json = JSON.parse(data);
     if (json == null) {
@@ -173,24 +167,24 @@ function getSuites() {
 //   });
 // }
 
-// Get the names & test counts of all known test runs in the store
-function getAllTestRuns() {
-  console.log("Requesting all test runs...");
+// // Get the names & test counts of all known test runs in the store
+// function getAllTestRuns() {
+//   console.log("Requesting all test runs...");
 
-  $.get("/admin/getalltestruncounts", function (data) {
-    console.log("Received all test runs");
-    var json = JSON.parse(data);
+//   $.get("/admin/getalltestruncounts", function (data) {
+//     console.log("Received all test runs");
+//     var json = JSON.parse(data);
 
-    console.log(`Received ${json.length} test runs`);
-    var e = document.getElementById("test-run-list");
-    e.innerHTML = ``;
-    for (var i = 0; i < json.length; i++) {
-      var obj = json[i];
-      console.log("Received " + obj.TestRunName + " and " + obj.Count);
-      e.innerHTML += `<li>${obj.TestRunName} :: ${obj.Count}</li>`;
-    }
-  });
-}
+//     console.log(`Received ${json.length} test runs`);
+//     var e = document.getElementById("test-run-list");
+//     e.innerHTML = ``;
+//     for (var i = 0; i < json.length; i++) {
+//       var obj = json[i];
+//       console.log("Received " + obj.TestRunName + " and " + obj.Count);
+//       e.innerHTML += `<li>${obj.TestRunName} :: ${obj.Count}</li>`;
+//     }
+//   });
+// }
 
 // On page load, get the result-count
 // JS requires this function-wrapping
