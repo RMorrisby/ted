@@ -94,7 +94,7 @@ func WriteSuiteToDBIfNew(suite structs.Suite) {
 }
 
 // Write the test to the DB, if the DB does not already contain a test of that name
-func WriteTestToDBIfNew(test structs.Test) {
+func WriteTestToDBIfNew(test structs.Test) (success bool, err error) {
 
 	if !TestExists(test.Name) {
 
@@ -105,8 +105,11 @@ func WriteTestToDBIfNew(test structs.Test) {
 		log.Println("SQL :", sql)
 		if _, err := DBConn.Exec(sql); err != nil {
 			log.Criticalf("Error writing result to DB: %q", err)
+			return false, err
 		}
 	} else {
 		log.Printf("Test %s already exists", test.Name)
 	}
+
+	return true, nil
 }

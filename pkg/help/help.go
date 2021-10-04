@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"ted/pkg/structs"
 
 	log "github.com/romana/rlog"
@@ -148,4 +149,25 @@ func SortTestRuns(testruns []string) {
 
 		return true
 	})
+}
+
+// replacer replaces ' with \'
+// It's a package-level variable so we can easily reuse it, but
+// this program doesn't take advantage of that fact.
+var replacer = strings.NewReplacer("'", "\\'")
+
+// Sanitises the fields within the test object so that SQL-injection can't occur
+// TODO better to sanitise each SQL line directly before execution
+func SanitiseTest(test structs.Test) structs.Test {
+	test.Description = replacer.Replace(test.Description)
+
+	return test
+}
+
+// Sanitises the fields within the update object so that SQL-injection can't occur
+// TODO better to sanitise each SQL line directly before execution
+func SanitiseUpdate(update structs.KnownIssueUpdate) structs.KnownIssueUpdate {
+	update.KnownIssueDescription = replacer.Replace(update.KnownIssueDescription)
+
+	return update
 }

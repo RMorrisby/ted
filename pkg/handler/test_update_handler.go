@@ -7,7 +7,8 @@ import (
 	"net/http"
 	// "ted/pkg/constants"
 	"ted/pkg/dataio"
-	// "ted/pkg/help"
+	"ted/pkg/help"
+
 	// "ted/pkg/pages"
 	"ted/pkg/structs"
 	// "ted/pkg/ws"
@@ -53,6 +54,8 @@ func TestUpdateHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// The test has passed validation, so now we can the update to the DB and then return the response
+		update = help.SanitiseUpdate(update)
+
 		dataio.WriteTestKnownIssueUpdate(update)
 
 		// Also update the result for the given testrun

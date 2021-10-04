@@ -7,7 +7,8 @@ import (
 	"net/http"
 	// "ted/pkg/constants"
 	"ted/pkg/dataio"
-	// "ted/pkg/help"
+	"ted/pkg/help"
+
 	// "ted/pkg/pages"
 	"ted/pkg/structs"
 	// "ted/pkg/ws"
@@ -67,8 +68,17 @@ func TestHandler(w http.ResponseWriter, r *http.Request) {
 
 		log.Println("New test received :", test.Name)
 
-		dataio.WriteTestToDBIfNew(test)
-		w.WriteHeader(http.StatusCreated) // return a 201
+		test = help.SanitiseTest(test)
+
+		success, err := dataio.WriteTestToDBIfNew(test)
+		
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+		} else if success {
+			w.WriteHeader(http.StatusCreated) // return a 201
+		} else {
+			http.Error(w, "ERROR - not successful but no error returned!", 500)
+		}
 
 	case "DELETE":
 		name := r.URL.Query().Get("test")
