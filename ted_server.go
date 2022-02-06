@@ -80,6 +80,7 @@ func main() {
 	http.HandleFunc("/result", handler.ResultHandler)    // path to POST new results into TED and PUT result updates
 	http.HandleFunc("/results", pages.DataGetAllResults) // get all results for the UI // called by data.js
 	http.HandleFunc("/reruns", handler.RerunHandler)     // path to GET the list of failed tests
+	http.HandleFunc("/claimtest", handler.ClaimTestHandler)              // path to POST for a test runner to claim a test
 	http.HandleFunc("/historydata", pages.HistoryOfSuite)
 	http.HandleFunc("/historydatarecent", pages.HistoryOfSuiteRecent)
 

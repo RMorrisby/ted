@@ -100,7 +100,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Debug("Result received :", result.ToJSON())
-		// TODO users should NOT supply TedStatus or TedNoted fields
+		// TODO users should NOT supply TedStatus or TedNotes fields
 		// Amend Result struct
 		if result.TedStatus != "" {
 			result.TedStatus = ""
@@ -141,7 +141,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 
 	default:
 		log.Println(r.Method, "/result called")
-		http.Error(w, "Only POST is supported for /result", http.StatusMethodNotAllowed)
+		http.Error(w, "Only POST, PUT is supported for /result", http.StatusMethodNotAllowed)
 	}
 }
 

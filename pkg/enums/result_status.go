@@ -6,6 +6,7 @@ const (
 	Passed        ResultStatus = "PASSED"
 	Failed                     = "FAILED"
 	NotRun                     = "NOT RUN"
+	Claimed                    = "CLAIMED"
 	Unknown                    = "UNKNOWN"
 	KnownIssue                 = "KNOWN ISSUE"
 	Intermittent               = "INTERMITTENT"
