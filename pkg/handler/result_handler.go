@@ -83,7 +83,7 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 		// If this is a rerun/update but there is no existing result for this testrun, reject it
 		// If the test already has a result for this testrun, and this result is not a rerun/update, reject it
 		existingResult := dataio.ReadResult(result.TestName, result.TestRunIdentifier)
-		log.Debugf("existingResult != nil? %t :: %s", (existingResult != nil), r.Method)
+		// log.Debugf("existingResult != nil? %t :: %s", (existingResult != nil), r.Method)
 		if existingResult != nil {
 			if r.Method == "POST" {
 				e := fmt.Sprintf("Result received on POST, but there was an existing result in the DB for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
