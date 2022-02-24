@@ -152,9 +152,11 @@ func SortTestRuns(testruns []string) {
 }
 
 // replacer replaces ' with \'
+// Actually, PostGres likes '' instead of \'
 // It's a package-level variable so we can easily reuse it, but
 // this program doesn't take advantage of that fact.
-var replacer = strings.NewReplacer("'", "\\'")
+// var replacer = strings.NewReplacer("'", "\\'")
+var replacer = strings.NewReplacer("'", "''")
 
 // Sanitises the fields within the test object so that SQL-injection can't occur
 // TODO better to sanitise each SQL line directly before execution
