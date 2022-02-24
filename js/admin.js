@@ -213,7 +213,8 @@ function getAllTestRuns() {
       var obj = json[i];
       console.log("Received " + obj.TestRunName + " and " + obj.Count);
       e.innerHTML += `<li id=test-run-${downcaseAndUnderscore(obj.TestRunName)}>${obj.TestRunName} :: ${
-        obj.Count
+        // obj.Count
+        obj.Total
       } <button onclick="deleteTestRun('${obj.TestRunName}')">Delete ${obj.TestRunName}</button></li>`;
     }
   });

@@ -196,10 +196,11 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var testruns []string // set of test run IDs
-	var stats []structs.Stat
+	var stats []structs.Stats
 
 	// Initialise testrunstats with the first result
-	stats = append(stats, structs.Stat{TestRunName: results[0].TestRunIdentifier, Count: 0})
+	// stats = append(stats, structs.Stat{TestRunName: results[0].TestRunIdentifier, Count: 0})
+	stats = append(stats, structs.Stats{TestRunName: results[0].TestRunIdentifier, Total: 0})
 
 	for _, r := range results {
 		incremented := false
@@ -211,13 +212,15 @@ func AdminGetAllTestRunCounts(w http.ResponseWriter, r *http.Request) {
 		// Now collect
 		for i := range stats {
 			if stats[i].TestRunName == r.TestRunIdentifier {
-				stats[i].Count++ // this woun't increment if we loop by object, only by index
+				// stats[i].Count++ // this woun't increment if we loop by object, only by index
+				stats[i].Total++ // this woun't increment if we loop by object, only by index
 				incremented = true
 				break
 			}
 		}
 		if !incremented {
-			stats = append(stats, structs.Stat{TestRunName: r.TestRunIdentifier, Count: 1})
+			// stats = append(stats, structs.Stat{TestRunName: r.TestRunIdentifier, Count: 1})
+			stats = append(stats, structs.Stats{TestRunName: r.TestRunIdentifier, Total: 1})
 		}
 
 	}
