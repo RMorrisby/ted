@@ -106,7 +106,7 @@ func ReadAllResultsForUI(testrun string) []structs.ResultForUI {
 
 // Read a single result from the DB
 func ReadResult(testname string, testrun string) *structs.Result {
-	log.Debug("Reading result from DB")
+	log.Debugf("Reading result from DB; want test %s :: %s", testname, testrun)
 
 	sql := fmt.Sprintf("SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM %s result LEFT JOIN %s suite ON result.suite_id = suite.id LEFT JOIN %s test ON result.test_id = test.id WHERE result.testrun = '%s' AND test.name = '%s'", constants.ResultTable, constants.SuiteTable, constants.RegisteredTestTable, testrun, testname)
 	log.Debug("SQL :", sql)
@@ -288,6 +288,52 @@ func GetFailedTestsForTestrun(testrun string) []structs.ResultForUI {
 
 	log.Debugf("Found %d failed results in DB for testrun %s", len(results), testrun)
 	return results
+}
+
+// Get stats for the given testrun
+func GetStatsForTestrun(testrun string) structs.Stats {
+	log.Debug("Reading results from DB for testrun", testrun)
+
+	// sql := "SELECT test.dir, test.name FROM " + constants.ResultTable + " result LEFT JOIN " + constants.RegisteredTestTable + " test ON result.test_id = test.id WHERE testrun = '" + testrun + "' AND status != '" + string(enums.Passed) + "' ORDER BY test.name ASC"
+	sql := "SELECT ted_status, count(*) FROM " + constants.ResultTable + " result WHERE testrun = '" + testrun + "' GROUP BY ted_status"
+	log.Debug("SQL :", sql)
+	rows, err := DBConn.Query(sql)
+	if err != nil {
+		log.Criticalf("Error reading results: %q", err)
+	}
+
+	var stats structs.Stats
+
+	for rows.Next() {
+		var status string
+		var count int
+		err = rows.Scan(&status, &count)
+		if err != nil {
+			log.Criticalf("Error reading stats-query row : %q", err)
+		}
+		log.Debugf("Stats query row : %s :: %d", status, count)
+
+		// Add Passed On Rerun to Passed, add Known Issue to Failed
+		switch status {
+		case enums.PassedOnRerun:
+			stats.PassedOnRerun += count
+			fallthrough
+		case string(enums.Passed):
+			stats.Passed += count
+		case enums.KnownIssue:
+			stats.KnownIssue += count
+			fallthrough
+		case enums.Failed:
+			stats.Failed += count
+		case enums.NotRun:
+			stats.NotRun += count
+		}
+	}
+	stats.TestRunName = testrun
+	stats.Total = stats.Passed + stats.Failed + stats.NotRun
+	stats.LastRun = "" // TODO
+
+	return stats
 }
 
 func ReadAllSuites() (suites []structs.Suite) {

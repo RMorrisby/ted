@@ -16,7 +16,7 @@ import (
 	log "github.com/romana/rlog"
 )
 
-// TestHandler handles the /test POST request path for receiving new tests
+// TestHandler handles the /test GET, POST, DELETE request paths for tests
 func TestHandler(w http.ResponseWriter, r *http.Request) {
 	log.Debug(r.Method, "/test called")
 	switch r.Method {
