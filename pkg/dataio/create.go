@@ -67,7 +67,12 @@ func WriteFullResultToDB(result structs.Result) (resultForUI structs.ResultForUI
 	// (suite_id, test_id, testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes)
 	sql := ""
 	// Postgres does not like '' as a null timestamp - need to use NULL instead
-	if result.StartTimestamp == "" || result.EndTimestamp == "" {
+	log.Debug("StartTimestamp ::", result.StartTimestamp)
+	log.Debug("EndTimestamp ::", result.EndTimestamp)
+	log.Debugf("StartTimestamp == \"\" :: %t", (result.StartTimestamp == ""))
+	log.Debugf("EndTimestamp == \"\" :: %t", (result.EndTimestamp == ""))
+
+	if result.StartTimestamp != "" && result.EndTimestamp != "" {
 		sql = constants.ResultTableInsertFullRowSQL + fmt.Sprintf("(%s, %s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.StartTimestamp, result.EndTimestamp, result.RanBy, result.Message, result.TedStatus, result.TedNotes)
 	} else {
 		sql = constants.ResultTableInsertFullRowSQL + fmt.Sprintf("(%s, %s, '%s', '%s', NULL, NULL, '%s', '%s', '%s', '%s')", suiteID, testID, result.TestRunIdentifier, result.Status, result.RanBy, result.Message, result.TedStatus, result.TedNotes)
