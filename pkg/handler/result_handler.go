@@ -62,6 +62,14 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// If the test's suite is not registered, return an error
+		if !dataio.SuiteExists(result.SuiteName) {
+			s := "Result referred to a suite that was not registered"
+			log.Error(s)
+			http.Error(w, s, http.StatusBadRequest)
+			return
+		}
+
 		if result.Overwrite {
 			// POST requires no Overwrite flag
 			if r.Method == "POST" {
