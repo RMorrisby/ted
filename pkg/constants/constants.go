@@ -37,7 +37,7 @@ const (
 
 	// Reads all results from the DB, without an ORDER BY clause
 	// You may append WHERE clauses, etc., to the end of this
-	ResultTableSelectAllNoSortingSQL = "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + ResultTable + " result LEFT JOIN " + SuiteTable + " suite ON result.suite_id = suite.id LEFT JOIN " + RegisteredTestTable + " test ON result.test_id = test.id"
+	ResultTableSelectAllNoSortingSQL = "SELECT suite.name, test.name, result.testrun, result.status, COALESCE(result.start_time, ''), result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + ResultTable + " result LEFT JOIN " + SuiteTable + " suite ON result.suite_id = suite.id LEFT JOIN " + RegisteredTestTable + " test ON result.test_id = test.id"
 
 	// Reads all results from the DB, yielding the fields that the ResultForUI struct wants (i.e. test.name instead of result.test_id)
 	ResultTableSelectAllResultsForUISQL = "SELECT test.categories, test.dir, test.name, result.testrun, result.status, test.priority, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + ResultTable + " result LEFT JOIN " + RegisteredTestTable + " test ON result.test_id = test.id ORDER BY result.testrun ASC, test.name ASC"
