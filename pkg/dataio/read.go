@@ -108,7 +108,14 @@ func ReadAllResultsForUI(testrun string) []structs.ResultForUI {
 func ReadResult(testname string, testrun string) *structs.Result {
 	log.Debugf("Reading result from DB; want test %s :: %s", testname, testrun)
 
-	sql := fmt.Sprintf("SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM %s result LEFT JOIN %s suite ON result.suite_id = suite.id LEFT JOIN %s test ON result.test_id = test.id WHERE result.testrun = '%s' AND test.name = '%s'", constants.ResultTable, constants.SuiteTable, constants.RegisteredTestTable, testrun, testname)
+	// SELECT 	product, 	(COALESCE(discount,0)) AS net_price FROM 	items;
+
+	// Golang doesn't handle NULLs well (can't convert them to empty strings)
+	// Use SQL COALESCE function to substitute in an empty string if the dates are NULL
+	sql := fmt.Sprintf("SELECT suite.name, test.name, result.testrun, result.status, COALESCE(result.start_time, ''), COALESCE(result.end_time, ''), result.ran_by, result.message, result.ted_status, result.ted_notes FROM %s result LEFT JOIN %s suite ON result.suite_id = suite.id LEFT JOIN %s test ON result.test_id = test.id WHERE result.testrun = '%s' AND test.name = '%s'", constants.ResultTable, constants.SuiteTable, constants.RegisteredTestTable, testrun, testname)
+	// sql := fmt.Sprintf("SELECT suite.name, test.name, result.testrun, result.status, COALESCE(result.start_time, '') as result.start_time, COALESCE(result.end_time, '') as result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM %s result LEFT JOIN %s suite ON result.suite_id = suite.id LEFT JOIN %s test ON result.test_id = test.id WHERE result.testrun = '%s' AND test.name = '%s'", constants.ResultTable, constants.SuiteTable, constants.RegisteredTestTable, testrun, testname)
+
+	// sql := fmt.Sprintf("SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM %s result LEFT JOIN %s suite ON result.suite_id = suite.id LEFT JOIN %s test ON result.test_id = test.id WHERE result.testrun = '%s' AND test.name = '%s'", constants.ResultTable, constants.SuiteTable, constants.RegisteredTestTable, testrun, testname)
 	log.Debug("SQL :", sql)
 
 	r := structs.Result{}
@@ -116,7 +123,8 @@ func ReadResult(testname string, testrun string) *structs.Result {
 	// If there was no error, then there was a row
 	err := DBConn.QueryRow(sql).Scan(&r.SuiteName, &r.TestName, &r.TestRunIdentifier, &r.Status, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
 	if err != nil {
-		log.Debugf("Result %s :: %s was not found in the DB", testname, testrun)
+		log.Errorf("Failed to retrieve result %s :: %s from the DB; error : %w", testname, testrun, err)
+		// log.Debugf("Result %s :: %s was not found in the DB", testname, testrun)
 		return nil
 	}
 
