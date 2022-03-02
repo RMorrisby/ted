@@ -40,7 +40,8 @@ function makeTimestampHumanReadable(t) {
   return date;
 }
 
-// The statuses in the DB are all uppercase (e.g. FAILED, PASSED ON RERUN). These take up
+// The statuses in the DB are all uppercase (e.g. FAILED, PASSED ON RERUN). These take up more space on the
+// page than capitalised-case
 function makeStatusesMoreReadable(status) {
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 }

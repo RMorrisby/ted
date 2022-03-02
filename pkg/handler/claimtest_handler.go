@@ -80,6 +80,7 @@ func ClaimTestHandler(w http.ResponseWriter, r *http.Request) {
 		// }
 
 		// If the specified test does not exist for that test run, reject the request
+		// TODO allow a claim on a test for a testrun without requiring a preexisting NOT RUN result
 		existingResult := dataio.ReadResult(claim.TestName, claim.TestRunIdentifier)
 		if existingResult == nil {
 			e := fmt.Sprintf("Claim received for test %s for testrun %s, but there was no existing result in the DB to claim", claim.TestName, claim.TestRunIdentifier)
@@ -88,9 +89,19 @@ func ClaimTestHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// If the existing test result has already been claimed or run, reject the request
+		// If the existing test result has already been run, reject the request
 		// TODO claim test for reruns?
 		if existingResult.Status != string(enums.NotRun) {
+			e := fmt.Sprintf("Claim received for test %s for testrun %s, but the result has already been run", claim.TestName, claim.TestRunIdentifier)
+			log.Info(e)
+
+			w.WriteHeader(http.StatusOK) // return a 200 with a body saying 'false'
+			w.Write([]byte("false"))
+			return
+		}
+
+		// If the existing test result has already been claimed, reject the request
+		if existingResult.TedStatus == string(enums.Claimed) {
 			e := fmt.Sprintf("Claim received for test %s for testrun %s, but the result has already been claimed", claim.TestName, claim.TestRunIdentifier)
 			log.Info(e)
 
