@@ -173,3 +173,11 @@ func SanitiseUpdate(update structs.KnownIssueUpdate) structs.KnownIssueUpdate {
 
 	return update
 }
+
+// Takes the name (perhaps qualified) of a DB column and returns the SQL string for the COALESCE command
+// which will format the column value into a date-string or an empty string (if NULL)
+// Golang can't automatically convert NULL DB timestamps into strings, so we use COALESCE to get Postgres
+// to do the conversion from timestamp (or NULL) into string
+func CoalesceDateSQL(column string) string {
+	return "COALESCE(to_char(" + column + ", 'YYYY-MM-DD HH24:MI:SS'), '')"
+}
