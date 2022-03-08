@@ -64,6 +64,9 @@ func WriteFullResultToDB(result structs.Result) (resultForUI structs.ResultForUI
 	// testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes) VALUES "
 
 	log.Println("Writing result to DB")
+	
+	result = help.SanitiseResult(result)
+
 	// (suite_id, test_id, testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes)
 	sql := ""
 	// Postgres does not like '' as a null timestamp - need to use NULL instead
@@ -76,6 +79,7 @@ func WriteFullResultToDB(result structs.Result) (resultForUI structs.ResultForUI
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
 		log.Criticalf("Error writing result to DB: %q", err)
+		return
 	}
 
 	// Now gather the info we need for the ResultForUI object

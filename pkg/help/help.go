@@ -162,8 +162,19 @@ var replacer = strings.NewReplacer("'", "''")
 // TODO better to sanitise each SQL line directly before execution
 func SanitiseTest(test structs.Test) structs.Test {
 	test.Description = replacer.Replace(test.Description)
+	test.KnownIssueDescription = replacer.Replace(test.KnownIssueDescription)
 
 	return test
+}
+
+// Sanitises the fields within the test object so that SQL-injection can't occur
+// TODO better to sanitise each SQL line directly before execution
+func SanitiseResult(result structs.Result) structs.Result {
+	result.SuiteName = replacer.Replace(result.SuiteName)
+	result.Message = replacer.Replace(result.Message)
+	result.TedNotes = replacer.Replace(result.TedNotes)
+
+	return result
 }
 
 // Sanitises the fields within the update object so that SQL-injection can't occur
