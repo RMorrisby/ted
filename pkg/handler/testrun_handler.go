@@ -7,7 +7,8 @@ import (
 	"net/http"
 	// "ted/pkg/constants"
 	"ted/pkg/dataio"
-	// "ted/pkg/help"
+	"ted/pkg/help"
+
 	// "ted/pkg/pages"
 	// "ted/pkg/structs"
 	// "ted/pkg/ws"
@@ -17,7 +18,7 @@ import (
 
 // TestRunHandler handles the /testrun DELETE request path for deleting test runs
 func TestRunHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("/testrun called")
+	help.LogNewAPICall("/testrun")
 	switch r.Method {
 	// case "GET":
 	// 	log.Println(r.Method, "GET /suite called")

@@ -247,29 +247,6 @@ func ReadAllTests() (tests []structs.Test) {
 	return tests
 }
 
-// func GetFailedTestsForTestrun(testrun string) (tests []structs.Test) {
-// 	log.Debug("Reading failed tests from DB for testrun", testrun)
-
-// 	sql := "SELECT suite.name, test.name, result.testrun, result.status, result.start_time, result.end_time, result.ran_by, result.message, result.ted_status, result.ted_notes FROM " + constants.ResultTable + " result LEFT JOIN " + constants.SuiteTable + " suite ON result.suite_id = suite.id LEFT JOIN " + constants.RegisteredTestTable + " test ON result.test_id = test.id WHERE result.testrun = " + testrun + " AND test.name = " + testname
-// 	log.Debug("SQL :", sql)
-// 	rows, err := DBConn.Query(sql)
-// 	if err != nil {
-// 		log.Criticalf("Error reading tests: %q", err)
-// 	}
-// 	// "SELECT name, dir, priority, categories, description, notes, owner, is_known_issue, known_issue_description from " + RegisteredTestTable
-// 	for rows.Next() {
-// 		var t structs.Test
-// 		err = rows.Scan(&t.Name, &t.Dir, &t.Priority, &t.Categories, &t.Description, &t.Notes, &t.Owner, &t.IsKnownIssue, &t.KnownIssueDescription)
-// 		if err != nil {
-// 			log.Criticalf("Error reading row into struct: %q", err)
-// 		}
-
-// 		tests = append(tests, t)
-// 	}
-
-// 	log.Debugf("Found %d tests in DB", len(tests))
-// 	return tests
-// }
 // Get all tests for the given testrun that did not pass
 // Will also return tests registered for that testrun that were not run
 func GetFailedTestsForTestrun(testrun string) []structs.ResultForUI {
@@ -442,20 +419,21 @@ func GetTestSummariesFromNames(names []string) []structs.Test {
 	sql := "SELECT name, dir, categories, is_known_issue, known_issue_description from " + constants.RegisteredTestTable + " WHERE test.name in (" + nameListSQL + ") ORDER BY name ASC"
 	log.Debug("SQL :", sql)
 
-	var tests []structs.Test
-
-	log.Debug("SQL :", sql)
 	rows, err := DBConn.Query(sql)
 	if err != nil {
 		log.Criticalf("Error reading tests: %q", err)
+		return nil
 	}
+
+	var tests []structs.Test
+
 	for rows.Next() {
 		var t structs.Test
 		err = rows.Scan(&t.Name, &t.Dir, &t.Categories, &t.IsKnownIssue, &t.KnownIssueDescription)
 		if err != nil {
 			log.Criticalf("Error reading row into struct: %q", err)
 		}
-		log.Debug(t) // TODO remove
+		// log.Debug(t)
 		tests = append(tests, t)
 	}
 

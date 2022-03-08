@@ -25,7 +25,7 @@ func DBResultsPage(w http.ResponseWriter, r *http.Request) {
 
 func DBGetEntireResultTable(w http.ResponseWriter, r *http.Request) {
 
-	log.Debug("DBGetEntireResultTable called")
+	help.LogNewAPICall("DBGetEntireResultTable")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)

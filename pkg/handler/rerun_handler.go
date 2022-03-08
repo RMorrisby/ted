@@ -18,7 +18,9 @@ import (
 
 // RerunHandler handles the /rerun GET request path for requesting the list of failed tests
 func RerunHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("/reruns called")
+	
+	help.LogNewAPICall("/reruns")
+
 	switch r.Method {
 	case "GET":
 

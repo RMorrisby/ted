@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"ted/pkg/dataio"
+	"ted/pkg/help"
 
 	"github.com/huandu/xstrings"
 	log "github.com/romana/rlog"
@@ -26,7 +27,7 @@ func TestRunIDLatestHandler(w http.ResponseWriter, r *http.Request) {
 
 // TestRunIDNextHandler handles the /testrunid/next GET request path for getting the next test run ID
 func TestRunIDNextHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("/testrunid/next called")
+	help.LogNewAPICall("/testrunid/next")
 	switch r.Method {
 	case "GET":
 		log.Println(r.Method, "GET /testrunid/next called")

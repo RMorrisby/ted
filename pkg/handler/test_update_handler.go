@@ -18,7 +18,7 @@ import (
 
 // TestUpdateHandler handles the /testupdate POST request path for updating a test's Known Issue
 func TestUpdateHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("/testupdate called")
+	help.LogNewAPICall("/testupdate")
 	switch r.Method {
 	case "POST":
 

@@ -18,7 +18,7 @@ import (
 
 // TestHandler handles the /test GET, POST, DELETE request paths for tests
 func TestHandler(w http.ResponseWriter, r *http.Request) {
-	log.Debug(r.Method, "/test called")
+	help.LogNewAPICall("/test")
 	switch r.Method {
 	case "GET":
 		log.Println(r.URL)

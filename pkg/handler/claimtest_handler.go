@@ -9,7 +9,7 @@ import (
 	"ted/pkg/dataio"
 	"ted/pkg/enums"
 
-	// "ted/pkg/help"
+	"ted/pkg/help"
 	// "ted/pkg/pages"
 	"ted/pkg/structs"
 	// "ted/pkg/ws"
@@ -19,9 +19,9 @@ import (
 
 // ClaimTestHandler handles the /claimtest POST request path for a test runner to claim a test
 func ClaimTestHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println()
-	log.Debug("/claimtest called")
-
+	
+	help.LogNewAPICall("/claimtest")
+	
 	switch r.Method {
 	case "POST":
 		// Now try to parse the body from JSON

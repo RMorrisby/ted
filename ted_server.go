@@ -151,8 +151,8 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 
 // IsAliveHandler handles the /isalive GET request path, returning a simple JSON object
 func IsAliveHandler(w http.ResponseWriter, r *http.Request) {
-
-	log.Debug("Is-Alive called")
+	
+	help.LogNewAPICall("Is-Alive")
 
 	data := "{\"is-alive\": true}"
 
