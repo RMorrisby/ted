@@ -98,6 +98,7 @@ func WriteSuiteToDBIfNew(suite structs.Suite) {
 		log.Println("SQL :", sql)
 		if _, err := DBConn.Exec(sql); err != nil {
 			log.Criticalf("Error writing result to DB: %q", err)
+			return
 		}
 	} else {
 		log.Printf("Suite %s already exists", suite.Name)

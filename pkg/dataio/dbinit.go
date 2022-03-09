@@ -88,6 +88,10 @@ func InitTableSuite() {
 	InitTable(constants.SuiteTable, constants.SuiteTableCreateSQL)
 }
 
+func InitTableStatus() {
+	InitTable(constants.StatusTable, constants.StatusTableCreateSQL)
+}
+
 // Generic method to intialise a DB table. Needs the table name and the SQL that would create the table
 func InitTable(name string, createSQL string) {
 

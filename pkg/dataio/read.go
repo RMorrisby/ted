@@ -123,6 +123,7 @@ func ReadResult(testname string, testrun string) *structs.Result {
 	// If there was no error, then there was a row
 	err := DBConn.QueryRow(sql).Scan(&r.SuiteName, &r.TestName, &r.TestRunIdentifier, &r.Status, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
 	if err != nil {
+		err.Error()
 		log.Errorf("Failed to retrieve result %s :: %s from the DB; error : %w", testname, testrun, err)
 		// log.Debugf("Result %s :: %s was not found in the DB", testname, testrun)
 		return nil
@@ -344,6 +345,67 @@ func ReadAllSuites() (suites []structs.Suite) {
 
 	log.Debugf("Found %d suites in DB", len(suites))
 	return suites
+}
+
+// Read all rows from the Status table
+func ReadAllStatuses() (statuses []structs.Status) {
+
+	log.Debug("Reading statuses from DB")
+
+	sql := constants.StatusTableSelectAllSQL
+	log.Debug("SQL :", sql)
+	rows, err := DBConn.Query(sql)
+	if err != nil {
+		log.Criticalf("Error reading statuses: %q", err)
+		return
+	}
+
+	for rows.Next() {
+		var s structs.Status
+		err = rows.Scan(&s.Name, &s.Type, &s.Value, &s.Notes)
+		if err != nil {
+			log.Criticalf("Error reading row into struct: %q", err)
+			return
+		}
+
+		statuses = append(statuses, s)
+	}
+
+	log.Debugf("Found %d statuses in DB", len(statuses))
+	return statuses
+}
+
+// May return nil
+func GetStatus(name string) *structs.Status {
+	log.Debug("\n\n")
+	log.Printf("Reading statuses from DB; want suite '%s'", name)
+
+	sql := constants.StatusTableSelectAllSQL + " WHERE name = '" + name + "'"
+	log.Debug("SQL :", sql)
+
+	status := structs.Status{}
+	// QueryRow is supposed to return an error if there was no row
+	// If there was no error, then there was a row
+	err := DBConn.QueryRow(sql).Scan(&status.Name, &status.Type, &status.Value, &status.Notes)
+	if err != nil {
+		log.Printf("Status %s was not found in the DB", name)
+		return nil
+	}
+
+	if name != status.Name {
+		log.Criticalf("Status %s was returned from the DB, when we searched for status %s", status.Name, name)
+		return nil
+	}
+	log.Debug("Found status", name)
+	return &status
+}
+
+func StatusExists(name string) bool {
+	status := GetStatus(name)
+	if status == nil {
+		return false
+	}
+	return true
 }
 
 // May return nil

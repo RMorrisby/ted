@@ -54,5 +54,19 @@ DEBUG
       <ul id="suite-list"></ul>
     </div>
   </div>
+
+  <!-- Status -->
+  <div id="admintable-status">
+    <div id="statuscountdiv" class="flex-item">
+      <span><span>Status item count :</span><span id="statuscount"></span></span>
+    </div>
+    <button class="adminbutton" onclick="getStatusCount()">
+      Get total status count
+    </button>
+    <button class="adminbutton" onclick="deleteAllStatuses()">Delete all statuses</button>
+    <div id="status-list-div">
+      <ul id="status-list"></ul>
+    </div>
+  </div>
 </div>
 {{ template "_footer.html" . }}

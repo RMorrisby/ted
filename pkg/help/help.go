@@ -159,7 +159,6 @@ func SortTestRuns(testruns []string) {
 var replacer = strings.NewReplacer("'", "''")
 
 // Sanitises the fields within the test object so that SQL-injection can't occur
-// TODO better to sanitise each SQL line directly before execution
 func SanitiseTest(test structs.Test) structs.Test {
 	test.Description = replacer.Replace(test.Description)
 	test.KnownIssueDescription = replacer.Replace(test.KnownIssueDescription)
@@ -167,8 +166,17 @@ func SanitiseTest(test structs.Test) structs.Test {
 	return test
 }
 
-// Sanitises the fields within the test object so that SQL-injection can't occur
-// TODO better to sanitise each SQL line directly before execution
+// Sanitises the fields within the suite object so that SQL-injection can't occur
+func SanitiseSuite(suite structs.Suite) structs.Suite {
+	suite.Name = replacer.Replace(suite.Name)
+	suite.Description = replacer.Replace(suite.Description)
+	suite.Owner = replacer.Replace(suite.Owner)
+	suite.Notes = replacer.Replace(suite.Notes)
+
+	return suite
+}
+
+// Sanitises the fields within the result object so that SQL-injection can't occur
 func SanitiseResult(result structs.Result) structs.Result {
 	result.SuiteName = replacer.Replace(result.SuiteName)
 	result.Message = replacer.Replace(result.Message)
@@ -177,8 +185,17 @@ func SanitiseResult(result structs.Result) structs.Result {
 	return result
 }
 
+// Sanitises the fields within the status object so that SQL-injection can't occur
+func SanitiseStatus(status structs.Status) structs.Status {
+	status.Name = replacer.Replace(status.Name)
+	status.Type = replacer.Replace(status.Type)
+	status.Value = replacer.Replace(status.Value)
+	status.Notes = replacer.Replace(status.Notes)
+
+	return status
+}
+
 // Sanitises the fields within the update object so that SQL-injection can't occur
-// TODO better to sanitise each SQL line directly before execution
 func SanitiseUpdate(update structs.KnownIssueUpdate) structs.KnownIssueUpdate {
 	update.KnownIssueDescription = replacer.Replace(update.KnownIssueDescription)
 

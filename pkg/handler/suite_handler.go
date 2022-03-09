@@ -7,7 +7,8 @@ import (
 	"net/http"
 	// "ted/pkg/constants"
 	"ted/pkg/dataio"
-	// "ted/pkg/help"
+	"ted/pkg/help"
+
 	// "ted/pkg/pages"
 	"ted/pkg/structs"
 	// "ted/pkg/ws"
@@ -67,6 +68,8 @@ func SuiteHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Println("New suite received :", suite.Name)
+
+		suite = help.SanitiseSuite(suite)
 
 		dataio.WriteSuiteToDBIfNew(suite)
 		w.WriteHeader(http.StatusCreated) // return a 201

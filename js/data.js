@@ -204,6 +204,91 @@ function getAllResults() {
   });
 }
 
+// Sets a status of PAUSED
+// TODO set paused-status for a specific testrun
+function pauseTestrun() {
+  $.ajax({
+    url: "/pause",
+    method: "PUT",
+    contentType: "application/json",
+    dataType: "json",
+
+    data: JSON.stringify({
+      Name: "Testrun Pause",
+      Type: "PAUSE",
+      Value: "PAUSED",
+    }),
+
+    statusCode: {
+      200: function (xhr) {
+        // TODO do anything?
+      },
+    },
+  });
+}
+
+// Sets a status of UNPAUSED
+// TODO set paused-status for a specific testrun
+function unpauseTestrun() {
+  $.ajax({
+    url: "/pause",
+    method: "PUT",
+    contentType: "application/json",
+    dataType: "json",
+
+    data: JSON.stringify({
+      Name: "Testrun Pause",
+      Type: "PAUSE",
+      Value: "UNPAUSED",
+    }),
+
+    statusCode: {
+      200: function (xhr) {
+        // TODO do anything?
+      },
+    },
+  });
+}
+
+// Deletes all results from the store
+function getPauseStatus() {
+  // tODO
+  $.ajax({
+    url: "/pause",
+    method: "GET",
+    contentType: "application/json",
+
+    complete: function (e, xhr, settings) {
+      if (e.status === 200) {
+        document.getElementById("pausestatus").textContent = data;
+      } else if (e.status === 204) {
+        // The paused-status doesn't exist, so it is by definition unpaused
+        document.getElementById("pausestatus").textContent = "UNPAUSED";
+      } else {
+        console.error("Failed to get pause-status");
+        document.getElementById("pausestatus").textContent = "ERROR - UNKNOWN";
+      }
+    },
+
+    // statusCode: {
+    //   200: function (xhr) {
+    //     document.getElementById("pausestatus").textContent = data;
+    //   },
+    //   204: function (xhr) {
+    //     document.getElementById("pausestatus").textContent = "UNPAUSED";
+    //   },
+    // }
+
+    // success: function (data) {
+    //   document.getElementById("pausestatus").textContent = data;
+    // },
+    // error: function (request, msg, error) {
+    //   console.error("Failed to get pause-status");
+    //   document.getElementById("pausestatus").textContent = "ERROR - UNKNOWN";
+    // },
+  });
+}
+
 // On page load, get the existing results
 // JS requires this function-wrapping
 // If testrun is supplied as a query parameter in the URL, that query parameter will be read and only results for that testrun will be returned

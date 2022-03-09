@@ -76,7 +76,7 @@ func AdminDeleteAllTests(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// REST endpoint to trigger the deletion of all tests
+// REST endpoint to trigger the deletion of all suites
 func AdminDeleteAllSuites(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "DELETE" {
@@ -85,6 +85,26 @@ func AdminDeleteAllSuites(w http.ResponseWriter, r *http.Request) {
 	}
 
 	success, err := dataio.DeleteAllSuites()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	} else if success {
+		w.Write([]byte(strconv.Itoa(0)))
+	} else {
+		http.Error(w, "ERROR - not successful but no error returned!", 500)
+		return
+	}
+}
+
+// REST endpoint to trigger the deletion of all statuses
+func AdminDeleteAllStatuses(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "DELETE" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	success, err := dataio.DeleteAllStatuses()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -154,6 +174,20 @@ func AdminGetAllSuites(w http.ResponseWriter, r *http.Request) {
 	help.MarshalJSONAndWriteToResponse(suites, w)
 }
 
+// REST endpoint to get all known statuses
+func AdminGetAllStatuses(w http.ResponseWriter, r *http.Request) {
+
+	help.LogNewAPICall("AdminGetAllStatuses")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	suites := dataio.ReadAllStatuses()
+	help.MarshalJSONAndWriteToResponse(suites, w)
+}
+
 // REST endpoint to get the total number of suites
 func AdminGetSuiteCount(w http.ResponseWriter, r *http.Request) {
 
@@ -166,6 +200,21 @@ func AdminGetSuiteCount(w http.ResponseWriter, r *http.Request) {
 
 	count := len(dataio.ReadAllSuites())
 	log.Debug("Total suite count : ", count)
+	w.Write([]byte(strconv.Itoa(count)))
+}
+
+// REST endpoint to get the total number of statuses
+func AdminGetStatusCount(w http.ResponseWriter, r *http.Request) {
+
+	help.LogNewAPICall("AdminGetStatusCount")
+
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	count := len(dataio.ReadAllStatuses())
+	log.Debug("Total status count : ", count)
 	w.Write([]byte(strconv.Itoa(count)))
 }
 

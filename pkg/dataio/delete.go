@@ -175,6 +175,28 @@ func DeleteAllSuites() (success bool, err error) {
 	return true, nil
 }
 
+func DeleteAllStatuses() (success bool, err error) {
+
+	log.Println("Will now delete all statuses from DB")
+
+	sql := fmt.Sprintf("DELETE FROM %s", constants.StatusTable)
+	log.Println("SQL :", sql)
+	r, err := DBConn.Exec(sql)
+	if err != nil {
+		log.Criticalf("Error deleting all statuses: %q", err)
+		return false, err
+	}
+
+	numDeleted, err := r.RowsAffected()
+	if err != nil {
+		log.Criticalf("Error deleting all statuses: %q", err)
+	}
+
+	log.Printf("Deleted %d statuses from the DB", numDeleted)
+
+	return true, nil
+}
+
 // Delete a specific test (and its results)
 func DeleteTest(name string) (success bool, err error) {
 

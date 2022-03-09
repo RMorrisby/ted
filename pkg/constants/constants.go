@@ -6,6 +6,14 @@ const (
 
 	ResultCSVFilename = "result.csv"
 
+	// Status Table
+	StatusTable                  = "status"
+	StatusTableColumnDefinitions = "id serial primary key, name varchar(100) unique, type varchar(100), value varchar(255), notes varchar(255)"
+	StatusTableCreateSQL         = "CREATE TABLE IF NOT EXISTS " + StatusTable + " (" + StatusTableColumnDefinitions + ")"
+	StatusTableInsertFullRowSQL  = "INSERT INTO " + StatusTable + " (name, type, value, notes) VALUES "
+
+	StatusTableSelectAllSQL = "SELECT name, type, value, notes from " + StatusTable
+
 	// Suite Table
 	SuiteTable                  = "suite"
 	SuiteTableColumnDefinitions = "id serial primary key, name varchar(100) unique, description varchar(255), owner varchar(32), notes varchar(100)"

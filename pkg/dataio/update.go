@@ -18,6 +18,7 @@ func WriteTestKnownIssueUpdate(update structs.KnownIssueUpdate) {
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
 		log.Criticalf("Error writing result to DB: %q", err)
+		return
 	}
 }
 
@@ -43,6 +44,7 @@ func WriteResultKnownIssueUpdate(update structs.KnownIssueUpdate) {
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
 		log.Criticalf("Error writing result to DB: %q", err)
+		return
 	}
 }
 
@@ -82,7 +84,9 @@ func WriteResultUpdate(update structs.Result, existing *structs.Result) structs.
 	log.Println("SQL :", sql)
 	if _, err := DBConn.Exec(sql); err != nil {
 		log.Criticalf("Error updating result in DB: %q", err)
+		return *new(structs.ResultForUI) // Golang won't allow return or return nil
 	}
+
 	// Now gather the info we need for the ResultForUI object
 	// Get the test
 	test := GetTest(update.TestName)

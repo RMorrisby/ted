@@ -219,6 +219,55 @@ function getAllTestRuns() {
   });
 }
 
+//
+// Statuses
+//
+
+// Get the total number of statuses in the store
+function getStatusCount() {
+  $.get("/admin/getstatuscount", function (data) {
+    document.getElementById("statuscount").textContent = " " + data;
+    if (data == 0) {
+      document.getElementById("status-list").innerHTML = "";
+    }
+  });
+  $.get("/admin/statuses", function (data) {
+    var json = JSON.parse(data);
+    if (json == null) {
+      return; // json is null if there are no suites
+    }
+    console.log(`Received ${json.length} statuses`);
+
+    var e = document.getElementById("status-list");
+    e.innerHTML = ``;
+    for (var i = 0; i < json.length; i++) {
+      var obj = json[i];
+      console.log("Received status " + obj.Name);
+      e.innerHTML += `<li id=status-list-${downcaseAndUnderscore(obj.Name)}>${obj.Name}</li>`;
+    }
+  });
+}
+
+// Deletes all statuses from the store
+function deleteAllStatuses() {
+  $.ajax({
+    url: "/admin/deleteallstatuses",
+    method: "DELETE",
+    contentType: "application/json",
+    success: function (data) {
+      document.getElementById("statuscount").textContent = " " + data;
+      document.getElementById("status-list").innerHTML = "";
+
+      // Refresh other parts of the page
+      resultInfoRefresh();
+    },
+    error: function (request, msg, error) {
+      console.error("Failed to delete all statuses");
+      // TODO more?
+    },
+  });
+}
+
 // On page load, get the result-count
 // JS requires this function-wrapping
 window.onload = function () {
@@ -226,4 +275,5 @@ window.onload = function () {
   getAllTestRuns();
   getTestCount();
   getSuiteCount();
+  getStatusCount();
 };
