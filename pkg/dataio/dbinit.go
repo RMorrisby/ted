@@ -15,6 +15,7 @@ Contains methods responsible for initialising the DB and its tables
 // InitDB connects to the DB and initialises all DB tables (if they're not there)
 func InitDB() {
 	ConnectToDB()
+	InitTableStatus()
 	InitTableSuite()
 	InitTableRegisteredTest()
 	InitTableResult()
