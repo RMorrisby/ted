@@ -252,7 +252,6 @@ function unpauseTestrun() {
 
 // Deletes all results from the store
 function getPauseStatus() {
-  // tODO
   $.ajax({
     url: "/pause",
     method: "GET",
@@ -301,4 +300,5 @@ function getPauseStatus() {
 // If testrun is supplied as a query parameter in the URL, that query parameter will be read and only results for that testrun will be returned
 window.onload = function () {
   getAllResults();
+  getPauseStatus();
 };

@@ -257,9 +257,6 @@ function deleteAllStatuses() {
     success: function (data) {
       document.getElementById("statuscount").textContent = " " + data;
       document.getElementById("status-list").innerHTML = "";
-
-      // Refresh other parts of the page
-      resultInfoRefresh();
     },
     error: function (request, msg, error) {
       console.error("Failed to delete all statuses");
