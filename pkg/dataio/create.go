@@ -141,7 +141,7 @@ func WriteStatusToDB(status structs.Status) (success bool, err error) {
 	} else {
 		log.Printf("Status %s already exists - will overwrite", status.Name)
 
-		sql := fmt.Sprintf("UPDATE %s SET value = %s WHERE name = '%s'", constants.StatusTable, status.Value, status.Name)
+		sql := fmt.Sprintf("UPDATE %s SET value = '%s' WHERE name = '%s'", constants.StatusTable, status.Value, status.Name)
 		log.Println("SQL :", sql)
 		if _, err := DBConn.Exec(sql); err != nil {
 			log.Criticalf("Error overwriting status in DB: %q", err)
