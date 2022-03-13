@@ -204,7 +204,7 @@ function getAllResults() {
   });
 }
 
-// Sets a status of PAUSED
+// Sets a status of Paused
 // TODO set paused-status for a specific testrun
 function pauseTestrun() {
   $.ajax({
@@ -221,13 +221,13 @@ function pauseTestrun() {
 
     statusCode: {
       200: function (xhr) {
-        // TODO do anything?
+        document.getElementById("pausestatus").textContent = "Paused";
       },
     },
   });
 }
 
-// Sets a status of UNPAUSED
+// Sets a status of Unpaused
 // TODO set paused-status for a specific testrun
 function unpauseTestrun() {
   $.ajax({
@@ -244,7 +244,7 @@ function unpauseTestrun() {
 
     statusCode: {
       200: function (xhr) {
-        // TODO do anything?
+        document.getElementById("pausestatus").textContent = "Unpaused";
       },
     },
   });
@@ -258,17 +258,17 @@ function getPauseStatus() {
     method: "GET",
     contentType: "application/json",
 
-    complete: function (e, xhr, settings) {
-      if (e.status === 200) {
-        document.getElementById("pausestatus").textContent = data;
-      } else if (e.status === 204) {
-        // The paused-status doesn't exist, so it is by definition unpaused
-        document.getElementById("pausestatus").textContent = "UNPAUSED";
-      } else {
-        console.error("Failed to get pause-status");
-        document.getElementById("pausestatus").textContent = "ERROR - UNKNOWN";
-      }
-    },
+    // complete: function (e, xhr, settings) {
+    //   if (e.status === 200) {
+    //     document.getElementById("pausestatus").textContent = data;
+    //   } else if (e.status === 204) {
+    //     // The paused-status doesn't exist, so it is by definition unpaused
+    //     document.getElementById("pausestatus").textContent = "UNPAUSED";
+    //   } else {
+    //     console.error("Failed to get pause-status");
+    //     document.getElementById("pausestatus").textContent = "ERROR - UNKNOWN";
+    //   }
+    // },
 
     // statusCode: {
     //   200: function (xhr) {
@@ -279,13 +279,20 @@ function getPauseStatus() {
     //   },
     // }
 
-    // success: function (data) {
-    //   document.getElementById("pausestatus").textContent = data;
-    // },
-    // error: function (request, msg, error) {
-    //   console.error("Failed to get pause-status");
-    //   document.getElementById("pausestatus").textContent = "ERROR - UNKNOWN";
-    // },
+    success: function (data) {
+      if (data == "true") {
+        document.getElementById("pausestatus").textContent = "Paused";
+      } else if (data == "false") {
+        document.getElementById("pausestatus").textContent = "Unpaused";
+      } else {
+        console.error("Request succeeded but contained unexpected value");
+        document.getElementById("pausestatus").textContent = data;
+      }
+    },
+    error: function (request, msg, error) {
+      console.error("Failed to get pause-status");
+      document.getElementById("pausestatus").textContent = data;
+    },
   });
 }
 

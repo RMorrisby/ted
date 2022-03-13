@@ -64,7 +64,7 @@ func WriteFullResultToDB(result structs.Result) (resultForUI structs.ResultForUI
 	// testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes) VALUES "
 
 	log.Println("Writing result to DB")
-	
+
 	result = help.SanitiseResult(result)
 
 	// (suite_id, test_id, testrun, status, start_time, end_time, ran_by, message, ted_status, ted_notes)
@@ -121,6 +121,32 @@ func WriteTestToDBIfNew(test structs.Test) (success bool, err error) {
 		}
 	} else {
 		log.Printf("Test %s already exists", test.Name)
+	}
+
+	return true, nil
+}
+
+// Write the status to the DB. If the DB alreadys contain a status of that name, its value will be overwritten
+func WriteStatusToDB(status structs.Status) (success bool, err error) {
+	log.Debugf("Writing status to DB : ", status)
+
+	if !StatusExists(status.Name) {
+		log.Println("Writing new status to DB")
+		sql := constants.StatusTableInsertFullRowSQL + fmt.Sprintf("('%s', '%s', '%s', '%s')", status.Name, status.Type, status.Value, status.Notes)
+		log.Println("SQL :", sql)
+		if _, err := DBConn.Exec(sql); err != nil {
+			log.Criticalf("Error writing status to DB: %q", err)
+			return false, err
+		}
+	} else {
+		log.Printf("Status %s already exists - will overwrite", status.Name)
+
+		sql := fmt.Sprintf("UPDATE %s SET value = %s WHERE name = '%s'", constants.StatusTable, status.Value, status.Name)
+		log.Println("SQL :", sql)
+		if _, err := DBConn.Exec(sql); err != nil {
+			log.Criticalf("Error overwriting status in DB: %q", err)
+			return false, err
+		}
 	}
 
 	return true, nil

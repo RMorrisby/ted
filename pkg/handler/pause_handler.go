@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"net/http"
 	// "ted/pkg/constants"
@@ -39,11 +38,17 @@ func PauseHandler(w http.ResponseWriter, r *http.Request) {
 
 		pause := dataio.GetStatus(enums.StatusNamePause)
 		if pause == nil {
-			w.WriteHeader(http.StatusNoContent) // return a 204
-			w.Write([]byte("No Pause status is set"))
+			w.WriteHeader(http.StatusOK) // return a 200 with a body saying 'false'
+			w.Write([]byte("false"))
+		} else if pause.Value == enums.Unpaused {
+			w.WriteHeader(http.StatusOK) // return a 200 with a body saying 'false'
+			w.Write([]byte("false"))
+		} else if pause.Value == enums.Paused {
+			w.WriteHeader(http.StatusOK) // return a 200 with a body saying 'true'
+			w.Write([]byte("true"))
 		} else {
-			w.WriteHeader(http.StatusOK) // return a 200
-			fmt.Fprintf(w, pause.ToJSON())
+			w.WriteHeader(http.StatusInternalServerError) // return a 500 with a body saying 'unknown'
+			w.Write([]byte("unknown"))
 		}
 
 	case "PUT":
@@ -85,34 +90,34 @@ func PauseHandler(w http.ResponseWriter, r *http.Request) {
 
 		pause = help.SanitiseStatus(pause)
 
-		success, err := dataio.WritePauseToDBIfNew(pause)
+		// If it's not a valid pause-request, reject it
+
+		if pause.Type != enums.Pause {
+			http.Error(w, "A pause-request must have a 'type' of '"+enums.Pause+"'", 400)
+			return
+		}
+
+		if pause.Name != enums.StatusNamePause {
+			http.Error(w, "A pause-request must have a 'name' of '"+enums.StatusNamePause+"'", 400)
+			return
+		}
+
+		if pause.Value != enums.Paused && pause.Value != enums.Unpaused {
+			http.Error(w, "A pause-request must have a 'value' of '"+enums.Paused+"' or '"+enums.Unpaused+"'", 400)
+			return
+		}
+
+		// Now write the status-object to the DB, overwriting if necessary
+		success, err := dataio.WriteStatusToDB(pause)
 
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 		} else if success {
-			w.WriteHeader(http.StatusCreated) // return a 201
+			w.WriteHeader(http.StatusOK) // return a 200
 		} else {
 			http.Error(w, "ERROR - not successful but no error returned!", 500)
 		}
 
-	// case "DELETE":
-	// 	name := r.URL.Query().Get("pause")
-	// 	if name == "" {
-	// 		// A pause name must be supplied
-	// 		s := "No pause name supplied to " + r.Method + " " + r.URL.RequestURI() + "; URL must be /pause?pause=___"
-	// 		log.Error(s)
-	// 		http.Error(w, s, http.StatusBadRequest)
-	// 		return
-	// 	}
-
-	// 	success, err := dataio.DeletePause(name)
-	// 	if err != nil {
-	// 		http.Error(w, err.Error(), 500)
-	// 	} else if success {
-	// 		w.WriteHeader(http.StatusOK) // return a 200
-	// 	} else {
-	// 		http.Error(w, "ERROR - not successful but no error returned!", 500)
-	// 	}
 	default:
 		log.Debug(r.Method, "/pause called")
 		http.Error(w, "Only GET, PUT are supported for /pause", http.StatusMethodNotAllowed)

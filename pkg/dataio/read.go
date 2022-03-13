@@ -123,7 +123,6 @@ func ReadResult(testname string, testrun string) *structs.Result {
 	// If there was no error, then there was a row
 	err := DBConn.QueryRow(sql).Scan(&r.SuiteName, &r.TestName, &r.TestRunIdentifier, &r.Status, &r.StartTimestamp, &r.EndTimestamp, &r.RanBy, &r.Message, &r.TedStatus, &r.TedNotes)
 	if err != nil {
-		err.Error()
 		log.Errorf("Failed to retrieve result %s :: %s from the DB; error : %w", testname, testrun, err)
 		// log.Debugf("Result %s :: %s was not found in the DB", testname, testrun)
 		return nil
@@ -375,6 +374,7 @@ func ReadAllStatuses() (statuses []structs.Status) {
 	return statuses
 }
 
+// Status objects are unique by their name; their type is only there for categorisation
 // May return nil
 func GetStatus(name string) *structs.Status {
 	log.Debug("\n\n")
@@ -400,6 +400,7 @@ func GetStatus(name string) *structs.Status {
 	return &status
 }
 
+// Status objects are unique by their name; their type is only there for categorisation
 func StatusExists(name string) bool {
 	status := GetStatus(name)
 	if status == nil {
