@@ -68,19 +68,19 @@ function addResultToPage(r) {
   if (r.StartTimestamp != null) {
     var startDate = makeTimestampHumanReadable(r.StartTimestamp);
   } else {
-    var startDate = null;
+    var startDate = "";
   }
 
   if (r.EndTimestamp != null) {
     var endDate = makeTimestampHumanReadable(r.EndTimestamp);
   } else {
-    var endDate = null;
+    var endDate = "";
   }
 
   var testStatusClass = "test-" + downcaseAndUnderscore(r.Status);
   var tedStatusClass = "test-" + downcaseAndUnderscore(r.TedStatus);
 
-  console.log(r); // TODO remove
+  // console.log(r);
   // If it is absent, set the message to an empty string
   if (r.Message == null) {
     r.Message = "";
@@ -124,10 +124,39 @@ function addResultToPage(r) {
   td.appendChild(document.createTextNode(r.TestName));
   tr.appendChild(td);
 
+  // Add the TED Status, Notes, Known Issue fields here for easier access
+
   var td = document.createElement("td");
-  td.className = "testrun";
-  td.appendChild(document.createTextNode(r.TestRunIdentifier));
+  td.className = "tedstatus";
+  var text = makeStatusesMoreReadable(r.TedStatus);
+  if (r.TedNotes != null && r.TedNotes != "") {
+    text = r.TedNotes;
+  }
+  td.appendChild(document.createTextNode(text));
   tr.appendChild(td);
+
+  // Add to the TED status cell two statuses - the test status and the TED status
+  // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup
+  td.classList.add(testStatusClass);
+  td.classList.add(tedStatusClass);
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
+  td.className = "tednotes";
+  td.appendChild(document.createTextNode(r.TedNotes));
+  tr.appendChild(td);
+
+  // tr = tbody.getElementsByTagName("tr")[-1];
+  // var knownIssueText
+  addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
+  tbody.appendChild(tr);
+
+  /////////////
+
+  // var td = document.createElement("td");
+  // td.className = "testrun";
+  // td.appendChild(document.createTextNode(r.TestRunIdentifier));
+  // tr.appendChild(td);
 
   var td = document.createElement("td");
   td.classList.add(testStatusClass);
@@ -159,31 +188,6 @@ function addResultToPage(r) {
   td.className = "message";
   td.appendChild(document.createTextNode(r.Message));
   tr.appendChild(td);
-
-  var td = document.createElement("td");
-  td.className = "tedstatus";
-  var text = makeStatusesMoreReadable(r.TedStatus);
-  if (r.TedNotes != null && r.TedNotes != "") {
-    text = r.TedNotes;
-  }
-  td.appendChild(document.createTextNode(text));
-  tr.appendChild(td);
-
-  // Add to the TED status cell two statuses - the test status and the TED status
-  // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup
-  td.classList.add(testStatusClass);
-  td.classList.add(tedStatusClass);
-  tr.appendChild(td);
-
-  var td = document.createElement("td");
-  td.className = "tednotes";
-  td.appendChild(document.createTextNode(r.TedNotes));
-  tr.appendChild(td);
-
-  // tr = tbody.getElementsByTagName("tr")[-1];
-  // var knownIssueText
-  addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
-  tbody.appendChild(tr);
 }
 
 // Get all existing results from the DB
@@ -256,27 +260,6 @@ function getPauseStatus() {
     url: "/pause",
     method: "GET",
     contentType: "application/json",
-
-    // complete: function (e, xhr, settings) {
-    //   if (e.status === 200) {
-    //     document.getElementById("pausestatus").textContent = data;
-    //   } else if (e.status === 204) {
-    //     // The paused-status doesn't exist, so it is by definition unpaused
-    //     document.getElementById("pausestatus").textContent = "UNPAUSED";
-    //   } else {
-    //     console.error("Failed to get pause-status");
-    //     document.getElementById("pausestatus").textContent = "ERROR - UNKNOWN";
-    //   }
-    // },
-
-    // statusCode: {
-    //   200: function (xhr) {
-    //     document.getElementById("pausestatus").textContent = data;
-    //   },
-    //   204: function (xhr) {
-    //     document.getElementById("pausestatus").textContent = "UNPAUSED";
-    //   },
-    // }
 
     success: function (data) {
       if (data == "true") {
