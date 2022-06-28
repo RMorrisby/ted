@@ -7,9 +7,13 @@ This is very much a WIP!
 
 # TODO :
 
-- Provide a list of tests (that can be dynamically updated) that a test runner can query, so that the test runner's next test(s) can be controlled
-- UI dashboard for test results
-- Store test results in file/DB
+TODO Data page - add links for previous test runs
+
+TODO Data page - add link to all results (most recent X (e.g. 100)) regardless of test run
+
+TODO Data page - remove TED Status column - colour-code TED Notes
+
+TODO Data page - auto-scroll page down when received new result
 
 # How to use
 
