@@ -110,7 +110,7 @@ function addResultToPage(r) {
   tr.id = `${r.TestName}-${r.TestRunIdentifier}`;
 
   var td = document.createElement("td");
-  td.className = "categories234";
+  td.className = "categories764";
   td.appendChild(document.createTextNode(r.Categories));
   tr.appendChild(td);
 
@@ -133,16 +133,16 @@ function addResultToPage(r) {
     text = r.TedNotes;
   }
   td.appendChild(document.createTextNode(text));
-  tr.appendChild(td);
+  // tr.appendChild(td);
 
   // Add to the TED status cell two statuses - the test status and the TED status
   // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup
   td.classList.add(testStatusClass);
   td.classList.add(tedStatusClass);
-  tr.appendChild(td);
 
-  // // Update test status - Pass or Fail
-  // addUpdateTestStatusFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier);
+  // Update test status - Pass or Fail
+  addUpdateTestStatusFieldsToTableRow(td, r.TestName, r.TestRunIdentifier);
+  tr.appendChild(td);
   // tbody.appendChild(tr);
 
   var td = document.createElement("td");

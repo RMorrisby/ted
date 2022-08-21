@@ -193,8 +193,8 @@ function addKnownIssueFieldsToTableRow(e, testName, lastTestRun, knownIssueDesc)
   input.setAttribute("test", testName);
 
   var td = document.createElement("td");
-  td.appendChild(buttonPassed);
-  td.appendChild(buttonFailed);
+  // td.appendChild(buttonPassed);
+  // td.appendChild(buttonFailed);
   td.appendChild(buttonClear);
   td.appendChild(buttonSet);
   td.appendChild(input);
