@@ -149,24 +149,6 @@ function addKnownIssueFieldsToTableRow(e, testName, lastTestRun, knownIssueDesc)
   $(buttonClear).on("click", function () {
     sendKnownIssueForTest(this);
   });
-  // buttonClear.onclick = function () {
-  //   $.ajax({
-  //     url: "/testupdate",
-  //     method: "POST",
-  //     contentType: "application/json; charset=utf-8",
-  //     dataType: "json",
-
-  //     data: JSON.stringify({ TestName: test.Name, TestRun: lastTestRun, IsKnownIssue: false }),
-
-  //     success: function (data) {
-  //       console.log(`Updated known-issue status for test ${test.Name}`);
-  //     },
-  //     error: function (request, msg, error) {
-  //       console.error("Failed to update test's Known Issue fields");
-  //       // TODO more?
-  //     },
-  //   });
-  // };
 
   // Button to set the Known Issue value
   var buttonSet = document.createElement("button");

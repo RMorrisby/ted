@@ -141,13 +141,14 @@ function addResultToPage(r) {
   td.classList.add(tedStatusClass);
   tr.appendChild(td);
 
+  // Update test status - Pass or Fail
+  addUpdateTestStatusFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier);
+  tbody.appendChild(tr);
+
   var td = document.createElement("td");
   td.className = "tednotes";
   td.appendChild(document.createTextNode(r.TedNotes));
   tr.appendChild(td);
-
-  // Update test status - Pass or Fail
-  addUpdateTestStatusFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier)
 
   // Known Issue field & controls
   addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
