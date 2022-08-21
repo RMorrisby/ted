@@ -148,10 +148,10 @@ function addResultToPage(r) {
   var td = document.createElement("td");
   td.className = "tednotes";
   td.appendChild(document.createTextNode(r.TedNotes));
-  tr.appendChild(td);
 
   // Known Issue field & controls
   addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
+  tr.appendChild(td);
   tbody.appendChild(tr);
 
   var td = document.createElement("td");
