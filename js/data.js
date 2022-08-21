@@ -139,10 +139,10 @@ function addResultToPage(r) {
   // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup
   td.classList.add(testStatusClass);
   td.classList.add(tedStatusClass);
+  tr.appendChild(td);
 
   // Update test status - Pass or Fail
-  addUpdateTestStatusFieldsToTableRow(td, r.TestName, r.TestRunIdentifier);
-  tr.appendChild(td);
+  addUpdateTestStatusFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier);
   // tbody.appendChild(tr);
 
   var td = document.createElement("td");
