@@ -110,12 +110,13 @@ function addResultToPage(r) {
   tr.id = `${r.TestName}-${r.TestRunIdentifier}`;
 
   var td = document.createElement("td");
+  td.className = "categories234";
+  td.appendChild(document.createTextNode(r.Categories));
+  tr.appendChild(td);
+
+  var td = document.createElement("td");
   td.className = "dir";
   td.appendChild(document.createTextNode(r.Dir));
-  tr.appendChild(td);
-  var td = document.createElement("td");
-  td.className = "categories";
-  td.appendChild(document.createTextNode(r.Categories));
   tr.appendChild(td);
 
   var td = document.createElement("td");
