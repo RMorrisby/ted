@@ -77,6 +77,7 @@ function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
   });
 
   var td = document.createElement("td");
+  // TODO hide each button if the result is already that status (don't show 'Pass' when the test has passed)
   td.appendChild(buttonPassed);
   td.appendChild(buttonFailed);
   e.appendChild(td);

@@ -136,7 +136,6 @@ function addResultToPage(r) {
     text = r.TedNotes;
   }
   td.appendChild(document.createTextNode(text));
-  // tr.appendChild(td);
 
   // Add to the TED status cell two statuses - the test status and the TED status
   // The TED status takes precedence for controlling the cell's formatting, with the test status as the backup
