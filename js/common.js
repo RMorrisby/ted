@@ -63,6 +63,7 @@ function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
   buttonPassed.setAttribute("outcome", "PASSED");
   $(buttonPassed).on("click", function () {
     sendStatusUpdateForTest(this);
+    reloadPage();
   });
   // Button to set the test to Passed
   var buttonFailed = document.createElement("button");
@@ -74,6 +75,7 @@ function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
   buttonFailed.setAttribute("outcome", "FAILED");
   $(buttonFailed).on("click", function () {
     sendStatusUpdateForTest(this);
+    reloadPage();
   });
 
   var td = document.createElement("td");
@@ -246,4 +248,8 @@ function sendKnownIssueForTest(button) {
       },
     },
   });
+}
+
+function reloadPage() {
+  window.location.reload();
 }

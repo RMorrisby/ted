@@ -152,38 +152,38 @@ function addResultToPage(r) {
 
   // Known Issue field & controls
   addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
-  tbody.appendChild(tr);
-
+  
   var td = document.createElement("td");
   td.classList.add(testStatusClass);
   td.classList.add("status");
   td.appendChild(document.createTextNode(makeStatusesMoreReadable(r.Status)));
   tr.appendChild(td);
-
+  
   var td = document.createElement("td");
   td.className = "priority";
   td.appendChild(document.createTextNode(r.Priority));
   tr.appendChild(td);
-
+  
   var td = document.createElement("td");
   td.className = "start";
   td.appendChild(document.createTextNode(startDate));
   tr.appendChild(td);
-
+  
   var td = document.createElement("td");
   td.className = "end";
   td.appendChild(document.createTextNode(endDate));
   tr.appendChild(td);
-
+  
   var td = document.createElement("td");
   td.className = "ranby";
   td.appendChild(document.createTextNode(r.RanBy));
   tr.appendChild(td);
-
+  
   var td = document.createElement("td");
   td.className = "message";
   td.appendChild(document.createTextNode(r.Message));
   tr.appendChild(td);
+  tbody.appendChild(tr);
 }
 
 // Get all existing results from the DB
