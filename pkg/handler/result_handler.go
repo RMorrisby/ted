@@ -148,6 +148,60 @@ func ResultHandler(w http.ResponseWriter, r *http.Request) {
 			dataio.LatestSuite = result.SuiteName
 		}
 
+	case "PATCH":
+		// Now try to parse the body from JSON
+		body := r.Body
+		// data, _ := ioutil.ReadAll(body)
+		// log.Debug(string(data))
+		// log.Debug("Result status update body received :", body)
+		var resultStatusPatch structs.ResultStatusPatch
+		d := json.NewDecoder(body)
+		d.DisallowUnknownFields() // catch unwanted fields
+
+		err := d.Decode(&resultStatusPatch)
+		if err != nil {
+			// bad JSON or unrecognized json field
+			log.Error("Bad JSON or unrecognized json field", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		resultStatusPatch = resultStatusPatch.Trim()
+
+		// 'name' field is mandatory
+		if resultStatusPatch.TestName == "" {
+			http.Error(w, "Missing field 'TestName' from JSON object", http.StatusBadRequest)
+			return
+		}
+
+		log.Debug("PATCH Result received for test", resultStatusPatch.TestName)
+		log.Debug(resultStatusPatch)
+
+		// If the test is not registered, return an error
+		if !dataio.TestExists(resultStatusPatch.TestName) {
+			s := "Result referred to a test that was not registered"
+			log.Error(s)
+			http.Error(w, s, http.StatusBadRequest)
+			return
+		}
+		
+		// If there is no existing result for this testrun, reject this PATCH request
+		existingResult := dataio.ReadResult(resultStatusPatch.TestName, resultStatusPatch.TestRunIdentifier)
+		log.Debugf("Reading result :: existingResult != nil? %t :: %s", (existingResult != nil), r.Method)
+		if existingResult == nil {
+			e := fmt.Sprintf("Result status update received on PATCH, but there was no existing result in the DB for test %s for testrun %s", resultStatusPatch.TestName, resultStatusPatch.TestRunIdentifier)
+			log.Error(e)
+			http.Error(w, e, http.StatusBadRequest)
+			return
+		}
+
+		log.Debug("PATCH Result received :", resultStatusPatch.ToJSON())
+
+		// The result has passed validation, so now we can write it to the DB and then return the response
+
+		dataio.WriteResultUpdateOnlyStatus(resultStatusPatch.Status, existingResult.Status, resultStatusPatch.TestName, resultStatusPatch.TestRunIdentifier)
+		w.WriteHeader(http.StatusOK) // return a 200
+
 	default:
 		log.Println(r.Method, "/result called")
 		http.Error(w, "Only POST, PUT is supported for /result", http.StatusMethodNotAllowed)

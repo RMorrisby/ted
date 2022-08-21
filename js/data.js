@@ -146,17 +146,12 @@ function addResultToPage(r) {
   td.appendChild(document.createTextNode(r.TedNotes));
   tr.appendChild(td);
 
-  // tr = tbody.getElementsByTagName("tr")[-1];
-  // var knownIssueText
+  // Update test status - Pass or Fail
+  addUpdateTestStatusFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier)
+
+  // Known Issue field & controls
   addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
   tbody.appendChild(tr);
-
-  /////////////
-
-  // var td = document.createElement("td");
-  // td.className = "testrun";
-  // td.appendChild(document.createTextNode(r.TestRunIdentifier));
-  // tr.appendChild(td);
 
   var td = document.createElement("td");
   td.classList.add(testStatusClass);

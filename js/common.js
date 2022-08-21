@@ -46,6 +46,89 @@ function makeStatusesMoreReadable(status) {
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 }
 
+// To the table row e, append buttons to set the test result as Passed or Failed
+// Takes : e : element (the tr)
+//         testName : string (the test name)
+//         lastTestRun : string (the value of the last test run)
+function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
+  var testNameDown = downcaseAndUnderscore(testName);
+
+  // Button to set the test to Passed
+  var buttonPassed = document.createElement("button");
+  buttonPassed.className = "test-status-set-to-passed";
+  buttonPassed.id = "history-table-button-test-status-set-to-passed-" + testNameDown;
+  buttonPassed.appendChild(document.createTextNode("Pass"));
+  buttonPassed.setAttribute("test", testName);
+  buttonPassed.setAttribute("testrun", lastTestRun);
+  buttonPassed.setAttribute("outcome", "PASSED");
+  $(buttonPassed).on("click", function () {
+    sendStatusUpdateForTest(this);
+  });
+  // Button to set the test to Passed
+  var buttonFailed = document.createElement("button");
+  buttonFailed.className = "test-status-set-to-failed";
+  buttonFailed.id = "history-table-button-test-status-set-to-failed-" + testNameDown;
+  buttonFailed.appendChild(document.createTextNode("Fail"));
+  buttonFailed.setAttribute("test", testName);
+  buttonFailed.setAttribute("testrun", lastTestRun);
+  buttonFailed.setAttribute("outcome", "FAILED");
+  $(buttonFailed).on("click", function () {
+    sendStatusUpdateForTest(this);
+  });
+
+  var td = document.createElement("td");
+  td.appendChild(buttonPassed);
+  td.appendChild(buttonFailed);
+  e.appendChild(td);
+}
+
+// Send to TED the updated status for the given test result
+function sendStatusUpdateForTest(button) {
+  var testName = button.getAttribute("test");
+  // var testNameDown = downcaseAndUnderscore(testName);
+  var lastTestRun = button.getAttribute("testrun");
+  var outcome = button.getAttribute("outcome");
+  console.log("In sendSU; 1 2 3 :: " + testName + " :: " + lastTestRun + " :: " + outcome);
+  // var desc = $("input#history-table-input-known-issue-" + testNameDown).val();
+  // console.log("Desc : " + desc);
+  // var isKnownIssue = stringToBoolean(button.getAttribute("is-known-issue"));
+  // // If we are clearing the Known Issue, set desc to ""
+  // if (isKnownIssue == false) {
+  //   desc = "";
+  // }
+
+  $.ajax({
+    url: "/result",
+    method: "PATCH",
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+
+    data: JSON.stringify({
+      TestName: testName,
+      TestRunIdentifier: lastTestRun,
+      Status: outcome,
+    }),
+
+    statusCode: {
+      200: function (xhr) {
+        // // TODO useful?
+        // // tedNotesE = button.parentNode.getElementsByClassName("tednotes");
+        // if (isKnownIssue == false) {
+        //   // Clear the Known Issue input
+        //   $("input#history-table-input-known-issue-" + testNameDown).val("");
+        //   // TODO
+        //   // Remove the 'known_issue' class from the result field
+        //   // document.getElementById(resultFieldID).classList.remove('.test-known_issue');
+        // } else {
+        //   // TODO
+        //   // Add the 'known_issue' class to the result field
+        //   // document.getElementById(resultFieldID).classList.add('.test-known_issue');
+        // }
+      },
+    },
+  });
+}
+
 // To the table row e, append the Known Issue fields
 // Takes : e : element (the tr)
 //         testName : string (the test name)
