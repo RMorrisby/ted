@@ -61,9 +61,8 @@ function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
   buttonPassed.setAttribute("test", testName);
   buttonPassed.setAttribute("testrun", lastTestRun);
   buttonPassed.setAttribute("outcome", "PASSED");
-  $(buttonPassed).on("click", async function () {
-    await sendStatusUpdateForTest(this);
-    reloadPage();
+  $(buttonPassed).on("click", function () {
+    sendStatusUpdateForTestAndReloadPage(this);
   });
   // Button to set the test to Passed
   var buttonFailed = document.createElement("button");
@@ -83,49 +82,14 @@ function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
   e.appendChild(td);
 }
 
-
 // Send to TED the updated status for the given test result
 // And reloads the page
-async function sendStatusUpdateForTest(button) {
-  var testName = button.getAttribute("test");
-  var lastTestRun = button.getAttribute("testrun");
-  var outcome = button.getAttribute("outcome");
-  console.log("In sendSU; 1 2 3 :: " + testName + " :: " + lastTestRun + " :: " + outcome);
-
-  $.ajax({
-    url: "/result",
-    method: "PATCH",
-    contentType: "application/json; charset=utf-8",
-    dataType: "json",
-
-    data: JSON.stringify({
-      TestName: testName,
-      TestRunIdentifier: lastTestRun,
-      Status: outcome,
-    }),
-
-    statusCode: {
-      200: function (xhr) {
-      },
-    },
-  });
-}
-
-// Send to TED the updated status for the given test result
-// And reloads the page
+// TODO all we want to change is the class & value of the Status & TEDStatus clss for the current row, not reloading the whole page
 function sendStatusUpdateForTestAndReloadPage(button) {
   var testName = button.getAttribute("test");
-  // var testNameDown = downcaseAndUnderscore(testName);
   var lastTestRun = button.getAttribute("testrun");
   var outcome = button.getAttribute("outcome");
   console.log("In sendSU; 1 2 3 :: " + testName + " :: " + lastTestRun + " :: " + outcome);
-  // var desc = $("input#history-table-input-known-issue-" + testNameDown).val();
-  // console.log("Desc : " + desc);
-  // var isKnownIssue = stringToBoolean(button.getAttribute("is-known-issue"));
-  // // If we are clearing the Known Issue, set desc to ""
-  // if (isKnownIssue == false) {
-  //   desc = "";
-  // }
 
   $.ajax({
     url: "/result",
@@ -142,19 +106,6 @@ function sendStatusUpdateForTestAndReloadPage(button) {
     statusCode: {
       200: function (xhr) {
         reloadPage();
-        // // TODO useful?
-        // // tedNotesE = button.parentNode.getElementsByClassName("tednotes");
-        // if (isKnownIssue == false) {
-        //   // Clear the Known Issue input
-        //   $("input#history-table-input-known-issue-" + testNameDown).val("");
-        //   // TODO
-        //   // Remove the 'known_issue' class from the result field
-        //   // document.getElementById(resultFieldID).classList.remove('.test-known_issue');
-        // } else {
-        //   // TODO
-        //   // Add the 'known_issue' class to the result field
-        //   // document.getElementById(resultFieldID).classList.add('.test-known_issue');
-        // }
       },
     },
   });

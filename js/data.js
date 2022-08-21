@@ -124,6 +124,9 @@ function addResultToPage(r) {
   td.appendChild(document.createTextNode(r.TestName));
   tr.appendChild(td);
 
+  // Update test status - Pass or Fail
+  addUpdateTestStatusFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier);
+
   // Add the TED Status, Notes, Known Issue fields here for easier access
 
   var td = document.createElement("td");
@@ -141,10 +144,6 @@ function addResultToPage(r) {
   td.classList.add(tedStatusClass);
   tr.appendChild(td);
 
-  // Update test status - Pass or Fail
-  addUpdateTestStatusFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier);
-  // tbody.appendChild(tr);
-
   var td = document.createElement("td");
   td.className = "tednotes";
   td.appendChild(document.createTextNode(r.TedNotes));
@@ -152,33 +151,33 @@ function addResultToPage(r) {
 
   // Known Issue field & controls
   addKnownIssueFieldsToTableRow(tr, r.TestName, r.TestRunIdentifier, r.TedNotes);
-  
+
   var td = document.createElement("td");
   td.classList.add(testStatusClass);
   td.classList.add("status");
   td.appendChild(document.createTextNode(makeStatusesMoreReadable(r.Status)));
   tr.appendChild(td);
-  
+
   var td = document.createElement("td");
   td.className = "priority";
   td.appendChild(document.createTextNode(r.Priority));
   tr.appendChild(td);
-  
+
   var td = document.createElement("td");
   td.className = "start";
   td.appendChild(document.createTextNode(startDate));
   tr.appendChild(td);
-  
+
   var td = document.createElement("td");
   td.className = "end";
   td.appendChild(document.createTextNode(endDate));
   tr.appendChild(td);
-  
+
   var td = document.createElement("td");
   td.className = "ranby";
   td.appendChild(document.createTextNode(r.RanBy));
   tr.appendChild(td);
-  
+
   var td = document.createElement("td");
   td.className = "message";
   td.appendChild(document.createTextNode(r.Message));
