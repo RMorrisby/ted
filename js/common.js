@@ -138,6 +138,29 @@ function sendStatusUpdateForTest(button) {
 function addKnownIssueFieldsToTableRow(e, testName, lastTestRun, knownIssueDesc) {
   var testNameDown = downcaseAndUnderscore(testName);
 
+  // Button to set the test to Passed
+  var buttonPassed = document.createElement("button");
+  buttonPassed.className = "test-status-set-to-passed";
+  buttonPassed.id = "history-table-button-test-status-set-to-passed-" + testNameDown;
+  buttonPassed.appendChild(document.createTextNode("Pass"));
+  buttonPassed.setAttribute("test", testName);
+  buttonPassed.setAttribute("testrun", lastTestRun);
+  buttonPassed.setAttribute("outcome", "PASSED");
+  $(buttonPassed).on("click", function () {
+    sendStatusUpdateForTest(this);
+  });
+  // Button to set the test to Passed
+  var buttonFailed = document.createElement("button");
+  buttonFailed.className = "test-status-set-to-failed";
+  buttonFailed.id = "history-table-button-test-status-set-to-failed-" + testNameDown;
+  buttonFailed.appendChild(document.createTextNode("Fail"));
+  buttonFailed.setAttribute("test", testName);
+  buttonFailed.setAttribute("testrun", lastTestRun);
+  buttonFailed.setAttribute("outcome", "FAILED");
+  $(buttonFailed).on("click", function () {
+    sendStatusUpdateForTest(this);
+  });
+
   // Button to clear the Known Issue value
   var buttonClear = document.createElement("button");
   buttonClear.className = "known-issue-clear";
@@ -170,6 +193,8 @@ function addKnownIssueFieldsToTableRow(e, testName, lastTestRun, knownIssueDesc)
   input.setAttribute("test", testName);
 
   var td = document.createElement("td");
+  td.appendChild(buttonPassed);
+  td.appendChild(buttonFailed);
   td.appendChild(buttonClear);
   td.appendChild(buttonSet);
   td.appendChild(input);
