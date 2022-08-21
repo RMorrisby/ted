@@ -61,8 +61,8 @@ function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
   buttonPassed.setAttribute("test", testName);
   buttonPassed.setAttribute("testrun", lastTestRun);
   buttonPassed.setAttribute("outcome", "PASSED");
-  $(buttonPassed).on("click", function () {
-    sendStatusUpdateForTest(this);
+  $(buttonPassed).on("click", async function () {
+    await sendStatusUpdateForTest(this);
     reloadPage();
   });
   // Button to set the test to Passed
@@ -74,8 +74,7 @@ function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
   buttonFailed.setAttribute("testrun", lastTestRun);
   buttonFailed.setAttribute("outcome", "FAILED");
   $(buttonFailed).on("click", function () {
-    sendStatusUpdateForTest(this);
-    reloadPage();
+    sendStatusUpdateForTestAndReloadPage(this);
   });
 
   var td = document.createElement("td");
@@ -84,8 +83,37 @@ function addUpdateTestStatusFieldsToTableRow(e, testName, lastTestRun) {
   e.appendChild(td);
 }
 
+
 // Send to TED the updated status for the given test result
-function sendStatusUpdateForTest(button) {
+// And reloads the page
+async function sendStatusUpdateForTest(button) {
+  var testName = button.getAttribute("test");
+  var lastTestRun = button.getAttribute("testrun");
+  var outcome = button.getAttribute("outcome");
+  console.log("In sendSU; 1 2 3 :: " + testName + " :: " + lastTestRun + " :: " + outcome);
+
+  $.ajax({
+    url: "/result",
+    method: "PATCH",
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+
+    data: JSON.stringify({
+      TestName: testName,
+      TestRunIdentifier: lastTestRun,
+      Status: outcome,
+    }),
+
+    statusCode: {
+      200: function (xhr) {
+      },
+    },
+  });
+}
+
+// Send to TED the updated status for the given test result
+// And reloads the page
+function sendStatusUpdateForTestAndReloadPage(button) {
   var testName = button.getAttribute("test");
   // var testNameDown = downcaseAndUnderscore(testName);
   var lastTestRun = button.getAttribute("testrun");
@@ -113,6 +141,7 @@ function sendStatusUpdateForTest(button) {
 
     statusCode: {
       200: function (xhr) {
+        reloadPage();
         // // TODO useful?
         // // tedNotesE = button.parentNode.getElementsByClassName("tednotes");
         // if (isKnownIssue == false) {
