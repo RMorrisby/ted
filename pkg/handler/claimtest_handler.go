@@ -61,24 +61,6 @@ func ClaimTestHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// if result.Overwrite {
-		// 	// POST requires no Overwrite flag
-		// 	if r.Method == "POST" {
-		// 		e := fmt.Sprintf("Result received on POST, but the Overwrite flag was true for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
-		// 		log.Error(e)
-		// 		http.Error(w, e, http.StatusBadRequest)
-		// 		return
-		// 	}
-		// } else {
-		// 	// PUT requires the Overwrite flag
-		// 	if r.Method == "PUT" {
-		// 		e := fmt.Sprintf("Result received on PUT, but the Overwrite flag was false for test %s for testrun %s", result.TestName, result.TestRunIdentifier)
-		// 		log.Error(e)
-		// 		http.Error(w, e, http.StatusBadRequest)
-		// 		return
-		// 	}
-		// }
-
 		// If the specified test does not exist for that test run, reject the request
 		// TODO allow a claim on a test for a testrun without requiring a preexisting NOT RUN result
 		existingResult := dataio.ReadResult(claim.TestName, claim.TestRunIdentifier)
