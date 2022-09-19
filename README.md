@@ -69,7 +69,7 @@ POST <hostname>/result
 {
   "SuiteName": "Suite ABC",
   "TestName": "test_1_foo_bar",
-  "TestRunIdentifier": "0.1.13",
+  "TestRunIdentifier": "0.1.15",
   "Status": "FAILED",
   "StartTimestamp": "2022-01-01 07:01:37 UTC",
   "EndTimestamp": "2022-01-01 07:01:59 UTC",
@@ -82,7 +82,7 @@ POST <hostname>/result
 {
   "SuiteName": "Suite ABC",
   "TestName": "test_1_foo_bar",
-  "TestRunIdentifier": "0.1.13",
+  "TestRunIdentifier": "0.1.15",
   "Status": "NOT RUN",
   "StartTimestamp": null,
   "EndTimestamp": null,
@@ -96,7 +96,7 @@ POST <hostname>/result
 
 ```
 400    (if the result was rejected because a result exists for this test & test-run )
-"Result received on POST, but there was an existing result in the DB for test test_1_foo_bar for testrun 0.0.46"
+"Result received on POST, but there was an existing result in the DB for test test_1_foo_bar for testrun 0.1.15"
 ```
 
 ## Claim a test result, so that other concurrently-running test agents don't try to run the test
@@ -105,7 +105,7 @@ POST <hostname>/result
 POST <hostname>/claimtest
 {
   "TestName": "test_1_foo_bar",
-  "TestRunIdentifier": "0.1.13",
+  "TestRunIdentifier": "0.1.15",
   "IsRerun": false
 }
 ```
@@ -122,7 +122,7 @@ PUT <hostname>/result
 {
   "SuiteName": "Suite ABC",
   "TestName": "test_1_foo_bar",
-  "TestRunIdentifier": "0.1.13",
+  "TestRunIdentifier": "0.1.15",
   "Status": "FAILED",
   "StartTimestamp": "2022-01-01 07:01:37 UTC",
   "EndTimestamp": "2022-01-01 07:01:59 UTC",
@@ -143,7 +143,7 @@ GET <hostname>/testrunid/latest
 
 ```
 200
-0.1.12
+0.1.14
 ```
 
 ## Get next test run ID
@@ -156,7 +156,7 @@ GET <hostname>/testrunid/next
 
 ```
 200
-0.1.13
+0.1.15
 ```
 
 ## Get all failed & not-run tests in a test run
@@ -172,7 +172,7 @@ GET <hostname>/reruns?testrun=<testrun>
   "Categories": "foo|bar",
   "Dir": "read_ABC",
   "TestName": "test_1_foo_bar",
-  "TestRunIdentifier": "0.1.13",
+  "TestRunIdentifier": "0.1.15",
   "Status": "FAILED",
   "Priority": 4,
   "StartTimestamp": "2022-01-01 07:01:37 UTC",
@@ -184,7 +184,7 @@ GET <hostname>/reruns?testrun=<testrun>
   "Categories": "foo|bar",
   "Dir": "read_ABC",
   "TestName": "test_2_foo_bar_baz",
-  "TestRunIdentifier": "0.1.13",
+  "TestRunIdentifier": "0.1.15",
   "Status": "FAILED",
   "Priority": 3,
   "StartTimestamp": "2022-01-01 07:02:01 UTC",
@@ -204,7 +204,7 @@ GET <hostname>/stats?testrun=<testrun>
 ```
 200
 {
-  "TestRunName": "0.1.13",
+  "TestRunName": "0.1.15",
   "Total": 3,
   "Passed": 1,
   "PassedOnRerun": 0,
